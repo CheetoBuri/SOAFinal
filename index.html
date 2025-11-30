@@ -1,0 +1,1181 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ thống Quản lý Quán Cafe</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            display: flex;
+            height: 100vh;
+        }
+
+        /* Sidebar Menu */
+        .sidebar {
+            width: 300px;
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            overflow-y: auto;
+            border-right: 3px solid #3498db;
+        }
+
+        .sidebar h2 {
+            margin-bottom: 20px;
+            font-size: 18px;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+
+        .menu-section {
+            margin-bottom: 30px;
+        }
+
+        .menu-section h3 {
+            font-size: 14px;
+            color: #3498db;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .menu-item {
+            background: #34495e;
+            padding: 12px;
+            margin-bottom: 8px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+        }
+
+        .menu-item:hover {
+            background: #3498db;
+            border-left-color: #f39c12;
+            transform: translateX(5px);
+        }
+
+        .menu-item .name {
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+
+        .menu-item .price {
+            color: #f39c12;
+            font-size: 12px;
+        }
+
+        .menu-item .ingredients {
+            font-size: 11px;
+            color: #bdc3c7;
+            margin-top: 4px;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        .header {
+            background: white;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 3px solid #3498db;
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            font-size: 28px;
+        }
+
+        .header-info {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .time {
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+
+        .stats {
+            display: flex;
+            gap: 15px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: bold;
+            color: #3498db;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #7f8c8d;
+        }
+
+        /* Container */
+        .container {
+            display: flex;
+            flex: 1;
+            gap: 20px;
+            padding: 20px;
+            overflow: hidden;
+        }
+
+        /* POS Order Section */
+        .pos-section {
+            flex: 1;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .pos-header {
+            background: #3498db;
+            color: white;
+            padding: 15px;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .order-items {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+        }
+
+        .order-item {
+            background: #ecf0f1;
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 4px solid #3498db;
+            transition: all 0.3s;
+        }
+
+        .order-item:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+
+        .order-item.warning {
+            border-left-color: #f39c12;
+            background: #fff8e1;
+        }
+
+        .order-item-info {
+            flex: 1;
+        }
+
+        .order-item-name {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 4px;
+        }
+
+        .order-item-ingredients {
+            font-size: 12px;
+            color: #7f8c8d;
+        }
+
+        .order-item-price {
+            font-size: 14px;
+            font-weight: bold;
+            color: #3498db;
+            margin-right: 15px;
+        }
+
+        .remove-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+
+        .remove-btn:hover {
+            background: #c0392b;
+        }
+
+        /* Order Summary */
+        .order-summary {
+            background: #2c3e50;
+            color: white;
+            padding: 15px;
+            border-top: 2px solid #3498db;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .summary-row.total {
+            font-size: 18px;
+            font-weight: bold;
+            color: #f39c12;
+            border-top: 1px solid #3498db;
+            padding-top: 10px;
+            margin-top: 10px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .btn-checkout {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-checkout:hover {
+            background: #229954;
+        }
+
+        .btn-clear {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-clear:hover {
+            background: #c0392b;
+        }
+
+        .btn-disabled {
+            background: #95a5a6;
+            color: white;
+            cursor: not-allowed;
+        }
+
+        /* Inventory Section */
+        .inventory-section {
+            width: 350px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .inventory-header {
+            background: #9b59b6;
+            color: white;
+            padding: 15px;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .inventory-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+        }
+
+        .inventory-item {
+            background: #ecf0f1;
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border-left: 4px solid #95a5a6;
+        }
+
+        .inventory-item.green {
+            border-left-color: #27ae60;
+            background: #d5f4e6;
+        }
+
+        .inventory-item.yellow {
+            border-left-color: #f39c12;
+            background: #fff8e1;
+        }
+
+        .inventory-item.red {
+            border-left-color: #e74c3c;
+            background: #fadbd8;
+        }
+
+        .inv-item-name {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 4px;
+        }
+
+        .inv-item-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+        }
+
+        .inv-quantity {
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .inv-quantity.warning {
+            color: #f39c12;
+        }
+
+        .inv-quantity.danger {
+            color: #e74c3c;
+        }
+
+        /* Restock Section */
+        .restock-section {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 2px solid #95a5a6;
+        }
+
+        .restock-header {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .restock-form {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 10px;
+        }
+
+        .restock-form select {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #bdc3c7;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+
+        .restock-form input {
+            width: 60px;
+            padding: 8px;
+            border: 1px solid #bdc3c7;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+
+        .restock-form button {
+            padding: 8px 12px;
+            background: #95a5a6;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+
+        .restock-form button:hover {
+            background: #7f8c8d;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 30px;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 500px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            animation: slideIn 0.3s;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-header {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #3498db;
+        }
+
+        .modal-body {
+            margin-bottom: 20px;
+        }
+
+        .modal-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            font-size: 14px;
+        }
+
+        .modal-row.total {
+            font-size: 18px;
+            font-weight: bold;
+            color: #f39c12;
+            border-top: 2px solid #3498db;
+            padding-top: 12px;
+            margin-top: 15px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .modal-button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .modal-button.confirm {
+            background: #27ae60;
+            color: white;
+        }
+
+        .modal-button.confirm:hover {
+            background: #229954;
+        }
+
+        .modal-button.cancel {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .modal-button.cancel:hover {
+            background: #7f8c8d;
+        }
+
+        /* Error Alert */
+        .alert {
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            display: none;
+            animation: slideIn 0.3s;
+        }
+
+        .alert.show {
+            display: block;
+        }
+
+        .alert.error {
+            background: #fadbd8;
+            color: #c0392b;
+            border-left: 4px solid #e74c3c;
+        }
+
+        .alert.success {
+            background: #d5f4e6;
+            color: #27ae60;
+            border-left: 4px solid #27ae60;
+        }
+
+        .alert.warning {
+            background: #fff8e1;
+            color: #f39c12;
+            border-left: 4px solid #f39c12;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #95a5a6;
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #3498db;
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #2980b9;
+        }
+
+        /* Status Badge */
+        .status-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: bold;
+            margin-left: 5px;
+        }
+
+        .status-badge.green {
+            background: #27ae60;
+            color: white;
+        }
+
+        .status-badge.yellow {
+            background: #f39c12;
+            color: white;
+        }
+
+        .status-badge.red {
+            background: #e74c3c;
+            color: white;
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .inventory-section {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar Menu -->
+    <div class="sidebar">
+        <h2>☕ MENU</h2>
+        
+        <div class="menu-section">
+            <h3>Cà phê đơn</h3>
+            <div class="menu-item" onclick="addToOrder('caPheĐen')">
+                <div class="name">Cà phê Đen</div>
+                <div class="price">25.000 VNĐ</div>
+                <div class="ingredients">Cafe - 2 shot</div>
+            </div>
+        </div>
+
+        <div class="menu-section">
+            <h3>Cà phê sữa</h3>
+            <div class="menu-item" onclick="addToOrder('caPheKaraMel')">
+                <div class="name">Cà phê Sữa</div>
+                <div class="price">30.000 VNĐ</div>
+                <div class="ingredients">Cafe - 1 shot, Sữa Đặc - 1 phần</div>
+            </div>
+            
+            <div class="menu-item" onclick="addToOrder('bacXiu')">
+                <div class="name">Bạc Xỉu</div>
+                <div class="price">28.000 VNĐ</div>
+                <div class="ingredients">Cafe - 0.5 shot, Sữa Đặc - 1.5 phần</div>
+            </div>
+        </div>
+
+        <div class="menu-section">
+            <h3>Đặc biệt</h3>
+            <div class="menu-item" onclick="addToOrder('latte')">
+                <div class="name">Latte</div>
+                <div class="price">35.000 VNĐ</div>
+                <div class="ingredients">Cafe - 1 shot, Sữa Tươi - 1 phần</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Header -->
+        <div class="header">
+            <h1>🍵 POS - Quản lý Quán Cafe</h1>
+            <div class="header-info">
+                <div class="time" id="currentTime"></div>
+                <div class="stats">
+                    <div class="stat-item">
+                        <div class="stat-value" id="orderCount">0</div>
+                        <div class="stat-label">Đơn hôm nay</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="totalRevenue">0</div>
+                        <div class="stat-label">Tổng thu</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Container -->
+        <div class="container">
+            <!-- POS Section -->
+            <div class="pos-section">
+                <div class="pos-header">📦 ĐƠN HÀNG HIỆN TẠI</div>
+                
+                <div id="alertBox"></div>
+
+                <div class="order-items" id="orderItems">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🛒</div>
+                        <div>Chưa có món nào trong đơn</div>
+                    </div>
+                </div>
+
+                <div class="order-summary">
+                    <div class="summary-row">
+                        <span>Số lượng:</span>
+                        <span id="orderQty">0</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Tổng tiền:</span>
+                        <span id="orderTotal">0 VNĐ</span>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn btn-checkout" id="checkoutBtn" onclick="checkout()">💳 THANH TOÁN</button>
+                        <button class="btn btn-clear" id="clearBtn" onclick="clearOrder()">🔄 HỦY ĐƠN</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Inventory Section -->
+            <div class="inventory-section">
+                <div class="inventory-header">📊 TỒN KHO</div>
+
+                <div class="inventory-list" id="inventoryList">
+                    <!-- Rendered by JavaScript -->
+                </div>
+
+                <div class="restock-section">
+                    <div class="restock-header">➕ NHẬP HÀNG</div>
+                    <div class="restock-form">
+                        <select id="restockSelect">
+                            <option value="">-- Chọn nguyên liệu --</option>
+                            <option value="boiCafe">Bột Cafe (Gói 1kg)</option>
+                            <option value="suaDac">Sữa Đặc (Lon 380g)</option>
+                            <option value="suaTuoi">Sữa Tươi (Hộp 1L)</option>
+                        </select>
+                        <input type="number" id="restockQty" placeholder="Số lượng" min="1">
+                        <button onclick="restock()">Nhập</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Checkout Modal -->
+    <div id="checkoutModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">💳 XÁC NHẬN THANH TOÁN</div>
+            <div class="modal-body" id="checkoutDetails">
+                <!-- Rendered by JavaScript -->
+            </div>
+            <div class="modal-buttons">
+                <button class="modal-button confirm" onclick="confirmCheckout()">✓ THANH TOÁN</button>
+                <button class="modal-button cancel" onclick="closeCheckoutModal()">✕ HỦY</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="successModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">✓ THANH TOÁN THÀNH CÔNG</div>
+            <div class="modal-body" id="successDetails">
+                <!-- Rendered by JavaScript -->
+            </div>
+            <div class="modal-buttons">
+                <button class="modal-button confirm" onclick="closeSuccessModal()">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error Modal -->
+    <div id="errorModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header" style="color: #e74c3c;">❌ LỖI HỆ THỐNG</div>
+            <div class="modal-body" id="errorDetails">
+                <!-- Rendered by JavaScript -->
+            </div>
+            <div class="modal-buttons">
+                <button class="modal-button cancel" onclick="closeErrorModal()">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // =====================================================
+        // DATA: Cấu hình Kho Hàng & Menu
+        // =====================================================
+
+        // Nguyên liệu và quy đổi đơn vị
+        const ingredients = {
+            boiCafe: {
+                name: 'Bột Cafe',
+                unit: 'Shot',
+                conversionRate: 50, // 1 Gói = 50 shot
+                purchaseUnit: 'Gói (1kg)',
+                quantity: 100, // Hiện tại tồn 100 shot
+            },
+            suaDac: {
+                name: 'Sữa Đặc',
+                unit: 'Phần',
+                conversionRate: 12, // 1 Lon = 12 phần
+                purchaseUnit: 'Lon (380g)',
+                quantity: 48, // Hiện tại tồn 48 phần
+            },
+            suaTuoi: {
+                name: 'Sữa Tươi',
+                unit: 'Phần',
+                conversionRate: 5, // 1 Hộp = 5 phần
+                purchaseUnit: 'Hộp (1L)',
+                quantity: 20, // Hiện tại tồn 20 phần
+            }
+        };
+
+        // Menu & Công thức trừ kho
+        const menu = {
+            caPheĐen: {
+                name: 'Cà phê Đen',
+                price: 25000,
+                recipe: {
+                    boiCafe: 2,
+                },
+                description: 'Cafe - 2 shot'
+            },
+            caPheKaraMel: {
+                name: 'Cà phê Sữa',
+                price: 30000,
+                recipe: {
+                    boiCafe: 1,
+                    suaDac: 1,
+                },
+                description: 'Cafe - 1 shot, Sữa Đặc - 1 phần'
+            },
+            bacXiu: {
+                name: 'Bạc Xỉu',
+                price: 28000,
+                recipe: {
+                    boiCafe: 0.5,
+                    suaDac: 1.5,
+                },
+                description: 'Cafe - 0.5 shot, Sữa Đặc - 1.5 phần'
+            },
+            latte: {
+                name: 'Latte',
+                price: 35000,
+                recipe: {
+                    boiCafe: 1,
+                    suaTuoi: 1,
+                },
+                description: 'Cafe - 1 shot, Sữa Tươi - 1 phần'
+            }
+        };
+
+        // Đơn hàng hiện tại
+        let currentOrder = [];
+
+        // Thống kê
+        let statistics = {
+            ordersToday: 0,
+            revenueToday: 0
+        };
+
+        // =====================================================
+        // UTILITY FUNCTIONS
+        // =====================================================
+
+        function updateTime() {
+            const now = new Date();
+            const time = now.toLocaleTimeString('vi-VN');
+            document.getElementById('currentTime').textContent = time;
+        }
+
+        function getInventoryStatus(ingredientKey) {
+            const ing = ingredients[ingredientKey];
+            const quantity = ing.quantity;
+            const threshold = 2;
+
+            if (quantity <= 0) {
+                return 'red';
+            } else if (quantity <= threshold) {
+                return 'yellow';
+            } else {
+                return 'green';
+            }
+        }
+
+        function showAlert(message, type = 'error') {
+            const alertBox = document.getElementById('alertBox');
+            alertBox.innerHTML = `<div class="alert ${type} show">${message}</div>`;
+            setTimeout(() => {
+                alertBox.innerHTML = '';
+            }, 3000);
+        }
+
+        // =====================================================
+        // LOGIC: Kiểm tra kho và trừ kho
+        // =====================================================
+
+        function canAddItem(menuId) {
+            const item = menu[menuId];
+            let missingIngredients = [];
+
+            for (const [ingredientKey, requiredAmount] of Object.entries(item.recipe)) {
+                const available = ingredients[ingredientKey].quantity;
+                if (available < requiredAmount) {
+                    missingIngredients.push(
+                        `${ingredients[ingredientKey].name} (còn ${available} ${ingredients[ingredientKey].unit}, cần ${requiredAmount} ${ingredients[ingredientKey].unit})`
+                    );
+                }
+            }
+
+            return { canAdd: missingIngredients.length === 0, missing: missingIngredients };
+        }
+
+        function deductInventory(menuId) {
+            const item = menu[menuId];
+            for (const [ingredientKey, amount] of Object.entries(item.recipe)) {
+                ingredients[ingredientKey].quantity -= amount;
+            }
+        }
+
+        // =====================================================
+        // UI: Add to Order
+        // =====================================================
+
+        function addToOrder(menuId) {
+            const { canAdd, missing } = canAddItem(menuId);
+
+            if (!canAdd) {
+                const msg = `❌ Hết nguyên liệu! Vui lòng chọn món khác.\n\n${missing.join('\n')}`;
+                showAlert(msg, 'error');
+                showErrorModal(msg);
+                return;
+            }
+
+            currentOrder.push(menuId);
+            showAlert(`✓ Đã thêm "${menu[menuId].name}" vào đơn`, 'success');
+            updateOrderUI();
+        }
+
+        function removeFromOrder(index) {
+            currentOrder.splice(index, 1);
+            updateOrderUI();
+        }
+
+        // =====================================================
+        // UI: Update Display
+        // =====================================================
+
+        function updateOrderUI() {
+            const orderItemsDiv = document.getElementById('orderItems');
+            const orderQtySpan = document.getElementById('orderQty');
+            const orderTotalSpan = document.getElementById('orderTotal');
+
+            if (currentOrder.length === 0) {
+                orderItemsDiv.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🛒</div>
+                        <div>Chưa có món nào trong đơn</div>
+                    </div>
+                `;
+                orderQtySpan.textContent = '0';
+                orderTotalSpan.textContent = '0 VNĐ';
+                return;
+            }
+
+            let total = 0;
+            let html = '';
+
+            currentOrder.forEach((menuId, index) => {
+                const item = menu[menuId];
+                total += item.price;
+                html += `
+                    <div class="order-item">
+                        <div class="order-item-info">
+                            <div class="order-item-name">${item.name}</div>
+                            <div class="order-item-ingredients">${item.description}</div>
+                        </div>
+                        <div class="order-item-price">${item.price.toLocaleString()} VNĐ</div>
+                        <button class="remove-btn" onclick="removeFromOrder(${index})">Xóa</button>
+                    </div>
+                `;
+            });
+
+            orderItemsDiv.innerHTML = html;
+            orderQtySpan.textContent = currentOrder.length;
+            orderTotalSpan.textContent = `${total.toLocaleString()} VNĐ`;
+        }
+
+        function updateInventoryUI() {
+            const inventoryList = document.getElementById('inventoryList');
+            let html = '';
+
+            for (const [key, ing] of Object.entries(ingredients)) {
+                const status = getInventoryStatus(key);
+                const statusText = status === 'green' ? '✓ Bình thường' : 
+                                 status === 'yellow' ? '⚠ Cảnh báo' : 
+                                 '❌ Hết hàng';
+
+                html += `
+                    <div class="inventory-item ${status}">
+                        <div class="inv-item-name">
+                            ${ing.name}
+                            <span class="status-badge ${status}">${statusText}</span>
+                        </div>
+                        <div class="inv-item-info">
+                            <span>Tồn: <span class="inv-quantity ${status === 'green' ? '' : status === 'yellow' ? 'warning' : 'danger'}">${ing.quantity} ${ing.unit}</span></span>
+                            <span>Tối thiểu: 2 ${ing.unit}</span>
+                        </div>
+                    </div>
+                `;
+            }
+
+            inventoryList.innerHTML = html;
+        }
+
+        // =====================================================
+        // LOGIC: Checkout
+        // =====================================================
+
+        function checkout() {
+            if (currentOrder.length === 0) {
+                showAlert('Chưa có món nào trong đơn', 'warning');
+                return;
+            }
+
+            showCheckoutModal();
+        }
+
+        function confirmCheckout() {
+            let total = 0;
+            currentOrder.forEach(menuId => {
+                total += menu[menuId].price;
+                deductInventory(menuId);
+            });
+
+            statistics.ordersToday++;
+            statistics.revenueToday += total;
+
+            closeCheckoutModal();
+            showSuccessModal(total, currentOrder.length);
+            
+            currentOrder = [];
+            updateOrderUI();
+            updateInventoryUI();
+            updateStatistics();
+        }
+
+        function clearOrder() {
+            currentOrder = [];
+            updateOrderUI();
+            showAlert('✓ Đã hủy đơn', 'warning');
+        }
+
+        // =====================================================
+        // LOGIC: Restock
+        // =====================================================
+
+        function restock() {
+            const select = document.getElementById('restockSelect');
+            const qty = parseInt(document.getElementById('restockQty').value);
+
+            if (!select.value) {
+                showAlert('Vui lòng chọn nguyên liệu', 'warning');
+                return;
+            }
+
+            if (!qty || qty <= 0) {
+                showAlert('Vui lòng nhập số lượng hợp lệ', 'warning');
+                return;
+            }
+
+            const ingredientKey = select.value;
+            const ingredient = ingredients[ingredientKey];
+            const addedQuantity = qty * ingredient.conversionRate;
+
+            ingredient.quantity += addedQuantity;
+
+            showAlert(`✓ Đã nhập ${qty} ${ingredient.purchaseUnit} = ${addedQuantity} ${ingredient.unit}`, 'success');
+
+            select.value = '';
+            document.getElementById('restockQty').value = '';
+            updateInventoryUI();
+        }
+
+        // =====================================================
+        // MODAL FUNCTIONS
+        // =====================================================
+
+        function showCheckoutModal() {
+            const modal = document.getElementById('checkoutModal');
+            const details = document.getElementById('checkoutDetails');
+
+            let total = 0;
+            let html = '';
+
+            currentOrder.forEach(menuId => {
+                const item = menu[menuId];
+                total += item.price;
+                html += `
+                    <div class="modal-row">
+                        <span>${item.name}</span>
+                        <span>${item.price.toLocaleString()} VNĐ</span>
+                    </div>
+                `;
+            });
+
+            html += `<div class="modal-row total">
+                <span>Tổng cộng:</span>
+                <span>${total.toLocaleString()} VNĐ</span>
+            </div>`;
+
+            details.innerHTML = html;
+            modal.style.display = 'block';
+        }
+
+        function closeCheckoutModal() {
+            document.getElementById('checkoutModal').style.display = 'none';
+        }
+
+        function showSuccessModal(total, qty) {
+            const modal = document.getElementById('successModal');
+            const details = document.getElementById('successDetails');
+
+            const receipt = `
+                <div class="modal-row">
+                    <span>Số lượng:</span>
+                    <span>${qty} món</span>
+                </div>
+                <div class="modal-row">
+                    <span>Tổng tiền:</span>
+                    <span style="color: #27ae60;">${total.toLocaleString()} VNĐ</span>
+                </div>
+                <div class="modal-row">
+                    <span>Thời gian:</span>
+                    <span>${new Date().toLocaleTimeString('vi-VN')}</span>
+                </div>
+            `;
+
+            details.innerHTML = receipt;
+            modal.style.display = 'block';
+        }
+
+        function closeSuccessModal() {
+            document.getElementById('successModal').style.display = 'none';
+        }
+
+        function showErrorModal(message) {
+            const modal = document.getElementById('errorModal');
+            const details = document.getElementById('errorDetails');
+            details.innerHTML = `<div style="color: #e74c3c;">${message}</div>`;
+            modal.style.display = 'block';
+        }
+
+        function closeErrorModal() {
+            document.getElementById('errorModal').style.display = 'none';
+        }
+
+        // =====================================================
+        // STATISTICS
+        // =====================================================
+
+        function updateStatistics() {
+            document.getElementById('orderCount').textContent = statistics.ordersToday;
+            document.getElementById('totalRevenue').textContent = 
+                statistics.revenueToday.toLocaleString() + ' đ';
+        }
+
+        // =====================================================
+        // INITIALIZATION
+        // =====================================================
+
+        window.addEventListener('load', () => {
+            updateTime();
+            setInterval(updateTime, 1000);
+            updateInventoryUI();
+            updateStatistics();
+
+            // Close modal when clicking outside
+            window.addEventListener('click', (event) => {
+                const checkoutModal = document.getElementById('checkoutModal');
+                const successModal = document.getElementById('successModal');
+                const errorModal = document.getElementById('errorModal');
+
+                if (event.target === checkoutModal) {
+                    closeCheckoutModal();
+                }
+                if (event.target === successModal) {
+                    closeSuccessModal();
+                }
+                if (event.target === errorModal) {
+                    closeErrorModal();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

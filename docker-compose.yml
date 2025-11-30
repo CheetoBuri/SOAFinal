@@ -1,0 +1,10 @@
+services:
+  cafe-pos:
+    build: .
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+    environment:
+      - PYTHONUNBUFFERED=1
+    container_name: cafe-pos-system

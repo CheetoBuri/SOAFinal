@@ -1,0 +1,22 @@
+{
+  "name": "cafe-pos-system",
+  "version": "1.0.0",
+  "description": "Hệ thống Quản lý Quán Cafe - POS System",
+  "scripts": {
+    "start": "bash start.sh up || cmd /c start.bat up",
+    "stop": "bash start.sh down || cmd /c start.bat down",
+    "restart": "bash start.sh restart || cmd /c start.bat restart",
+    "logs": "bash start.sh logs || cmd /c start.bat logs",
+    "shell": "bash start.sh shell || cmd /c start.bat shell",
+    "clean": "bash start.sh clean || cmd /c start.bat clean"
+  },
+  "keywords": [
+    "cafe",
+    "pos",
+    "system",
+    "python",
+    "fastapi"
+  ],
+  "author": "",
+  "license": "ISC"
+}
