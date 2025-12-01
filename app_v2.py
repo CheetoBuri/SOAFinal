@@ -131,6 +131,7 @@ class PromoCodeRequest(BaseModel):
     code: str
 
 class FavoriteRequest(BaseModel):
+    user_id: str
     product_id: str
 
 # ============= MENU DATA =============
@@ -575,9 +576,9 @@ def validate_promo(request: PromoCodeRequest, user_id: Optional[str] = None):
 
 # ============= FAVORITES ENDPOINTS =============
 @app.post("/api/favorites/add")
-def add_favorite(request: FavoriteRequest, user_id: str):
+def add_favorite(request: FavoriteRequest):
     """Add product to favorites"""
-    if not user_id:
+    if not request.user_id:
         raise HTTPException(status_code=401, detail="Not authenticated")
     
     # Verify product exists
@@ -597,7 +598,7 @@ def add_favorite(request: FavoriteRequest, user_id: str):
         c.execute("""
             INSERT INTO favorites (user_id, product_id)
             VALUES (?, ?)
-        """, (user_id, request.product_id))
+        """, (request.user_id, request.product_id))
         conn.commit()
     except sqlite3.IntegrityError:
         pass  # Already favorited

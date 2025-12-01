@@ -12,28 +12,30 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f5f5f5;
-            color: #333;
+            font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+            background-color: #fafafa;
+            color: #2d2d2d;
+            line-height: 1.6;
         }
 
         /* ========== HEADER ========== */
         header {
-            background: linear-gradient(135deg, #006241 0%, #00502d 100%);
+            background: linear-gradient(135deg, #c41e3a 0%, #a01729 100%);
             color: white;
-            padding: 15px 20px;
+            padding: 18px 30px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             position: sticky;
             top: 0;
             z-index: 100;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            box-shadow: 0 3px 12px rgba(196, 30, 58, 0.2);
         }
 
         header h1 {
-            font-size: 24px;
-            font-weight: 600;
+            font-size: 26px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
         }
 
         .header-buttons {
@@ -43,18 +45,21 @@
         }
 
         .header-buttons button {
-            background: rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.15);
             color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 10px 20px;
+            border-radius: 25px;
             cursor: pointer;
             font-size: 14px;
-            transition: background 0.3s;
+            font-weight: 600;
+            transition: all 0.3s ease;
         }
 
         .header-buttons button:hover {
-            background: rgba(255,255,255,0.3);
+            background: rgba(255,255,255,0.25);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
         }
 
         .user-info {
@@ -81,18 +86,20 @@
 
         .sidebar-section {
             background: white;
-            border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 15px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 18px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            border: 1px solid #f0f0f0;
         }
 
         .sidebar-section h3 {
-            color: #006241;
-            margin-bottom: 12px;
-            font-size: 16px;
-            border-bottom: 2px solid #006241;
-            padding-bottom: 8px;
+            color: #c41e3a;
+            margin-bottom: 16px;
+            font-size: 17px;
+            font-weight: 700;
+            border-bottom: 3px solid #c41e3a;
+            padding-bottom: 10px;
         }
 
         .search-box {
@@ -114,25 +121,29 @@
             display: block;
             width: 100%;
             text-align: left;
-            padding: 10px 12px;
-            margin: 5px 0;
-            background: #f0f0f0;
-            border: none;
-            border-left: 3px solid transparent;
-            border-radius: 5px;
+            padding: 12px 16px;
+            margin: 8px 0;
+            background: #f8f8f8;
+            border: 1px solid #e8e8e8;
+            border-left: 4px solid transparent;
+            border-radius: 8px;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.3s ease;
             font-size: 14px;
+            font-weight: 500;
         }
 
         .category-btn:hover {
-            background: #e0e0e0;
+            background: #fff;
+            border-left-color: #c41e3a;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.06);
         }
 
         .category-btn.active {
-            background: #006241;
+            background: #c41e3a;
             color: white;
-            border-left-color: #004d34;
+            border-left-color: #a01729;
+            box-shadow: 0 3px 8px rgba(196, 30, 58, 0.25);
         }
 
         .favorites-list {
@@ -184,97 +195,114 @@
 
         .product-card {
             background: white;
-            border-radius: 10px;
-            padding: 15px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-            transition: transform 0.2s, box-shadow 0.2s;
+            border-radius: 16px;
+            padding: 0;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+            border: 1px solid #f0f0f0;
         }
 
         .product-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transform: translateY(-8px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+            border-color: #c41e3a;
         }
 
         .product-icon {
-            font-size: 40px;
+            font-size: 80px;
             text-align: center;
-            margin-bottom: 10px;
+            padding: 30px;
+            background: linear-gradient(135deg, #fff5f5 0%, #ffe8e8 100%);
+            min-height: 180px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .product-name {
-            font-weight: 600;
-            margin-bottom: 5px;
-            color: #006241;
-            font-size: 15px;
+            font-weight: 700;
+            margin: 15px 15px 8px;
+            color: #2d2d2d;
+            font-size: 16px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .product-price {
             font-size: 18px;
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 10px;
+            font-weight: 700;
+            color: #c41e3a;
+            margin: 0 15px 15px;
         }
 
         .product-buttons {
             display: flex;
-            gap: 5px;
-            font-size: 12px;
+            gap: 8px;
+            padding: 0 15px 15px;
         }
 
         .btn-small {
             flex: 1;
-            padding: 8px;
+            padding: 12px;
             border: none;
-            border-radius: 5px;
+            border-radius: 10px;
             cursor: pointer;
-            transition: all 0.3s;
-            font-size: 12px;
+            transition: all 0.3s ease;
+            font-size: 13px;
+            font-weight: 600;
         }
 
         .btn-add {
-            background: #006241;
+            background: linear-gradient(135deg, #c41e3a 0%, #a01729 100%);
             color: white;
+            box-shadow: 0 2px 8px rgba(196, 30, 58, 0.3);
         }
 
         .btn-add:hover {
-            background: #004d34;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(196, 30, 58, 0.4);
         }
 
         .btn-favorite {
-            background: #ffe0e0;
-            color: #d63031;
+            background: #fff;
+            color: #ff6b6b;
+            border: 2px solid #ff6b6b;
         }
 
         .btn-favorite:hover {
-            background: #ffb3b3;
+            background: #fff5f5;
+            transform: scale(1.05);
         }
 
         .btn-favorite.favorited {
-            background: #d63031;
+            background: #ff6b6b;
             color: white;
+            border-color: #ff6b6b;
         }
 
         /* ========== CART SIDEBAR ========== */
         .cart-sidebar {
-            width: 300px;
+            width: 320px;
             background: white;
-            border-radius: 10px;
-            padding: 15px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 3px 16px rgba(0,0,0,0.1);
             position: sticky;
             top: 80px;
             height: fit-content;
             max-height: calc(100vh - 100px);
             overflow-y: auto;
+            border: 1px solid #f0f0f0;
         }
 
         .cart-title {
-            font-size: 18px;
-            font-weight: bold;
-            color: #006241;
-            margin-bottom: 15px;
-            border-bottom: 2px solid #006241;
-            padding-bottom: 8px;
+            font-size: 20px;
+            font-weight: 700;
+            color: #c41e3a;
+            margin-bottom: 18px;
+            border-bottom: 3px solid #c41e3a;
+            padding-bottom: 12px;
         }
 
         .cart-empty {
@@ -366,25 +394,31 @@
 
         .checkout-btn {
             width: 100%;
-            padding: 12px;
-            background: #006241;
+            padding: 16px;
+            background: linear-gradient(135deg, #c41e3a 0%, #a01729 100%);
             color: white;
             border: none;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: bold;
+            border-radius: 12px;
+            font-size: 17px;
+            font-weight: 700;
             cursor: pointer;
             margin-top: 15px;
-            transition: background 0.3s;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(196, 30, 58, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         .checkout-btn:hover {
-            background: #004d34;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(196, 30, 58, 0.4);
         }
 
         .checkout-btn:disabled {
-            background: #ccc;
+            background: #ddd;
             cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
         }
 
         /* ========== ORDER HISTORY VIEW ========== */
@@ -448,6 +482,92 @@
             color: #0f5132;
         }
 
+        /* ========== PROFILE VIEW ========== */
+        .profile-section {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+
+        .profile-section h3 {
+            color: #006241;
+            margin: 0 0 15px 0;
+            font-size: 18px;
+            border-bottom: 2px solid #00754a;
+            padding-bottom: 10px;
+        }
+
+        .profile-info-card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+        }
+
+        .profile-info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .profile-info-row:last-child {
+            border-bottom: none;
+        }
+
+        .profile-label {
+            font-weight: 600;
+            color: #555;
+            min-width: 120px;
+        }
+
+        .profile-value {
+            color: #333;
+            text-align: right;
+            flex: 1;
+        }
+
+        .transaction-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .transaction-item {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            border-left: 4px solid #00754a;
+            text-align: center;
+            color: #666;
+            font-style: italic;
+        }
+
+        .btn-logout {
+            width: 100%;
+            padding: 15px;
+            background: #d32f2f;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .btn-logout:hover {
+            background: #b71c1c;
+        }
+
+        .profile-section p {
+            color: #666;
+            font-size: 14px;
+            margin: 10px 0 0 0;
+            text-align: center;
+        }
+
         .order-items {
             margin: 10px 0;
             font-size: 13px;
@@ -477,7 +597,8 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(4px);
             z-index: 1000;
             align-items: center;
             justify-content: center;
@@ -489,22 +610,22 @@
 
         .modal-content {
             background: white;
-            border-radius: 10px;
-            padding: 30px;
-            max-width: 500px;
+            border-radius: 20px;
+            padding: 35px;
+            max-width: 550px;
             width: 90%;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
             max-height: 90vh;
             overflow-y: auto;
         }
 
         .modal-header {
-            font-size: 22px;
-            font-weight: bold;
-            color: #006241;
-            margin-bottom: 20px;
-            border-bottom: 2px solid #006241;
-            padding-bottom: 10px;
+            font-size: 24px;
+            font-weight: 700;
+            color: #c41e3a;
+            margin-bottom: 25px;
+            border-bottom: 3px solid #c41e3a;
+            padding-bottom: 12px;
         }
 
         .form-group {
@@ -523,19 +644,20 @@
         .form-group select,
         .form-group textarea {
             width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 14px;
+            padding: 12px 15px;
+            border: 2px solid #e8e8e8;
+            border-radius: 10px;
+            font-size: 15px;
             font-family: inherit;
+            transition: all 0.3s ease;
         }
 
         .form-group input:focus,
         .form-group select:focus,
         .form-group textarea:focus {
             outline: none;
-            border-color: #006241;
-            box-shadow: 0 0 5px rgba(0,98,65,0.3);
+            border-color: #c41e3a;
+            box-shadow: 0 0 0 3px rgba(196, 30, 58, 0.1);
         }
 
         .form-group textarea {
@@ -554,18 +676,22 @@
         }
 
         .promo-section button {
-            background: #006241;
+            background: linear-gradient(135deg, #c41e3a 0%, #a01729 100%);
             color: white;
             border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
+            padding: 12px 24px;
+            border-radius: 10px;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 15px;
+            font-weight: 600;
             white-space: nowrap;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(196, 30, 58, 0.3);
         }
 
         .promo-section button:hover {
-            background: #004d34;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(196, 30, 58, 0.4);
         }
 
         .promo-discount {
@@ -592,45 +718,51 @@
         }
 
         .summary-line.total {
-            font-size: 16px;
-            font-weight: bold;
-            color: #006241;
-            border-top: 1px solid #ddd;
-            padding-top: 8px;
+            font-size: 18px;
+            font-weight: 700;
+            color: #c41e3a;
+            border-top: 2px solid #e8e8e8;
+            padding-top: 12px;
+            margin-top: 5px;
         }
 
         .modal-buttons {
             display: flex;
-            gap: 10px;
+            gap: 12px;
+            margin-top: 20px;
         }
 
         .modal-buttons button {
             flex: 1;
-            padding: 12px;
+            padding: 14px;
             border: none;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: bold;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 700;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.3s ease;
         }
 
         .btn-submit {
-            background: #006241;
+            background: linear-gradient(135deg, #c41e3a 0%, #a01729 100%);
             color: white;
+            box-shadow: 0 3px 10px rgba(196, 30, 58, 0.3);
         }
 
         .btn-submit:hover {
-            background: #004d34;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(196, 30, 58, 0.4);
         }
 
         .btn-cancel {
-            background: #e0e0e0;
-            color: #333;
+            background: #f5f5f5;
+            color: #666;
+            border: 2px solid #e0e0e0;
         }
 
         .btn-cancel:hover {
-            background: #d0d0d0;
+            background: #e8e8e8;
+            border-color: #d0d0d0;
         }
 
         /* ========== AUTH SCREEN ========== */
@@ -639,23 +771,25 @@
             align-items: center;
             justify-content: center;
             min-height: 100vh;
-            background: linear-gradient(135deg, #006241 0%, #00502d 100%);
+            background: linear-gradient(135deg, #c41e3a 0%, #a01729 100%);
+            padding: 20px;
         }
 
         .auth-box {
             background: white;
-            padding: 40px;
-            border-radius: 10px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            padding: 45px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
             width: 100%;
-            max-width: 400px;
+            max-width: 440px;
         }
 
         .auth-box h2 {
-            color: #006241;
-            margin-bottom: 25px;
+            color: #c41e3a;
+            margin-bottom: 30px;
             text-align: center;
-            font-size: 24px;
+            font-size: 28px;
+            font-weight: 700;
         }
 
         .auth-box .form-group {
@@ -664,27 +798,27 @@
 
         .auth-tabs {
             display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            border-bottom: 2px solid #e0e0e0;
+            gap: 12px;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f0f0f0;
         }
 
         .auth-tab {
             flex: 1;
-            padding: 10px;
+            padding: 12px;
             background: none;
             border: none;
             cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
+            font-size: 15px;
+            font-weight: 700;
             color: #999;
             border-bottom: 3px solid transparent;
-            transition: all 0.3s;
+            transition: all 0.3s ease;
         }
 
         .auth-tab.active {
-            color: #006241;
-            border-bottom-color: #006241;
+            color: #c41e3a;
+            border-bottom-color: #c41e3a;
         }
 
         .auth-form {
@@ -697,19 +831,24 @@
 
         .auth-submit {
             width: 100%;
-            padding: 12px;
-            background: #006241;
+            padding: 15px;
+            background: linear-gradient(135deg, #c41e3a 0%, #a01729 100%);
             color: white;
             border: none;
-            border-radius: 6px;
-            font-size: 16px;
-            font-weight: bold;
+            border-radius: 12px;
+            font-size: 17px;
+            font-weight: 700;
             cursor: pointer;
-            margin-top: 10px;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(196, 30, 58, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .auth-submit:hover {
-            background: #004d34;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(196, 30, 58, 0.4);
         }
 
         /* Password toggle eye */
@@ -748,14 +887,16 @@
         }
 
         .forgot-password-link a {
-            color: #006241;
+            color: #c41e3a;
             text-decoration: none;
-            font-size: 13px;
+            font-size: 14px;
             cursor: pointer;
+            font-weight: 600;
         }
 
         .forgot-password-link a:hover {
             text-decoration: underline;
+            color: #a01729;
         }
 
         .error-message {
@@ -1007,10 +1148,10 @@
                 <button onclick="switchView('shop')">🛒 Shop</button>
                 <button onclick="switchView('history')">📜 History</button>
                 <button onclick="switchView('favorites')">❤️ Favorites</button>
+                <button onclick="switchView('profile')">👤 Profile</button>
                 <div class="user-info">
                     <span id="userEmail"></span>
                 </div>
-                <button onclick="logout()">Logout</button>
             </div>
         </header>
 
@@ -1068,6 +1209,72 @@
                     <h2 style="color:#006241; margin-bottom:20px;">❤️ Your Favorites</h2>
                     <div class="products-grid" id="favoritesGrid">
                         <p style="color:#999;">No favorites yet. Add some from the shop!</p>
+                    </div>
+                </div>
+
+                <!-- PROFILE VIEW -->
+                <div id="profileView" class="view">
+                    <h2 style="color:#006241; margin-bottom:20px;">👤 My Profile</h2>
+                    
+                    <div style="max-width:800px; margin:0 auto;">
+                        <!-- Personal Information Section -->
+                        <div class="profile-section">
+                            <h3 style="color:#006241; margin-bottom:15px; display:flex; align-items:center; gap:10px;">
+                                <span>📋</span> Personal Information
+                            </h3>
+                            <div class="profile-info-card">
+                                <div class="profile-info-row">
+                                    <span class="profile-label">Email:</span>
+                                    <span class="profile-value" id="profileEmail">-</span>
+                                </div>
+                                <div class="profile-info-row">
+                                    <span class="profile-label">Full Name:</span>
+                                    <span class="profile-value" id="profileName">-</span>
+                                </div>
+                                <div class="profile-info-row">
+                                    <span class="profile-label">Phone:</span>
+                                    <span class="profile-value" id="profilePhone">-</span>
+                                </div>
+                                <div class="profile-info-row">
+                                    <span class="profile-label">Member Since:</span>
+                                    <span class="profile-value" id="profileJoined">-</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Transaction History Section -->
+                        <div class="profile-section">
+                            <h3 style="color:#006241; margin-bottom:15px; display:flex; align-items:center; gap:10px;">
+                                <span>💳</span> Transaction History
+                            </h3>
+                            <div class="transaction-list" id="transactionList">
+                                <div class="transaction-item">
+                                    <div class="transaction-header">
+                                        <span class="transaction-date">📅 Coming Soon</span>
+                                        <span class="transaction-status status-pending">Pending Payment Integration</span>
+                                    </div>
+                                    <div class="transaction-details">
+                                        <p style="color:#666; margin:10px 0;">Transaction history will be available after payment integration.</p>
+                                        <p style="color:#999; font-size:14px;">Features: Payment history, receipts, refunds</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Logout Section -->
+                        <div class="profile-section">
+                            <h3 style="color:#006241; margin-bottom:15px; display:flex; align-items:center; gap:10px;">
+                                <span>🚪</span> Account Actions
+                            </h3>
+                            <div class="profile-actions">
+                                <button class="btn-logout" onclick="logout()">
+                                    <span>🚪</span> Logout
+                                </button>
+                                <p style="color:#999; font-size:14px; margin-top:10px;">
+                                    You will be logged out and redirected to the login page.
+                                </p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1362,6 +1569,9 @@
             } else if (view === 'favorites') {
                 document.getElementById('favoritesView').classList.add('active');
                 loadFavoritesView();
+            } else if (view === 'profile') {
+                document.getElementById('profileView').classList.add('active');
+                loadProfileData();
             }
         }
 
@@ -1526,6 +1736,9 @@
         function displayProducts(items) {
             const grid = document.getElementById('productsGrid');
             grid.innerHTML = '';
+            
+            // Lưu lại danh sách hiện tại để dùng khi toggle favorite
+            currentDisplayedProducts = items;
 
             items.forEach(item => {
                 const isFavorited = state.favorites && state.favorites.includes(item.id);
@@ -1609,21 +1822,41 @@
             const sizeModal = document.createElement('div');
             sizeModal.className = 'modal active';
             sizeModal.style.zIndex = '2000';
+            sizeModal.id = 'sizeModal';
             sizeModal.innerHTML = `
                 <div class="modal-content">
                     <div class="modal-header">${productName}</div>
                     <div class="form-group">
                         <label>Select Size:</label>
-                        <select id="sizeSelect" onchange="addToCart('${productId}', '${productName}', ${price}, this.value); this.parentElement.parentElement.parentElement.remove();">
+                        <select id="sizeSelect">
                             <option value="">Choose size...</option>
                             <option value="S">Small (90% of price)</option>
                             <option value="M">Medium (100% of price)</option>
                             <option value="L">Large (110% of price)</option>
                         </select>
                     </div>
+                    <div class="modal-buttons">
+                        <button type="button" class="btn-submit" onclick="addToCartFromModal('${productId}', '${productName}', ${price})">Add to Cart</button>
+                        <button type="button" class="btn-cancel" onclick="closeSizeModal()">Cancel</button>
+                    </div>
                 </div>
             `;
             document.body.appendChild(sizeModal);
+        }
+
+        function closeSizeModal() {
+            const modal = document.getElementById('sizeModal');
+            if (modal) modal.remove();
+        }
+
+        function addToCartFromModal(productId, productName, price) {
+            const size = document.getElementById('sizeSelect').value;
+            if (!size) {
+                alert('Please select a size');
+                return;
+            }
+            addToCart(productId, productName, price, size);
+            closeSizeModal();
         }
 
         function addToCart(productId, productName, price, size) {
@@ -1737,7 +1970,7 @@
         async function toggleFavorite(productId) {
             try {
                 if (state.favorites && state.favorites.includes(productId)) {
-                    await fetch(`${API_URL}/favorites/${productId}`, {
+                    await fetch(`${API_URL}/favorites/${productId}?user_id=${state.currentUser.id}`, {
                         method: 'DELETE',
                         headers: { 'Content-Type': 'application/json' }
                     });
@@ -1746,12 +1979,20 @@
                     await fetch(`${API_URL}/favorites/add`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ product_id: productId })
+                        body: JSON.stringify({ 
+                            user_id: state.currentUser.id,
+                            product_id: productId 
+                        })
                     });
                     state.favorites.push(productId);
                 }
-                updateCartUI();
-                displayProducts(currentDisplayedProducts);
+                
+                // Reload view hiện tại
+                if (state.currentView === 'shop') {
+                    displayProducts(currentDisplayedProducts);
+                } else if (state.currentView === 'favorites') {
+                    loadFavoritesView();
+                }
             } catch (err) {
                 console.error('Error updating favorite:', err);
             }
@@ -1772,6 +2013,24 @@
                 console.error('Error loading favorites view:', err);
             }
         }
+
+        // ========== PROFILE VIEW ==========
+        function loadProfileData() {
+            if (!state.currentUser) return;
+
+            // Load personal information
+            document.getElementById('profileEmail').textContent = state.currentUser.email || '-';
+            document.getElementById('profileName').textContent = state.currentUser.name || '-';
+            document.getElementById('profilePhone').textContent = state.currentUser.phone || '-';
+            
+            // Calculate member since (you can store this in database or use a default)
+            const joinDate = new Date().toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'long' 
+            });
+            document.getElementById('profileJoined').textContent = joinDate;
+        }
+
 
         // ========== ORDER HISTORY ==========
         async function loadOrderHistory() {
