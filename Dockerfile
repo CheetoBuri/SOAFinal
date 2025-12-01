@@ -1,20 +1,32 @@
-FROM python:3.13-slim
+# Use Python 3.11 slim image
+FROM python:3.11-slim
 
+# Set working directory
 WORKDIR /app
 
-# Copy requirements
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements first (for better caching)
 COPY requirements.txt .
 
-# Install dependencies
+# Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application files
-COPY app.py .
-COPY cafe_pos_system.py .
-COPY frontend.html .
+COPY app_v2.py .
+COPY order_frontend_v2.html .
+COPY schema.sql .
+COPY .env .
 
-# Expose port
+# Expose port 3000
 EXPOSE 3000
 
-# Run application
-CMD ["python", "app.py"]
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD python -c "import requests; requests.get('http://localhost:3000/api/health')" || exit 1
+
+# Run the application
+CMD ["python", "app_v2.py"]

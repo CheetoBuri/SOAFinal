@@ -1,0 +1,1931 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cafe Ordering System v2</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+
+        /* ========== HEADER ========== */
+        header {
+            background: linear-gradient(135deg, #006241 0%, #00502d 100%);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+
+        header h1 {
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .header-buttons {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .header-buttons button {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+
+        .header-buttons button:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .user-info {
+            color: white;
+            font-size: 14px;
+            padding: 0 10px;
+        }
+
+        /* ========== MAIN CONTAINER ========== */
+        .container {
+            display: flex;
+            max-width: 1200px;
+            margin: 0 auto;
+            gap: 20px;
+            padding: 20px;
+            min-height: calc(100vh - 60px);
+        }
+
+        /* ========== SIDEBAR ========== */
+        .sidebar {
+            width: 250px;
+            flex-shrink: 0;
+        }
+
+        .sidebar-section {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .sidebar-section h3 {
+            color: #006241;
+            margin-bottom: 12px;
+            font-size: 16px;
+            border-bottom: 2px solid #006241;
+            padding-bottom: 8px;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: #006241;
+            box-shadow: 0 0 5px rgba(0,98,65,0.3);
+        }
+
+        .category-btn {
+            display: block;
+            width: 100%;
+            text-align: left;
+            padding: 10px 12px;
+            margin: 5px 0;
+            background: #f0f0f0;
+            border: none;
+            border-left: 3px solid transparent;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .category-btn:hover {
+            background: #e0e0e0;
+        }
+
+        .category-btn.active {
+            background: #006241;
+            color: white;
+            border-left-color: #004d34;
+        }
+
+        .favorites-list {
+            max-height: 300px;
+            overflow-y: auto;
+            font-size: 13px;
+        }
+
+        .favorite-item {
+            padding: 8px;
+            background: #f9f9f9;
+            border-radius: 4px;
+            margin: 5px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .favorite-item button {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        /* ========== MAIN CONTENT ========== */
+        .main-content {
+            flex: 1;
+        }
+
+        .view {
+            display: none;
+        }
+
+        .view.active {
+            display: block;
+        }
+
+        /* ========== SHOPPING VIEW ========== */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .product-card {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .product-icon {
+            font-size: 40px;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .product-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #006241;
+            font-size: 15px;
+        }
+
+        .product-price {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .product-buttons {
+            display: flex;
+            gap: 5px;
+            font-size: 12px;
+        }
+
+        .btn-small {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 12px;
+        }
+
+        .btn-add {
+            background: #006241;
+            color: white;
+        }
+
+        .btn-add:hover {
+            background: #004d34;
+        }
+
+        .btn-favorite {
+            background: #ffe0e0;
+            color: #d63031;
+        }
+
+        .btn-favorite:hover {
+            background: #ffb3b3;
+        }
+
+        .btn-favorite.favorited {
+            background: #d63031;
+            color: white;
+        }
+
+        /* ========== CART SIDEBAR ========== */
+        .cart-sidebar {
+            width: 300px;
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 80px;
+            height: fit-content;
+            max-height: calc(100vh - 100px);
+            overflow-y: auto;
+        }
+
+        .cart-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #006241;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #006241;
+            padding-bottom: 8px;
+        }
+
+        .cart-empty {
+            color: #999;
+            text-align: center;
+            padding: 20px 10px;
+            font-size: 14px;
+        }
+
+        .cart-item {
+            background: #f9f9f9;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            font-size: 13px;
+        }
+
+        .cart-item-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .cart-item-details {
+            color: #666;
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+
+        .cart-item-price {
+            color: #006241;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .cart-item-controls {
+            display: flex;
+            gap: 5px;
+            margin-top: 8px;
+        }
+
+        .qty-btn {
+            background: #e0e0e0;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+            flex: 1;
+        }
+
+        .qty-btn:hover {
+            background: #d0d0d0;
+        }
+
+        .remove-btn {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+            flex: 1;
+        }
+
+        .remove-btn:hover {
+            background: #ee5a52;
+        }
+
+        .cart-summary {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 2px solid #e0e0e0;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .summary-row.total {
+            font-size: 16px;
+            font-weight: bold;
+            color: #006241;
+        }
+
+        .checkout-btn {
+            width: 100%;
+            padding: 12px;
+            background: #006241;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: background 0.3s;
+        }
+
+        .checkout-btn:hover {
+            background: #004d34;
+        }
+
+        .checkout-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        /* ========== ORDER HISTORY VIEW ========== */
+        .order-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .order-card {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #e0e0e0;
+            padding-bottom: 10px;
+        }
+
+        .order-id {
+            font-weight: bold;
+            color: #006241;
+            font-size: 16px;
+        }
+
+        .order-date {
+            color: #999;
+            font-size: 13px;
+        }
+
+        .order-status {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-preparing {
+            background: #cfe2ff;
+            color: #084298;
+        }
+
+        .status-ready {
+            background: #d1e7dd;
+            color: #0f5132;
+        }
+
+        .status-completed {
+            background: #d1e7dd;
+            color: #0f5132;
+        }
+
+        .order-items {
+            margin: 10px 0;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .order-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .order-total {
+            font-size: 16px;
+            font-weight: bold;
+            color: #006241;
+        }
+
+        /* ========== CHECKOUT MODAL ========== */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            font-size: 22px;
+            font-weight: bold;
+            color: #006241;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #006241;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #006241;
+            box-shadow: 0 0 5px rgba(0,98,65,0.3);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .promo-section {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .promo-section input {
+            flex: 1;
+        }
+
+        .promo-section button {
+            background: #006241;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+
+        .promo-section button:hover {
+            background: #004d34;
+        }
+
+        .promo-discount {
+            background: #d1e7dd;
+            color: #0f5132;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 13px;
+            margin-bottom: 10px;
+        }
+
+        .modal-summary {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+
+        .summary-line {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .summary-line.total {
+            font-size: 16px;
+            font-weight: bold;
+            color: #006241;
+            border-top: 1px solid #ddd;
+            padding-top: 8px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .modal-buttons button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-submit {
+            background: #006241;
+            color: white;
+        }
+
+        .btn-submit:hover {
+            background: #004d34;
+        }
+
+        .btn-cancel {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .btn-cancel:hover {
+            background: #d0d0d0;
+        }
+
+        /* ========== AUTH SCREEN ========== */
+        .auth-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #006241 0%, #00502d 100%);
+        }
+
+        .auth-box {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .auth-box h2 {
+            color: #006241;
+            margin-bottom: 25px;
+            text-align: center;
+            font-size: 24px;
+        }
+
+        .auth-box .form-group {
+            margin-bottom: 15px;
+        }
+
+        .auth-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .auth-tab {
+            flex: 1;
+            padding: 10px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            color: #999;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .auth-tab.active {
+            color: #006241;
+            border-bottom-color: #006241;
+        }
+
+        .auth-form {
+            display: none;
+        }
+
+        .auth-form.active {
+            display: block;
+        }
+
+        .auth-submit {
+            width: 100%;
+            padding: 12px;
+            background: #006241;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .auth-submit:hover {
+            background: #004d34;
+        }
+
+        /* Password toggle eye */
+        .password-field {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .password-field input {
+            flex: 1;
+            padding: 10px 35px 10px 10px;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 10px;
+            cursor: pointer;
+            font-size: 18px;
+            color: #666;
+            background: none;
+            border: none;
+            padding: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .password-toggle:hover {
+            color: #333;
+        }
+
+        .forgot-password-link {
+            text-align: right;
+            margin-top: 8px;
+        }
+
+        .forgot-password-link a {
+            color: #006241;
+            text-decoration: none;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .forgot-password-link a:hover {
+            text-decoration: underline;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            font-size: 13px;
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            font-size: 13px;
+        }
+
+        .otp-sent-message {
+            background: #cfe2ff;
+            color: #084298;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            font-size: 13px;
+        }
+
+        /* ========== RESPONSIVE ========== */
+        @media (max-width: 1024px) {
+            .container {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .sidebar {
+                width: 100%;
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+            }
+
+            .sidebar-section {
+                margin-bottom: 0;
+            }
+
+            .cart-sidebar {
+                position: relative;
+                top: auto;
+                grid-column: 1 / -1;
+            }
+
+            .products-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 18px;
+            }
+
+            .sidebar {
+                grid-template-columns: 1fr;
+            }
+
+            .products-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .cart-sidebar {
+                position: static;
+            }
+
+            .auth-box {
+                margin: 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 10px;
+                gap: 10px;
+            }
+
+            .products-grid {
+                grid-template-columns: 1fr;
+            }
+
+            header {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .header-buttons {
+                width: 100%;
+                gap: 5px;
+            }
+
+            .header-buttons button {
+                flex: 1;
+                padding: 6px 10px;
+                font-size: 12px;
+            }
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #006241;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-left: 8px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- ========== AUTH SCREEN ========== -->
+    <div id="authScreen" class="auth-container">
+        <div class="auth-box">
+            <h2>☕ Cafe Order</h2>
+            
+            <div class="auth-tabs">
+                <button class="auth-tab active" onclick="switchAuthTab('login')">Login</button>
+                <button class="auth-tab" onclick="switchAuthTab('register')">Register</button>
+                <button class="auth-tab" onclick="switchAuthTab('forgot')">Forgot Password</button>
+            </div>
+
+            <!-- LOGIN FORM -->
+            <form id="loginForm" class="auth-form active" onsubmit="handleLogin(event)">
+                <div id="loginError"></div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="loginEmail" required placeholder="your@email.com">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <div class="password-field">
+                        <input type="password" id="loginPassword" required placeholder="Enter password">
+                        <button type="button" class="password-toggle" onclick="togglePasswordVisibility('loginPassword')">👁️</button>
+                    </div>
+                </div>
+                <div class="forgot-password-link">
+                    <a onclick="switchAuthTab('forgot')">Forgot password?</a>
+                </div>
+                <button type="submit" class="auth-submit">Login</button>
+            </form>
+
+            <!-- REGISTER FORM -->
+            <form id="registerForm" class="auth-form" onsubmit="handleRegister(event)">
+                <div id="registerError"></div>
+                <div id="registerSuccess"></div>
+
+                <div id="registerStep1">
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="registerEmail" required placeholder="your@email.com">
+                    </div>
+                    <button type="button" class="auth-submit" onclick="sendOTP()">Send OTP Code</button>
+                </div>
+
+                <div id="registerStep2" style="display:none;">
+                    <div class="otp-sent-message">✅ OTP code sent to your email! Check spam folder if not found.</div>
+                    <div class="form-group">
+                        <label>OTP Code (6 digits)</label>
+                        <input type="text" id="otpCode" maxlength="6" placeholder="000000">
+                    </div>
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" id="registerName" placeholder="Your name">
+                    </div>
+                    <div class="form-group">
+                        <label>Phone</label>
+                        <input type="tel" id="registerPhone" placeholder="Your phone">
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <div class="password-field">
+                            <input type="password" id="registerPassword" placeholder="Create a strong password" required>
+                            <button type="button" class="password-toggle" onclick="togglePasswordVisibility('registerPassword')">👁️</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Confirm Password</label>
+                        <div class="password-field">
+                            <input type="password" id="registerPasswordConfirm" placeholder="Confirm password" required>
+                            <button type="button" class="password-toggle" onclick="togglePasswordVisibility('registerPasswordConfirm')">👁️</button>
+                        </div>
+                    </div>
+                    <button type="submit" class="auth-submit">Create Account</button>
+                    <button type="button" class="auth-submit" style="background:#999; margin-top:8px;" onclick="resetRegisterForm()">Back</button>
+                </div>
+            </form>
+
+            <!-- FORGOT PASSWORD FORM -->
+            <form id="forgotForm" class="auth-form" onsubmit="handleForgotPassword(event)">
+                <div id="forgotError"></div>
+                
+                <div id="forgotStep1">
+                    <p style="color:#666; font-size:14px; margin-bottom:15px;">Enter your email to reset password</p>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="forgotEmail" required placeholder="your@email.com">
+                    </div>
+                    <button type="button" class="auth-submit" onclick="sendForgotOTP()">Send OTP Code</button>
+                </div>
+
+                <div id="forgotStep2" style="display:none;">
+                    <div class="otp-sent-message">✅ OTP code sent to your email!</div>
+                    <div class="form-group">
+                        <label>OTP Code</label>
+                        <input type="text" id="forgotOTP" maxlength="6" placeholder="000000">
+                    </div>
+                    <div class="form-group">
+                        <label>New Password</label>
+                        <div class="password-field">
+                            <input type="password" id="forgotNewPassword" placeholder="Create new password" required>
+                            <button type="button" class="password-toggle" onclick="togglePasswordVisibility('forgotNewPassword')">👁️</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Confirm New Password</label>
+                        <div class="password-field">
+                            <input type="password" id="forgotConfirmPassword" placeholder="Confirm password" required>
+                            <button type="button" class="password-toggle" onclick="togglePasswordVisibility('forgotConfirmPassword')">👁️</button>
+                        </div>
+                    </div>
+                    <button type="submit" class="auth-submit">Reset Password</button>
+                    <button type="button" class="auth-submit" style="background:#999; margin-top:8px;" onclick="resetForgotForm()">Back</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========== MAIN APP ========== -->
+    <div id="appScreen" style="display:none;">
+        <!-- HEADER -->
+        <header>
+            <h1>☕ Cafe Ordering System</h1>
+            <div class="header-buttons">
+                <button onclick="switchView('shop')">🛒 Shop</button>
+                <button onclick="switchView('history')">📜 History</button>
+                <button onclick="switchView('favorites')">❤️ Favorites</button>
+                <div class="user-info">
+                    <span id="userEmail"></span>
+                </div>
+                <button onclick="logout()">Logout</button>
+            </div>
+        </header>
+
+        <!-- MAIN CONTENT -->
+        <div class="container">
+            <!-- SIDEBAR -->
+            <div class="sidebar">
+                <!-- SEARCH -->
+                <div class="sidebar-section">
+                    <h3>🔍 Search</h3>
+                    <input type="text" class="search-box" id="searchInput" placeholder="Search menu..." onkeyup="handleSearch()">
+                    <div id="searchResults" style="display:none; margin-top:10px;">
+                        <div id="searchResultsList" style="font-size:13px;"></div>
+                    </div>
+                </div>
+
+                <!-- CATEGORIES -->
+                <div class="sidebar-section">
+                    <h3>📂 Categories</h3>
+                    <button class="category-btn active" onclick="filterByCategory('all')">All</button>
+                    <button class="category-btn" onclick="filterByCategory('coffee')">☕ Coffee</button>
+                    <button class="category-btn" onclick="filterByCategory('tea')">🍵 Tea</button>
+                    <button class="category-btn" onclick="filterByCategory('juice')">🧃 Juice</button>
+                    <button class="category-btn" onclick="filterByCategory('food')">🍰 Food</button>
+                </div>
+
+                <!-- FAVORITES (SHORT) -->
+                <div class="sidebar-section" id="favoritesSection">
+                    <h3>❤️ My Favorites</h3>
+                    <div class="favorites-list" id="favoritesList">
+                        <p style="color:#999; font-size:13px;">No favorites yet</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MAIN CONTENT AREA -->
+            <div class="main-content">
+                <!-- SHOP VIEW -->
+                <div id="shopView" class="view active">
+                    <div class="products-grid" id="productsGrid">
+                        <!-- Products will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- ORDER HISTORY VIEW -->
+                <div id="historyView" class="view">
+                    <h2 style="color:#006241; margin-bottom:20px;">📜 Your Orders</h2>
+                    <div class="order-list" id="ordersList">
+                        <p style="color:#999;">Loading orders...</p>
+                    </div>
+                </div>
+
+                <!-- FAVORITES VIEW -->
+                <div id="favoritesView" class="view">
+                    <h2 style="color:#006241; margin-bottom:20px;">❤️ Your Favorites</h2>
+                    <div class="products-grid" id="favoritesGrid">
+                        <p style="color:#999;">No favorites yet. Add some from the shop!</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CART SIDEBAR -->
+            <div class="cart-sidebar">
+                <div class="cart-title">🛒 Cart</div>
+                <div id="cartItems">
+                    <div class="cart-empty">Cart is empty</div>
+                </div>
+                <div class="cart-summary" id="cartSummary" style="display:none;">
+                    <div class="summary-row">
+                        <span>Subtotal:</span>
+                        <span id="subtotal">₫0</span>
+                    </div>
+                    <div class="summary-row" id="discountRow" style="display:none;">
+                        <span>Discount:</span>
+                        <span id="discountAmount">-₫0</span>
+                    </div>
+                    <div class="summary-row total">
+                        <span>Total:</span>
+                        <span id="totalPrice">₫0</span>
+                    </div>
+                    <button class="checkout-btn" onclick="openCheckoutModal()">Checkout</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== CHECKOUT MODAL ========== -->
+    <div id="checkoutModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">Order Summary</div>
+
+            <div class="modal-summary" id="modalItems">
+                <!-- Items will be listed here -->
+            </div>
+
+            <form onsubmit="submitOrder(event)">
+                <div class="form-group">
+                    <label>Full Name *</label>
+                    <input type="text" id="checkoutName" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Phone Number *</label>
+                    <input type="tel" id="checkoutPhone" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Special Notes (Optional)</label>
+                    <textarea id="checkoutNotes" placeholder="E.g., Extra sugar, no ice..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Promo Code (Optional)</label>
+                    <div class="promo-section">
+                        <input type="text" id="checkoutPromo" placeholder="Enter code">
+                        <button type="button" onclick="validatePromo()">Apply</button>
+                    </div>
+                    <div id="promoMessage"></div>
+                </div>
+
+                <div class="modal-summary">
+                    <div class="summary-line">
+                        <span>Subtotal:</span>
+                        <span id="modalSubtotal">₫0</span>
+                    </div>
+                    <div class="summary-line" id="modalDiscountRow" style="display:none;">
+                        <span>Discount:</span>
+                        <span id="modalDiscountAmount">-₫0</span>
+                    </div>
+                    <div class="summary-line total">
+                        <span>Total:</span>
+                        <span id="modalTotal">₫0</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Payment Method *</label>
+                    <select id="checkoutPayment" required>
+                        <option value="">Select payment method</option>
+                        <option value="cash">💵 Cash</option>
+                        <option value="card">💳 Card</option>
+                        <option value="bank_transfer">🏦 Bank Transfer</option>
+                    </select>
+                </div>
+
+                <div class="modal-buttons">
+                    <button type="submit" class="btn-submit">Place Order</button>
+                    <button type="button" class="btn-cancel" onclick="closeCheckoutModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // ========== STATE MANAGEMENT ==========
+        const state = {
+            currentUser: null,
+            cart: [],
+            currentCategory: 'all',
+            promoApplied: null,
+            discountPercent: 0,
+            currentView: 'shop'
+        };
+
+        const API_URL = 'http://localhost:3000/api';
+
+        // ========== INITIALIZATION ==========
+        document.addEventListener('DOMContentLoaded', async () => {
+            const userId = localStorage.getItem('userId');
+            if (userId) {
+                state.currentUser = {
+                    id: userId,
+                    email: localStorage.getItem('userEmail'),
+                    name: localStorage.getItem('userName')
+                };
+                showApp();
+                await loadMenu();
+                await loadFavorites();
+            } else {
+                showAuthScreen();
+            }
+        });
+
+        // ========== UI NAVIGATION ==========
+        function showAuthScreen() {
+            document.getElementById('authScreen').style.display = 'flex';
+            document.getElementById('appScreen').style.display = 'none';
+        }
+
+        function showApp() {
+            document.getElementById('authScreen').style.display = 'none';
+            document.getElementById('appScreen').style.display = 'block';
+            document.getElementById('userEmail').textContent = state.currentUser.email;
+        }
+
+        function switchAuthTab(tab) {
+            document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+            document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+            
+            // Clear all error messages when switching tabs
+            document.getElementById('loginError').innerHTML = '';
+            document.getElementById('registerError').innerHTML = '';
+            document.getElementById('forgotError').innerHTML = '';
+            
+            if (tab === 'login') {
+                document.getElementById('loginForm').classList.add('active');
+                document.querySelectorAll('.auth-tab')[0].classList.add('active');
+            } else if (tab === 'register') {
+                document.getElementById('registerForm').classList.add('active');
+                document.querySelectorAll('.auth-tab')[1].classList.add('active');
+            } else if (tab === 'forgot') {
+                document.getElementById('forgotForm').classList.add('active');
+                document.querySelectorAll('.auth-tab')[2].classList.add('active');
+            }
+        }
+
+        // Toggle password visibility
+        function togglePasswordVisibility(fieldId) {
+            const field = document.getElementById(fieldId);
+            if (field.type === 'password') {
+                field.type = 'text';
+            } else {
+                field.type = 'password';
+            }
+        }
+
+        // Forgot password functions
+        async function sendForgotOTP() {
+            const email = document.getElementById('forgotEmail').value.toLowerCase().trim();
+            const errorDiv = document.getElementById('forgotError');
+
+            if (!email) {
+                errorDiv.innerHTML = `<div class="error-message">❌ Please enter your email</div>`;
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_URL}/auth/send-reset-otp`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+
+                const data = await res.json();
+
+                if (res.ok) {
+                    document.getElementById('forgotStep1').style.display = 'none';
+                    document.getElementById('forgotStep2').style.display = 'block';
+                } else {
+                    errorDiv.innerHTML = `<div class="error-message">❌ ${data.detail}</div>`;
+                }
+            } catch (err) {
+                errorDiv.innerHTML = `<div class="error-message">❌ Connection error</div>`;
+            }
+        }
+
+        async function handleForgotPassword(e) {
+            e.preventDefault();
+            const email = document.getElementById('forgotEmail').value.toLowerCase().trim();
+            const otp = document.getElementById('forgotOTP').value;
+            const newPassword = document.getElementById('forgotNewPassword').value;
+            const confirmPassword = document.getElementById('forgotConfirmPassword').value;
+            const errorDiv = document.getElementById('forgotError');
+
+            if (newPassword.length < 6) {
+                errorDiv.innerHTML = `<div class="error-message">❌ Password must be at least 6 characters</div>`;
+                return;
+            }
+
+            if (newPassword !== confirmPassword) {
+                errorDiv.innerHTML = `<div class="error-message">❌ Passwords do not match</div>`;
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_URL}/auth/reset-password`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, otp_code: otp, new_password: newPassword })
+                });
+
+                const data = await res.json();
+
+                if (res.ok) {
+                    alert('✅ Password reset successfully! Please login with your new password.');
+                    resetForgotForm();
+                    switchAuthTab('login');
+                } else {
+                    errorDiv.innerHTML = `<div class="error-message">❌ ${data.detail}</div>`;
+                }
+            } catch (err) {
+                errorDiv.innerHTML = `<div class="error-message">❌ Connection error</div>`;
+            }
+        }
+
+        function resetForgotForm() {
+            document.getElementById('forgotForm').reset();
+            document.getElementById('forgotStep1').style.display = 'block';
+            document.getElementById('forgotStep2').style.display = 'none';
+            document.getElementById('forgotError').innerHTML = '';
+        }
+
+        // Clear error messages when user starts typing
+        document.addEventListener('DOMContentLoaded', function() {
+            const loginEmail = document.getElementById('loginEmail');
+            const loginPassword = document.getElementById('loginPassword');
+            const registerEmail = document.getElementById('registerEmail');
+            const registerPassword = document.getElementById('registerPassword');
+            const registerConfirm = document.getElementById('registerConfirmPassword');
+            const registerName = document.getElementById('registerName');
+            const registerPhone = document.getElementById('registerPhone');
+            const forgotEmail = document.getElementById('forgotEmail');
+            const forgotOTP = document.getElementById('forgotOTP');
+            const forgotNewPassword = document.getElementById('forgotNewPassword');
+            const forgotConfirmPassword = document.getElementById('forgotConfirmPassword');
+
+            const clearLoginError = () => document.getElementById('loginError').innerHTML = '';
+            const clearRegisterError = () => document.getElementById('registerError').innerHTML = '';
+            const clearForgotError = () => document.getElementById('forgotError').innerHTML = '';
+
+            // Login form
+            loginEmail?.addEventListener('input', clearLoginError);
+            loginPassword?.addEventListener('input', clearLoginError);
+
+            // Register form
+            registerEmail?.addEventListener('input', clearRegisterError);
+            registerPassword?.addEventListener('input', clearRegisterError);
+            registerConfirm?.addEventListener('input', clearRegisterError);
+            registerName?.addEventListener('input', clearRegisterError);
+            registerPhone?.addEventListener('input', clearRegisterError);
+
+            // Forgot password form
+            forgotEmail?.addEventListener('input', clearForgotError);
+            forgotOTP?.addEventListener('input', clearForgotError);
+            forgotNewPassword?.addEventListener('input', clearForgotError);
+            forgotConfirmPassword?.addEventListener('input', clearForgotError);
+        });
+
+        function switchView(view) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            state.currentView = view;
+
+            if (view === 'shop') {
+                document.getElementById('shopView').classList.add('active');
+                filterByCategory('all');
+            } else if (view === 'history') {
+                document.getElementById('historyView').classList.add('active');
+                loadOrderHistory();
+            } else if (view === 'favorites') {
+                document.getElementById('favoritesView').classList.add('active');
+                loadFavoritesView();
+            }
+        }
+
+        // ========== AUTHENTICATION ==========
+        async function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            const errorDiv = document.getElementById('loginError');
+            errorDiv.innerHTML = ''; // Clear previous errors
+
+            try {
+                const res = await fetch(`${API_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await res.json();
+
+                if (res.ok) {
+                    state.currentUser = {
+                        id: data.user_id,
+                        email: data.email,
+                        name: data.name
+                    };
+
+                    localStorage.setItem('userId', data.user_id);
+                    localStorage.setItem('userEmail', data.email);
+                    localStorage.setItem('userName', data.name);
+
+                    showApp();
+                    await loadMenu();
+                    await loadFavorites();
+                    document.getElementById('loginForm').reset();
+                } else {
+                    errorDiv.innerHTML = `<div class="error-message">❌ ${data.detail}</div>`;
+                }
+            } catch (err) {
+                errorDiv.innerHTML = `<div class="error-message">❌ Connection error</div>`;
+            }
+        }
+
+        async function sendOTP() {
+            const email = document.getElementById('registerEmail').value;
+            const errorDiv = document.getElementById('registerError');
+            const successDiv = document.getElementById('registerSuccess');
+
+            if (!email) {
+                errorDiv.innerHTML = '<div class="error-message">❌ Please enter email</div>';
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_URL}/auth/send-otp`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+
+                const data = await res.json();
+
+                if (res.ok) {
+                    errorDiv.innerHTML = '';
+                    successDiv.innerHTML = `<div class="success-message">✅ OTP sent to ${email}</div>`;
+                    document.getElementById('registerStep1').style.display = 'none';
+                    document.getElementById('registerStep2').style.display = 'block';
+                } else {
+                    errorDiv.innerHTML = `<div class="error-message">❌ ${data.detail}</div>`;
+                }
+            } catch (err) {
+                errorDiv.innerHTML = `<div class="error-message">❌ Connection error</div>`;
+            }
+        }
+
+        function resetRegisterForm() {
+            document.getElementById('registerStep1').style.display = 'block';
+            document.getElementById('registerStep2').style.display = 'none';
+            document.getElementById('registerForm').reset();
+            document.getElementById('registerError').innerHTML = '';
+            document.getElementById('registerSuccess').innerHTML = '';
+        }
+
+        async function handleRegister(e) {
+            e.preventDefault();
+            const email = document.getElementById('registerEmail').value;
+            const otp = document.getElementById('otpCode').value;
+            const name = document.getElementById('registerName').value;
+            const phone = document.getElementById('registerPhone').value;
+            const password = document.getElementById('registerPassword').value;
+            const passwordConfirm = document.getElementById('registerPasswordConfirm').value;
+            const errorDiv = document.getElementById('registerError');
+
+            // Validate password
+            if (!password || password.length < 6) {
+                errorDiv.innerHTML = `<div class="error-message">❌ Password must be at least 6 characters</div>`;
+                return;
+            }
+
+            if (password !== passwordConfirm) {
+                errorDiv.innerHTML = `<div class="error-message">❌ Passwords do not match</div>`;
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_URL}/auth/verify-otp`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        email, 
+                        otp_code: otp, 
+                        full_name: name, 
+                        phone,
+                        password: password
+                    })
+                });
+
+                const data = await res.json();
+
+                if (res.ok) {
+                    state.currentUser = {
+                        id: data.user_id,
+                        email: data.email,
+                        name: data.name
+                    };
+
+                    localStorage.setItem('userId', data.user_id);
+                    localStorage.setItem('userEmail', data.email);
+                    localStorage.setItem('userName', data.name);
+
+                    showApp();
+                    await loadMenu();
+                    resetRegisterForm();
+                    switchAuthTab('login');
+                } else {
+                    errorDiv.innerHTML = `<div class="error-message">❌ ${data.detail}</div>`;
+                }
+            } catch (err) {
+                errorDiv.innerHTML = `<div class="error-message">❌ Connection error</div>`;
+            }
+        }
+
+        function logout() {
+            localStorage.clear();
+            state.currentUser = null;
+            state.cart = [];
+            showAuthScreen();
+            switchAuthTab('login');
+        }
+
+        // ========== MENU & PRODUCTS ==========
+        async function loadMenu() {
+            try {
+                const res = await fetch(`${API_URL}/menu`);
+                const data = await res.json();
+                displayProducts(data.items);
+            } catch (err) {
+                console.error('Error loading menu:', err);
+            }
+        }
+
+        function displayProducts(items) {
+            const grid = document.getElementById('productsGrid');
+            grid.innerHTML = '';
+
+            items.forEach(item => {
+                const isFavorited = state.favorites && state.favorites.includes(item.id);
+                const card = document.createElement('div');
+                card.className = 'product-card';
+                card.innerHTML = `
+                    <div class="product-icon">${item.icon}</div>
+                    <div class="product-name">${item.name}</div>
+                    <div class="product-price">₫${item.price.toLocaleString()}</div>
+                    <div class="product-buttons">
+                        <button class="btn-small btn-add" onclick="showAddToCart('${item.id}', '${item.name}', ${item.price})">Add</button>
+                        <button class="btn-small btn-favorite ${isFavorited ? 'favorited' : ''}" onclick="toggleFavorite('${item.id}')" title="${isFavorited ? 'Remove from favorites' : 'Add to favorites'}">
+                            ${isFavorited ? '❤️' : '🤍'}
+                        </button>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        async function handleSearch() {
+            const query = document.getElementById('searchInput').value.trim();
+            const resultsDiv = document.getElementById('searchResults');
+            const resultsList = document.getElementById('searchResultsList');
+
+            if (query.length < 2) {
+                resultsDiv.style.display = 'none';
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_URL}/menu/search?q=${encodeURIComponent(query)}`);
+                const data = await res.json();
+
+                if (data.results && data.results.length > 0) {
+                    resultsList.innerHTML = data.results.map(item => 
+                        `<div style="padding:8px; background:#f0f0f0; border-radius:4px; margin:5px 0; cursor:pointer;" onclick="selectSearchResult('${item.id}')">
+                            ${item.icon} ${item.name} - ₫${item.price.toLocaleString()}
+                        </div>`
+                    ).join('');
+                    resultsDiv.style.display = 'block';
+                } else {
+                    resultsList.innerHTML = '<div style="color:#999;">No results found</div>';
+                    resultsDiv.style.display = 'block';
+                }
+            } catch (err) {
+                console.error('Search error:', err);
+            }
+        }
+
+        function selectSearchResult(productId) {
+            // Find product and scroll to it
+            document.getElementById('searchInput').value = '';
+            document.getElementById('searchResults').style.display = 'none';
+            filterByCategory('all');
+        }
+
+        async function filterByCategory(category) {
+            document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            state.currentCategory = category;
+
+            try {
+                let res;
+                if (category === 'all') {
+                    res = await fetch(`${API_URL}/menu`);
+                } else {
+                    res = await fetch(`${API_URL}/menu/${category}`);
+                }
+                const data = await res.json();
+                const items = data.items || data.items;
+                displayProducts(items);
+            } catch (err) {
+                console.error('Error filtering:', err);
+            }
+        }
+
+        // ========== CART MANAGEMENT ==========
+        function showAddToCart(productId, productName, price) {
+            const sizeModal = document.createElement('div');
+            sizeModal.className = 'modal active';
+            sizeModal.style.zIndex = '2000';
+            sizeModal.innerHTML = `
+                <div class="modal-content">
+                    <div class="modal-header">${productName}</div>
+                    <div class="form-group">
+                        <label>Select Size:</label>
+                        <select id="sizeSelect" onchange="addToCart('${productId}', '${productName}', ${price}, this.value); this.parentElement.parentElement.parentElement.remove();">
+                            <option value="">Choose size...</option>
+                            <option value="S">Small (90% of price)</option>
+                            <option value="M">Medium (100% of price)</option>
+                            <option value="L">Large (110% of price)</option>
+                        </select>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(sizeModal);
+        }
+
+        function addToCart(productId, productName, price, size) {
+            if (!size) return;
+
+            const existingItem = state.cart.find(item => item.id === productId && item.size === size);
+
+            if (existingItem) {
+                existingItem.quantity++;
+            } else {
+                state.cart.push({ id: productId, name: productName, price, size, quantity: 1 });
+            }
+
+            updateCartUI();
+        }
+
+        function updateCartUI() {
+            const cartDiv = document.getElementById('cartItems');
+            const summaryDiv = document.getElementById('cartSummary');
+
+            if (state.cart.length === 0) {
+                cartDiv.innerHTML = '<div class="cart-empty">Cart is empty</div>';
+                summaryDiv.style.display = 'none';
+                return;
+            }
+
+            cartDiv.innerHTML = state.cart.map(item => {
+                const sizeMultiplier = { 'S': 0.9, 'M': 1, 'L': 1.1 }[item.size] || 1;
+                const itemPrice = item.price * sizeMultiplier * item.quantity;
+                return `
+                    <div class="cart-item">
+                        <div class="cart-item-name">${item.name}</div>
+                        <div class="cart-item-details">Size: ${item.size}</div>
+                        <div class="cart-item-price">₫${itemPrice.toLocaleString()}</div>
+                        <div class="cart-item-controls">
+                            <button class="qty-btn" onclick="changeQty('${item.id}', '${item.size}', -1)">-</button>
+                            <span style="padding:4px; flex:1; text-align:center;">${item.quantity}</span>
+                            <button class="qty-btn" onclick="changeQty('${item.id}', '${item.size}', 1)">+</button>
+                            <button class="remove-btn" onclick="removeFromCart('${item.id}', '${item.size}')">Remove</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            updateCartTotal();
+            summaryDiv.style.display = 'block';
+        }
+
+        function updateCartTotal() {
+            let subtotal = 0;
+            state.cart.forEach(item => {
+                const sizeMultiplier = { 'S': 0.9, 'M': 1, 'L': 1.1 }[item.size] || 1;
+                subtotal += item.price * sizeMultiplier * item.quantity;
+            });
+
+            const discount = subtotal * (state.discountPercent / 100);
+            const total = subtotal - discount;
+
+            document.getElementById('subtotal').textContent = `₫${subtotal.toLocaleString()}`;
+            document.getElementById('totalPrice').textContent = `₫${Math.round(total).toLocaleString()}`;
+
+            if (discount > 0) {
+                document.getElementById('discountRow').style.display = 'flex';
+                document.getElementById('discountAmount').textContent = `-₫${Math.round(discount).toLocaleString()}`;
+            } else {
+                document.getElementById('discountRow').style.display = 'none';
+            }
+
+            // Update modal summary too
+            document.getElementById('modalSubtotal').textContent = `₫${subtotal.toLocaleString()}`;
+            document.getElementById('modalTotal').textContent = `₫${Math.round(total).toLocaleString()}`;
+
+            if (discount > 0) {
+                document.getElementById('modalDiscountRow').style.display = 'flex';
+                document.getElementById('modalDiscountAmount').textContent = `-₫${Math.round(discount).toLocaleString()}`;
+            } else {
+                document.getElementById('modalDiscountRow').style.display = 'none';
+            }
+        }
+
+        function changeQty(productId, size, change) {
+            const item = state.cart.find(i => i.id === productId && i.size === size);
+            if (item) {
+                item.quantity += change;
+                if (item.quantity <= 0) {
+                    removeFromCart(productId, size);
+                } else {
+                    updateCartUI();
+                }
+            }
+        }
+
+        function removeFromCart(productId, size) {
+            state.cart = state.cart.filter(item => !(item.id === productId && item.size === size));
+            updateCartUI();
+        }
+
+        // ========== FAVORITES ==========
+        let state_favorites = [];
+
+        async function loadFavorites() {
+            try {
+                const res = await fetch(`${API_URL}/favorites?user_id=${state.currentUser.id}`);
+                const data = await res.json();
+                state.favorites = data.favorites ? data.favorites.map(f => f.id) : [];
+            } catch (err) {
+                console.error('Error loading favorites:', err);
+            }
+        }
+
+        async function toggleFavorite(productId) {
+            try {
+                if (state.favorites && state.favorites.includes(productId)) {
+                    await fetch(`${API_URL}/favorites/${productId}`, {
+                        method: 'DELETE',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+                    state.favorites = state.favorites.filter(f => f !== productId);
+                } else {
+                    await fetch(`${API_URL}/favorites/add`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ product_id: productId })
+                    });
+                    state.favorites.push(productId);
+                }
+                updateCartUI();
+                displayProducts(currentDisplayedProducts);
+            } catch (err) {
+                console.error('Error updating favorite:', err);
+            }
+        }
+
+        async function loadFavoritesView() {
+            try {
+                const res = await fetch(`${API_URL}/favorites?user_id=${state.currentUser.id}`);
+                const data = await res.json();
+                const grid = document.getElementById('favoritesGrid');
+
+                if (data.favorites && data.favorites.length > 0) {
+                    displayProducts(data.favorites);
+                } else {
+                    grid.innerHTML = '<p style="color:#999; grid-column:1/-1;">No favorites yet. Add some from the shop!</p>';
+                }
+            } catch (err) {
+                console.error('Error loading favorites view:', err);
+            }
+        }
+
+        // ========== ORDER HISTORY ==========
+        async function loadOrderHistory() {
+            try {
+                const res = await fetch(`${API_URL}/orders?user_id=${state.currentUser.id}`);
+                const data = await res.json();
+                const ordersList = document.getElementById('ordersList');
+
+                if (data.orders && data.orders.length > 0) {
+                    ordersList.innerHTML = data.orders.map(order => {
+                        const itemsList = order.items.map(item => `${item.name} x${item.quantity}`).join(', ');
+                        const date = new Date(order.created_at).toLocaleString();
+                        return `
+                            <div class="order-card">
+                                <div class="order-header">
+                                    <div>
+                                        <div class="order-id">Order #${order.id}</div>
+                                        <div class="order-date">${date}</div>
+                                    </div>
+                                    <div class="order-status status-${order.status}">${order.status.toUpperCase()}</div>
+                                </div>
+                                <div class="order-items">${itemsList}</div>
+                                ${order.special_notes ? `<div style="color:#999; font-size:12px; margin-top:8px;">📝 ${order.special_notes}</div>` : ''}
+                                <div class="order-footer">
+                                    <span>Payment: ${order.payment_method}</span>
+                                    <div class="order-total">₫${order.total.toLocaleString()}</div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                } else {
+                    ordersList.innerHTML = '<p style="color:#999;">No orders yet. Start shopping!</p>';
+                }
+            } catch (err) {
+                console.error('Error loading orders:', err);
+            }
+        }
+
+        // ========== CHECKOUT ==========
+        function openCheckoutModal() {
+            if (state.cart.length === 0) {
+                alert('Cart is empty!');
+                return;
+            }
+
+            document.getElementById('checkoutName').value = state.currentUser.name || '';
+            document.getElementById('checkoutPhone').value = '';
+            document.getElementById('checkoutNotes').value = '';
+            document.getElementById('checkoutPayment').value = '';
+            document.getElementById('checkoutPromo').value = '';
+            document.getElementById('promoMessage').innerHTML = '';
+
+            const modalItems = document.getElementById('modalItems');
+            let subtotal = 0;
+            let html = '';
+
+            state.cart.forEach(item => {
+                const sizeMultiplier = { 'S': 0.9, 'M': 1, 'L': 1.1 }[item.size] || 1;
+                const itemTotal = item.price * sizeMultiplier * item.quantity;
+                subtotal += itemTotal;
+                html += `<div class="summary-line">${item.name} (${item.size}) x${item.quantity}: ₫${itemTotal.toLocaleString()}</div>`;
+            });
+
+            modalItems.innerHTML = html;
+            updateCartTotal();
+
+            document.getElementById('checkoutModal').classList.add('active');
+        }
+
+        function closeCheckoutModal() {
+            document.getElementById('checkoutModal').classList.remove('active');
+        }
+
+        async function validatePromo() {
+            const code = document.getElementById('checkoutPromo').value.trim();
+            const messageDiv = document.getElementById('promoMessage');
+
+            if (!code) {
+                messageDiv.innerHTML = '';
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_URL}/promo/validate`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code })
+                });
+
+                const data = await res.json();
+
+                if (res.ok) {
+                    state.discountPercent = data.discount_percent;
+                    messageDiv.innerHTML = `<div class="promo-discount">✅ ${data.message}</div>`;
+                    updateCartTotal();
+                } else {
+                    messageDiv.innerHTML = `<div class="error-message">❌ ${data.detail}</div>`;
+                    state.discountPercent = 0;
+                    updateCartTotal();
+                }
+            } catch (err) {
+                messageDiv.innerHTML = `<div class="error-message">❌ Error validating promo</div>`;
+            }
+        }
+
+        async function submitOrder(e) {
+            e.preventDefault();
+
+            const name = document.getElementById('checkoutName').value;
+            const phone = document.getElementById('checkoutPhone').value;
+            const notes = document.getElementById('checkoutNotes').value;
+            const promoCode = document.getElementById('checkoutPromo').value;
+            const payment = document.getElementById('checkoutPayment').value;
+
+            if (!name || !phone || !payment) {
+                alert('Please fill in all required fields');
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_URL}/checkout`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        items: state.cart,
+                        customer_name: name,
+                        customer_phone: phone,
+                        customer_email: state.currentUser.email,
+                        payment_method: payment,
+                        special_notes: notes,
+                        promo_code: promoCode
+                    })
+                });
+
+                const data = await res.json();
+
+                if (res.ok) {
+                    alert(`✅ Order placed successfully!\nOrder ID: ${data.order_id}\nTotal: ₫${data.total.toLocaleString()}`);
+                    state.cart = [];
+                    state.discountPercent = 0;
+                    updateCartUI();
+                    closeCheckoutModal();
+                    loadOrderHistory();
+                } else {
+                    alert(`❌ Error: ${data.detail}`);
+                }
+            } catch (err) {
+                alert('❌ Connection error');
+                console.error(err);
+            }
+        }
+
+        // Store displayed products for filtering
+        let currentDisplayedProducts = [];
+    </script>
+</body>
+</html>

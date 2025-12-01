@@ -1,255 +1,239 @@
-# ☕ Hệ Thống Quản Lý Quán Cafe - POS System
+# ☕ Cafe Ordering System v2
 
-Một hệ thống Point of Sale (POS) đầy đủ cho quán cafe, với khả năng kiểm tra kho real-time, trừ kho tự động, và thanh toán linh hoạt.
+A modern web-based cafe ordering system built with FastAPI (Python) and vanilla JavaScript. Features user authentication with OTP, order management, favorites, promo codes, and email notifications.
 
-## 🛠️ Công Nghệ
+## ✨ Features
 
-- **Backend**: FastAPI (Python 3.13)
-- **Frontend**: HTML5, CSS3, JavaScript
-- **API**: RESTful API với Swagger UI
-- **Container**: Docker & Docker Compose
-- **Port**: 3000
+- **User Authentication**: OTP-based registration and login via Gmail
+- **Menu Management**: Browse products by category with search functionality
+- **Shopping Cart**: Add items with size selection and quantity controls
+- **Order Management**: Create orders with special notes and payment method selection
+- **Order History**: Track all orders with real-time status updates
+- **Favorites**: Save and manage favorite items
+- **Promo Codes**: Apply discount codes to orders
+- **Email Notifications**: Automated order confirmations via Gmail SMTP
+- **Responsive Design**: Works on desktop and mobile devices
 
-## 🚀 Cách Chạy Nhanh
+## 🚀 Quick Start
 
-### Với Docker (Khuyến nghị)
+### Prerequisites
+- Python 3.11+
+- pip (Python package manager)
 
+### Installation
+
+1. **Setup virtual environment:**
 ```bash
-# Mac/Linux
-bash start.sh up
-
-# Windows
-start.bat up
+python3 -m venv .venv
+source .venv/bin/activate
 ```
 
-**Xong!** Truy cập http://localhost:3000
-
-### Hoặc dùng npm
-
-```bash
-npm start
-```
-
-### Hoặc Python trực tiếp
-
-```bash
-pip install -r requirements.txt
-python app.py
-```
-
-## 🌐 Truy Cập
-
-- **Web**: http://localhost:3000
-- **Swagger API**: http://localhost:3000/docs
-- **ReDoc**: http://localhost:3000/redoc
-
-## 🎯 Tính Năng Chính
-
-### 1. ✅ Quản Lý Menu Động
-- Hiển thị chỉ những món **đủ nguyên liệu** để làm
-- Các món hết nguyên liệu sẽ **bị khóa** (không thể chọn)
-- Tự động cập nhật khi nguyên liệu thay đổi
-
-### 2. 📊 Kiểm Tra Kho Real-Time
-- **Cơ chế 3 màu**:
-  - 🟢 **Xanh**: Tồn kho đủ (> 2 phần)
-  - 🟡 **Vàng**: Cảnh báo (≤ 2 phần)
-  - 🔴 **Đỏ**: Hết hàng (= 0)
-- Ước tính nguyên liệu còn lại **sau khi hoàn tất đơn**
-
-### 3. 🛒 Quản Lý Đơn Hàng
-- Thêm/xóa món khỏi đơn
-- Tính tổng tiền tự động
-- **Kiểm tra kho trước khi order** - chặn nếu không đủ
-
-### 4. 💳 Thanh Toán
-- 2 phương thức: **Tiền Mặt** & **Chuyển Khoản**
-- **Trừ kho tự động** sau thanh toán
-- Thống kê doanh thu theo ngày
-
-### 5. 📈 Nguyên Liệu & Quy Đổi
-- **Bột Cafe**: 1 Gói (1kg) = 50 Shot
-- **Sữa Đặc**: 1 Lon (380g) = 12 Phần
-- **Sữa Tươi**: 1 Hộp (1L) = 5 Phần
-
-### 6. 🍽️ Menu Mẫu
-- ☕ **Cà phê Đen** (25k): 2 Shot Cafe
-- ☕ **Cà phê Sữa** (30k): 1 Shot + 1 Phần Sữa Đặc
-- ☕ **Bạc Xỉu** (28k): 0.5 Shot + 1.5 Phần Sữa Đặc
-- ☕ **Latte** (35k): 1 Shot + 1 Phần Sữa Tươi
-
-## 🚀 Hướng Dẫn Cài Đặt & Chạy
-
-### Yêu Cầu
-- Python 3.8+
-- pip
-
-### Bước 1: Cài đặt Dependencies
+2. **Install dependencies:**
 ```bash
 pip install -r requirements.txt
 ```
 
-### Bước 2: Chạy Backend Server
+3. **Configure environment (optional - for email notifications):**
 ```bash
-python app.py
+cp .env.example .env
+# Edit .env with your Gmail credentials
 ```
 
-Server sẽ chạy trên **http://localhost:3000**
-
-### Bước 3: Mở Frontend
-1. Mở trình duyệt
-2. Truy cập: **http://localhost:3000/frontend.html**
-3. Hoặc xem **API Documentation**: **http://localhost:3000/docs**
-
-## 📚 API Documentation
-
-Tất cả API endpoint được tài liệu hóa bằng **Swagger/OpenAPI**.
-
-### Truy cập Swagger UI
-```
-http://localhost:3000/docs
+4. **Start the server:**
+```bash
+python3 app_v2.py
 ```
 
-### Các Endpoint Chính
+5. **Open in browser:**
+```
+http://localhost:3000
+```
 
-#### Menu
-- `GET /api/menu` - Lấy danh sách menu
-  - Query: `simulated=true` - Menu sau khi ước tính kho đơn hiện tại
-
-#### Kho Hàng
-- `GET /api/inventory` - Lấy tồn kho hiện tại
-- `POST /api/restock` - Nhập thêm nguyên liệu
-
-#### Đơn Hàng
-- `GET /api/order` - Lấy đơn hàng hiện tại
-- `POST /api/order/add?menu_id=...` - Thêm mon vào đơn
-- `POST /api/order/remove?menu_id=...` - Xóa mon khỏi đơn
-- `POST /api/order/clear` - Hủy đơn hàng
-
-#### Thanh Toán
-- `POST /api/payment` - Xử lý thanh toán
-  - Body: `{"method": "cash"}` hoặc `{"method": "bank"}`
-
-#### Thống Kê
-- `GET /api/statistics` - Lấy thống kê hôm nay
-
-## 🏗️ Cấu Trúc Dự Án
+## 📂 Project Structure
 
 ```
 SOAFinal/
-├── app.py                 # Backend FastAPI
-├── frontend.html          # Frontend HTML/JS
-├── cafe_pos_system.py     # CLI version (Python thuần)
-├── requirements.txt       # Dependencies
-├── index.html            # HTML demo không backend
-└── README.md             # Tài liệu này
+├── app_v2.py                      # FastAPI backend (650+ lines)
+├── order_frontend_v2.html         # Web UI (1200+ lines)
+├── schema.sql                     # Database schema definition
+├── db_manager.sh                  # Database management tool
+├── cafe_orders.db                 # SQLite database (auto-created)
+├── requirements.txt               # Python dependencies
+├── .env.example                   # Environment variables template
+└── Documentation/
+    ├── README_V2_COMPLETE.md      # Detailed feature documentation
+    ├── DATABASE_GUIDE.md          # Database management guide
+    ├── QUICK_START_V2.txt         # Quick reference guide
+    ├── IMPLEMENTATION_SUMMARY.txt # Technical implementation details
+    └── DEPLOYMENT_CHECKLIST.txt   # Deployment steps
 ```
 
-## 💡 Ví Dụ Sử Dụng
+## 🛠️ Database Management
 
-### 1. Lấy Menu Hiện Có
+The project includes a professional database management tool:
+
 ```bash
-curl http://localhost:3000/api/menu?simulated=false
+# Check database status
+./db_manager.sh status
+
+# View users, orders, favorites
+./db_manager.sh users
+./db_manager.sh orders
+./db_manager.sh favorites
+
+# Create backup
+./db_manager.sh backup
+
+# Reset database (auto-backs up first)
+./db_manager.sh reset
+
+# Open interactive SQL shell
+./db_manager.sh shell
+
+# Execute custom SQL query
+./db_manager.sh query "SELECT * FROM users"
+
+# Show all commands
+./db_manager.sh help
 ```
 
-**Response:**
-```json
-[
-  {
-    "id": "coffee_black",
-    "name": "Cà phê Đen",
-    "price": 25000,
-    "recipe": {"boiCafe": 2},
-    "available": true
-  },
-  ...
-]
-```
+## 📋 API Endpoints
 
-### 2. Thêm Món vào Đơn
+### Authentication
+- `POST /api/auth/send-otp` - Send OTP to email
+- `POST /api/auth/verify-otp` - Verify OTP and register user
+- `POST /api/auth/login` - Login with email and password
+
+### Menu
+- `GET /api/menu` - Get all products
+- `GET /api/menu/category/{category}` - Get products by category
+- `GET /api/menu/search` - Search products
+
+### Orders
+- `POST /api/orders/checkout` - Create new order
+- `GET /api/orders/history` - Get user's order history
+- `GET /api/orders/{order_id}` - Get order details
+- `PUT /api/orders/{order_id}/status` - Update order status
+
+### Favorites
+- `GET /api/favorites` - Get user's favorites
+- `POST /api/favorites` - Add item to favorites
+- `DELETE /api/favorites/{product_id}` - Remove from favorites
+
+### Promo
+- `POST /api/promo/validate` - Validate promo code
+
+### Health
+- `GET /api/health` - Check server status
+
+## 🗄️ Database Schema
+
+### Tables
+- **users**: User accounts with email, password hash, phone, name
+- **otp_codes**: One-time passwords for registration
+- **orders**: Order records with items, status, total, payment method
+- **favorites**: User's favorite products
+- **promo_codes**: Available discount codes with usage tracking
+
+## 🧪 Testing
+
+Run the comprehensive test suite:
+
 ```bash
-curl -X POST http://localhost:3000/api/order/add?menu_id=coffee_black
+python3 test_features.py
 ```
 
-### 3. Thanh Toán Tiền Mặt
+This tests:
+- User registration and login
+- Product browsing and search
+- Shopping cart functionality
+- Order creation and status updates
+- Favorites management
+- Promo code validation
+- Email notifications
+
+## ⚙️ Configuration
+
+### Environment Variables (.env)
+
+```
+GMAIL_USER=your-email@gmail.com
+GMAIL_PASSWORD=your-app-password
+GMAIL_SMTP_SERVER=smtp.gmail.com
+GMAIL_SMTP_PORT=587
+```
+
+**Note:** Use Gmail App Password, not your regular password. [Generate one here](https://myaccount.google.com/apppasswords)
+
+## 📦 Dependencies
+
+- **FastAPI** 0.123.0 - Web framework
+- **Uvicorn** 0.28.0 - ASGI server
+- **Pydantic** 2.4.2 - Data validation
+- **python-dotenv** 1.0.1 - Environment configuration
+
+Install all: `pip install -r requirements.txt`
+
+## 🐳 Deployment
+
+### Docker (Optional)
+
+The project is Docker-ready. Customize `docker-compose.yml` as needed.
+
+### Production Checklist
+
+- [ ] Set up production database (PostgreSQL recommended)
+- [ ] Configure environment variables for production
+- [ ] Enable HTTPS/SSL
+- [ ] Set up proper error logging
+- [ ] Configure backup strategy
+- [ ] Set up monitoring
+
+See `DEPLOYMENT_CHECKLIST.txt` for detailed steps.
+
+## 📖 Documentation
+
+- **README_V2_COMPLETE.md** - Full feature documentation
+- **DATABASE_GUIDE.md** - Database operations and management
+- **QUICK_START_V2.txt** - Quick reference for developers
+- **IMPLEMENTATION_SUMMARY.txt** - Technical architecture details
+
+## 🐛 Troubleshooting
+
+### Port already in use
 ```bash
-curl -X POST http://localhost:3000/api/payment \
-  -H "Content-Type: application/json" \
-  -d '{"method": "cash"}'
+# Kill process on port 3000
+lsof -i :3000 | xargs kill -9
 ```
 
-## 🔍 Kiểm Tra Hệ Thống
+### Database issues
+```bash
+# Reset database (creates backup first)
+./db_manager.sh reset
 
-### Test Thêm Đơn
-1. Mở Frontend
-2. Click vào "Cà phê Đen" → Thêm vào đơn
-3. Click lại "Cà phê Đen" → Tăng lên 2 ly
-4. Nhìn phần "TỒN KHO" → Cập nhật ước tính
-
-### Test Hết Nguyên Liệu
-1. Thêm nhiều đơn cho đến khi hết Sữa Tươi
-2. Khi đó "Latte" sẽ chuyển thành **❌ HẾT** (không thể chọn)
-3. Menu sẽ tự động cập nhật
-
-### Test Thanh Toán
-1. Thêm một số món vào đơn
-2. Click "💳 THANH TOÁN"
-3. Chọn "💰 Tiền Mặt" hoặc "🏦 Chuyển Khoản"
-4. Kho sẽ **tự động trừ** theo công thức
-5. Thống kê doanh thu sẽ **cập nhật**
-
-## 🎨 Giao Diện
-
-- **3 khu vực chính**: Menu (trái), Đơn hàng (giữa), Tồn kho (phải)
-- **Responsive design**: Tự động responsive trên mobile
-- **Dark mode sidebar** + Light POS area
-- **Real-time updates**: Cập nhật 5 giây một lần
-
-## 🔧 Phát Triển Thêm
-
-### Thêm Nguyên Liệu Mới
-Sửa trong `app.py`, hàm `CafePOSBackend.__init__()`:
-```python
-self.ingredients['newId'] = Ingredient(
-    name='Tên',
-    unit='Đơn vị',
-    conversion_rate=số,
-    purchase_unit='Đơn vị nhập',
-    quantity=100
-)
+# Check database status
+./db_manager.sh status
 ```
 
-### Thêm Món Mới
-Sửa trong `app.py`:
-```python
-self.menu['menu_id'] = {
-    'name': 'Tên Món',
-    'price': 30000,
-    'recipe': {'boiCafe': 1, 'suaDac': 1},
-    'description': '...'
-}
-```
+### Email not sending
+- Verify Gmail credentials in `.env`
+- Use Gmail App Password (not regular password)
+- Check `GMAIL_USER` and `GMAIL_PASSWORD` are set correctly
+- Email logging is available in console if not configured
 
-## 📝 Ghi Chú
+## 📝 License
 
-- Mỗi lần thanh toán, kho sẽ **trừ ngay lập tức**
-- Menu **tự động cập nhật** khi có thay đổi kho
-- Thống kê lưu trong **memory** (sẽ reset khi restart server)
+This project is part of SOA course assignment.
 
-## 👨‍💼 Yêu Cầu Của Giảng Viên
+## 👨‍💻 Support
 
-✅ Backend Python (FastAPI)
-✅ Frontend HTML
-✅ Port 3000
-✅ API Swagger tự động (`/docs`)
-✅ Kiểm tra kho trước order
-✅ Trừ kho tự động
-✅ Cảnh báo 3 màu (🟢🟡🔴)
-✅ Ước tính nguyên liệu
-✅ Thanh toán 2 cách
+For issues or questions, refer to:
+1. `DATABASE_GUIDE.md` - Database operations
+2. `README_V2_COMPLETE.md` - Feature documentation
+3. `QUICK_START_V2.txt` - Common tasks
 
 ---
 
-**Tác Giả**: Your Name
-**Ngày Tạo**: 2025-12-01
-**Phiên Bản**: 1.0.0
+**Version:** 2.0  
+**Last Updated:** December 1, 2025  
+**Status:** Production Ready ✅
