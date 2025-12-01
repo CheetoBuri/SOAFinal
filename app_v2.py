@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Depends, status
+from fastapi import FastAPI, HTTPException, Depends, status, BackgroundTasks
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
@@ -7,19 +7,26 @@ import sqlite3
 import os
 import secrets
 import hashlib
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
+import requests
 from datetime import datetime, timedelta
 import uuid
 from typing import List, Optional
 import re
 from dotenv import load_dotenv
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 # ============= CONFIGURATION =============
 load_dotenv()  # Load from .env file if it exists
-GMAIL_ADDRESS = os.getenv("GMAIL_ADDRESS", "")  # Set your Gmail
-GMAIL_PASSWORD = os.getenv("GMAIL_PASSWORD", "")  # App password from Gmail
+
+# Simple SMTP-based email configuration (no domain auth required)
+SMTP_HOST = os.getenv("SMTP_HOST", "")
+SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))  # 587 for TLS, 465 for SSL
+SMTP_USER = os.getenv("SMTP_USER", "")
+SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "")
+SMTP_FROM_EMAIL = os.getenv("SMTP_FROM_EMAIL", SMTP_USER or "")
+
 DATABASE = "cafe_orders.db"
 
 # ============= DATABASE SETUP =============
@@ -166,27 +173,61 @@ def generate_otp() -> str:
     return ''.join([str(secrets.randbelow(10)) for _ in range(6)])
 
 def send_email(to_email: str, subject: str, html_body: str) -> bool:
-    """Send email via Gmail SMTP"""
+    """
+    Send email via generic SMTP server.
+
+    This uses simple username/password SMTP (e.g. Gmail SMTP with App Password,
+    Mailtrap, Outlook, or any other provider) and does NOT require
+    domain authentication like SendGrid.
+
+    Required .env variables:
+      - SMTP_HOST
+      - SMTP_PORT (default 587)
+      - SMTP_USER
+      - SMTP_PASSWORD
+      - SMTP_FROM_EMAIL (optional, falls back to SMTP_USER)
+    """
+    # If SMTP is not configured, just log to console so you can still test OTP.
+    if not SMTP_HOST or not SMTP_USER or not SMTP_PASSWORD:
+        print("⚠️  SMTP not configured. Would send email:")
+        print(f"   To: {to_email}")
+        print(f"   Subject: {subject}")
+        # For testing, also print a short version of the body (OTP will be inside)
+        preview = html_body.replace("\n", " ")
+        if len(preview) > 200:
+            preview = preview[:200] + "..."
+        print(f"   Body preview: {preview}")
+        return True
+
     try:
-        if not GMAIL_ADDRESS or not GMAIL_PASSWORD:
-            print(f"⚠️  Email not configured. Would send to {to_email}: {subject}")
-            return True
-        
         msg = MIMEMultipart("alternative")
         msg["Subject"] = subject
-        msg["From"] = GMAIL_ADDRESS
+        msg["From"] = SMTP_FROM_EMAIL
         msg["To"] = to_email
-        
-        msg.attach(MIMEText(html_body, "html"))
-        
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
-            server.login(GMAIL_ADDRESS, GMAIL_PASSWORD)
-            server.sendmail(GMAIL_ADDRESS, to_email, msg.as_string())
-        
+
+        # Only HTML part (you can add plain text if needed)
+        part_html = MIMEText(html_body, "html")
+        msg.attach(part_html)
+
+        # Use SSL for Gmail (port 465) or TLS for others (port 587)
+        if SMTP_PORT == 465:
+            # Gmail with SSL
+            with smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT, timeout=30) as server:
+                server.login(SMTP_USER, SMTP_PASSWORD)
+                server.sendmail(SMTP_FROM_EMAIL, [to_email], msg.as_string())
+        else:
+            # Other SMTP with STARTTLS
+            with smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=30) as server:
+                server.starttls()
+                server.login(SMTP_USER, SMTP_PASSWORD)
+                server.sendmail(SMTP_FROM_EMAIL, [to_email], msg.as_string())
+
         print(f"✅ Email sent to {to_email}")
         return True
     except Exception as e:
-        print(f"❌ Email error: {e}")
+        print(f"❌ Email error (SMTP): {e}")
+        import traceback
+        traceback.print_exc()
         return False
 
 def get_user_from_token(token: str) -> Optional[dict]:
@@ -221,7 +262,7 @@ def health_check():
 
 # ============= AUTHENTICATION ENDPOINTS =============
 @app.post("/api/auth/send-otp")
-def send_otp(request: OTPRequest):
+def send_otp(request: OTPRequest, background_tasks: BackgroundTasks):
     """Send OTP to email"""
     email = request.email.lower().strip()
     
@@ -248,11 +289,11 @@ def send_otp(request: OTPRequest):
     conn.commit()
     conn.close()
     
-    # Send email
+    # Prepare email HTML
     html_body = f"""
     <html>
         <body style="font-family: Arial, sans-serif; background-color: #f5f5f5; padding: 20px;">
-            <div style="max-width: 500px; margin: 0 auto; background-color: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            <div style="max-inline-size: 500px; margin: 0 auto; background-color: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                 <h2 style="color: #006241; text-align: center;">Cafe Ordering System</h2>
                 <p style="color: #333; font-size: 16px;">Your OTP code is:</p>
                 <h1 style="color: #006241; text-align: center; font-size: 48px; letter-spacing: 10px; margin: 30px 0;">{otp}</h1>
@@ -262,7 +303,8 @@ def send_otp(request: OTPRequest):
     </html>
     """
     
-    send_email(email, "Your Cafe Ordering OTP Code", html_body)
+    # Send email in background (non-blocking)
+    background_tasks.add_task(send_email, email, "Your Cafe Ordering OTP Code", html_body)
     
     return {
         "status": "success",
@@ -363,7 +405,7 @@ def login(request: LoginRequest):
     }
 
 @app.post("/api/auth/send-reset-otp")
-def send_reset_otp(request: OTPRequest):
+def send_reset_otp(request: OTPRequest, background_tasks: BackgroundTasks):
     """Send OTP for password reset"""
     email = request.email.lower().strip()
     
@@ -391,11 +433,11 @@ def send_reset_otp(request: OTPRequest):
     conn.commit()
     conn.close()
     
-    # Send email
+    # Prepare email HTML
     html_body = f"""
     <html>
         <body style="font-family: Arial, sans-serif; background-color: #f5f5f5; padding: 20px;">
-            <div style="max-width: 500px; margin: 0 auto; background-color: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            <div style="max-inline-size: 500px; margin: 0 auto; background-color: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                 <h2 style="color: #006241; text-align: center;">Password Reset</h2>
                 <p style="color: #333; font-size: 16px;">Your OTP code for password reset is:</p>
                 <h1 style="color: #006241; text-align: center; font-size: 48px; letter-spacing: 10px; margin: 30px 0;">{otp}</h1>
@@ -405,7 +447,8 @@ def send_reset_otp(request: OTPRequest):
     </html>
     """
     
-    send_email(email, "Password Reset OTP Code", html_body)
+    # Send email in background (non-blocking)
+    background_tasks.add_task(send_email, email, "Password Reset OTP Code", html_body)
     
     return {
         "status": "success",
@@ -689,7 +732,7 @@ def checkout(request: CheckoutRequest, user_id: Optional[str] = None):
     html_body = f"""
     <html>
         <body style="font-family: Arial, sans-serif; background-color: #f5f5f5; padding: 20px;">
-            <div style="max-width: 600px; margin: 0 auto; background-color: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            <div style="max-inline-size: 600px; margin: 0 auto; background-color: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                 <h2 style="color: #006241;">Order Confirmation</h2>
                 <p>Hi <strong>{request.customer_name}</strong>,</p>
                 <p>Your order has been received!</p>
