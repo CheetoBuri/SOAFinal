@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS users (
     password_hash TEXT NOT NULL,
     full_name TEXT,
     phone TEXT,
+    balance REAL DEFAULT 1000000.0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -90,6 +91,24 @@ CREATE TABLE IF NOT EXISTS favorites (
 
 CREATE INDEX IF NOT EXISTS idx_favorites_user_id ON favorites(user_id);
 CREATE INDEX IF NOT EXISTS idx_favorites_product_id ON favorites(product_id);
+
+-- ============================================
+-- PAYMENT OTP TABLE
+-- ============================================
+CREATE TABLE IF NOT EXISTS payment_otp (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id TEXT NOT NULL,
+    order_id TEXT NOT NULL,
+    code TEXT NOT NULL,
+    amount REAL NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    expires_at TIMESTAMP NOT NULL,
+    verified BOOLEAN DEFAULT 0,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_payment_otp_user ON payment_otp(user_id);
+CREATE INDEX IF NOT EXISTS idx_payment_otp_order ON payment_otp(order_id);
 
 -- ============================================
 -- SAMPLE DATA (Optional - uncomment to use)

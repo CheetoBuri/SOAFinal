@@ -8,6 +8,8 @@ import os
 import secrets
 import hashlib
 import requests
+import random
+import threading
 from datetime import datetime, timedelta
 import uuid
 from typing import List, Optional
@@ -120,9 +122,11 @@ class ResetPasswordRequest(BaseModel):
     new_password: str
 
 class CheckoutRequest(BaseModel):
+    user_id: str
     items: List[dict]
     customer_name: str
     customer_phone: str
+    customer_email: str
     payment_method: str
     special_notes: Optional[str] = ""
     promo_code: Optional[str] = ""
@@ -133,6 +137,16 @@ class PromoCodeRequest(BaseModel):
 class FavoriteRequest(BaseModel):
     user_id: str
     product_id: str
+
+class PaymentOTPRequest(BaseModel):
+    user_id: str
+    order_id: str
+    amount: float
+
+class VerifyPaymentOTPRequest(BaseModel):
+    user_id: str
+    order_id: str
+    otp_code: str
 
 # ============= MENU DATA =============
 MENU_PRODUCTS = {
@@ -647,10 +661,12 @@ def get_favorites(user_id: str):
 
 # ============= ORDER ENDPOINTS =============
 @app.post("/api/checkout")
-def checkout(request: CheckoutRequest, user_id: Optional[str] = None):
+def checkout(request: CheckoutRequest):
     """Create new order"""
     if not request.items or len(request.items) == 0:
         raise HTTPException(status_code=400, detail="Cart is empty")
+    
+    user_id = request.user_id
     
     # Calculate total
     total = 0
@@ -723,44 +739,18 @@ def checkout(request: CheckoutRequest, user_id: Optional[str] = None):
         request.payment_method,
         request.customer_name,
         request.customer_phone,
-        "pending"
+        "pending_payment"  # Change to pending_payment instead of pending
     ))
     
     conn.commit()
     conn.close()
-    
-    # Send confirmation email
-    html_body = f"""
-    <html>
-        <body style="font-family: Arial, sans-serif; background-color: #f5f5f5; padding: 20px;">
-            <div style="max-inline-size: 600px; margin: 0 auto; background-color: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                <h2 style="color: #006241;">Order Confirmation</h2>
-                <p>Hi <strong>{request.customer_name}</strong>,</p>
-                <p>Your order has been received!</p>
-                
-                <div style="background-color: #f0f0f0; padding: 15px; border-radius: 5px; margin: 20px 0;">
-                    <p><strong>Order ID:</strong> {order_id}</p>
-                    <p><strong>Total:</strong> ₫{final_total:,.0f}</p>
-                    <p><strong>Payment Method:</strong> {request.payment_method}</p>
-                    {f'<p><strong>Notes:</strong> {request.special_notes}</p>' if request.special_notes else ''}
-                </div>
-                
-                <p style="color: #666; font-size: 14px;">We'll prepare your order and notify you when it's ready!</p>
-                <p style="color: #999; font-size: 12px;">Estimated time: 15-20 minutes</p>
-            </div>
-        </body>
-    </html>
-    """
-    
-    send_email(request.customer_email if hasattr(request, 'customer_email') else request.customer_phone, 
-               "Order Confirmation", html_body)
     
     return {
         "status": "success",
         "order_id": order_id,
         "total": final_total,
         "discount": discount,
-        "message": "Order created successfully"
+        "message": "Order created. Please confirm payment with OTP."
     }
 
 @app.get("/api/orders")
@@ -853,6 +843,188 @@ def update_order_status(order_id: str, status: str = None):
     conn.close()
     
     return {"status": "success", "order_id": order_id, "new_status": status}
+
+# ============= PAYMENT WITH OTP =============
+@app.post("/api/payment/send-otp")
+def send_payment_otp(request: PaymentOTPRequest):
+    """Send OTP for payment confirmation"""
+    # Get user email
+    conn = sqlite3.connect(DATABASE)
+    c = conn.cursor()
+    c.execute("SELECT email, balance FROM users WHERE id = ?", (request.user_id,))
+    user = c.fetchone()
+    
+    if not user:
+        conn.close()
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    email, balance = user
+    
+    # Check if user has enough balance
+    if balance < request.amount:
+        conn.close()
+        raise HTTPException(status_code=400, detail=f"Insufficient balance. Current balance: ₫{balance:,.0f}")
+    
+    # Generate OTP
+    otp_code = str(random.randint(100000, 999999))
+    expires_at = datetime.now() + timedelta(minutes=10)
+    
+    # Save OTP to database
+    c.execute("""
+        INSERT INTO payment_otp (user_id, order_id, code, amount, expires_at)
+        VALUES (?, ?, ?, ?, ?)
+    """, (request.user_id, request.order_id, otp_code, request.amount, expires_at))
+    
+    conn.commit()
+    conn.close()
+    
+    # Send OTP email
+    html_body = f"""
+    <html>
+        <body style="font-family: Arial, sans-serif; background-color: #f5f5f5; padding: 20px;">
+            <div style="max-width: 600px; margin: 0 auto; background-color: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <h2 style="color: #c41e3a;">Payment Confirmation</h2>
+                <p>Your OTP code for payment confirmation:</p>
+                
+                <div style="background: linear-gradient(135deg, #c41e3a 0%, #a01729 100%); color: white; padding: 20px; border-radius: 10px; text-align: center; margin: 20px 0;">
+                    <h1 style="margin: 0; font-size: 36px; letter-spacing: 8px;">{otp_code}</h1>
+                </div>
+                
+                <div style="background-color: #fff5f5; padding: 15px; border-radius: 5px; border-left: 4px solid #c41e3a; margin: 20px 0;">
+                    <p style="margin: 5px 0;"><strong>Order ID:</strong> {request.order_id}</p>
+                    <p style="margin: 5px 0;"><strong>Amount:</strong> ₫{request.amount:,.0f}</p>
+                    <p style="margin: 5px 0;"><strong>Current Balance:</strong> ₫{balance:,.0f}</p>
+                    <p style="margin: 5px 0;"><strong>Balance After:</strong> ₫{(balance - request.amount):,.0f}</p>
+                </div>
+                
+                <p style="color: #666; font-size: 14px;">This OTP will expire in 10 minutes.</p>
+                <p style="color: #999; font-size: 12px;">If you didn't request this, please ignore this email.</p>
+            </div>
+        </body>
+    </html>
+    """
+    
+    # Send email asynchronously
+    email_thread = threading.Thread(
+        target=send_email,
+        args=(email, f"Payment OTP: {otp_code}", html_body)
+    )
+    email_thread.start()
+    
+    return {"status": "success", "message": "OTP sent to your email"}
+
+@app.post("/api/payment/verify-otp")
+def verify_payment_otp(request: VerifyPaymentOTPRequest):
+    """Verify OTP and complete payment"""
+    conn = sqlite3.connect(DATABASE)
+    c = conn.cursor()
+    
+    # Check OTP
+    c.execute("""
+        SELECT id, amount, expires_at, verified
+        FROM payment_otp
+        WHERE user_id = ? AND order_id = ? AND code = ?
+        ORDER BY created_at DESC
+        LIMIT 1
+    """, (request.user_id, request.order_id, request.otp_code))
+    
+    otp_record = c.fetchone()
+    
+    if not otp_record:
+        conn.close()
+        raise HTTPException(status_code=400, detail="Invalid OTP code")
+    
+    otp_id, amount, expires_at_str, verified = otp_record
+    
+    if verified:
+        conn.close()
+        raise HTTPException(status_code=400, detail="OTP already used")
+    
+    expires_at = datetime.fromisoformat(expires_at_str)
+    if datetime.now() > expires_at:
+        conn.close()
+        raise HTTPException(status_code=400, detail="OTP expired")
+    
+    # Get user balance
+    c.execute("SELECT balance, email, full_name FROM users WHERE id = ?", (request.user_id,))
+    user = c.fetchone()
+    
+    if not user:
+        conn.close()
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    balance, email, full_name = user
+    
+    if balance < amount:
+        conn.close()
+        raise HTTPException(status_code=400, detail="Insufficient balance")
+    
+    # Deduct balance
+    new_balance = balance - amount
+    c.execute("UPDATE users SET balance = ? WHERE id = ?", (new_balance, request.user_id))
+    
+    # Mark OTP as verified
+    c.execute("UPDATE payment_otp SET verified = 1 WHERE id = ?", (otp_id,))
+    
+    # Update order status
+    c.execute("UPDATE orders SET status = 'confirmed' WHERE id = ?", (request.order_id,))
+    
+    # Get order details for confirmation email
+    c.execute("SELECT total, special_notes FROM orders WHERE id = ?", (request.order_id,))
+    order = c.fetchone()
+    total, special_notes = order if order else (amount, "")
+    
+    conn.commit()
+    conn.close()
+    
+    # Send confirmation email
+    html_body = f"""
+    <html>
+        <body style="font-family: Arial, sans-serif; background-color: #f5f5f5; padding: 20px;">
+            <div style="max-width: 600px; margin: 0 auto; background-color: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <h2 style="color: #c41e3a;">✅ Payment Successful!</h2>
+                <p>Hi <strong>{full_name}</strong>,</p>
+                <p>Your payment has been confirmed and your order is being prepared!</p>
+                
+                <div style="background: linear-gradient(135deg, #fff5f5 0%, #ffe8e8 100%); padding: 20px; border-radius: 10px; margin: 20px 0;">
+                    <p style="margin: 8px 0;"><strong>Order ID:</strong> {request.order_id}</p>
+                    <p style="margin: 8px 0;"><strong>Amount Paid:</strong> ₫{amount:,.0f}</p>
+                    <p style="margin: 8px 0;"><strong>Remaining Balance:</strong> ₫{new_balance:,.0f}</p>
+                    {f'<p style="margin: 8px 0;"><strong>Notes:</strong> {special_notes}</p>' if special_notes else ''}
+                </div>
+                
+                <p style="color: #666; font-size: 14px;">We'll prepare your order and notify you when it's ready!</p>
+                <p style="color: #999; font-size: 12px;">Estimated time: 15-20 minutes</p>
+            </div>
+        </body>
+    </html>
+    """
+    
+    send_email(email, "Payment Confirmed - Order in Progress", html_body)
+    
+    return {
+        "status": "success",
+        "message": "Payment successful",
+        "new_balance": new_balance,
+        "order_id": request.order_id
+    }
+
+@app.get("/api/user/balance")
+def get_user_balance(user_id: str):
+    """Get user's current balance"""
+    if not user_id:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    conn = sqlite3.connect(DATABASE)
+    c = conn.cursor()
+    c.execute("SELECT balance FROM users WHERE id = ?", (user_id,))
+    result = c.fetchone()
+    conn.close()
+    
+    if not result:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    return {"balance": result[0]}
 
 # ============= STATIC FILES =============
 @app.get("/")

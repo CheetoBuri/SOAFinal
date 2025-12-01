@@ -1236,6 +1236,10 @@
                                     <span class="profile-value" id="profilePhone">-</span>
                                 </div>
                                 <div class="profile-info-row">
+                                    <span class="profile-label">Balance:</span>
+                                    <span class="profile-value" id="profileBalance" style="color:#c41e3a; font-weight:700;">₫0</span>
+                                </div>
+                                <div class="profile-info-row">
                                     <span class="profile-label">Member Since:</span>
                                     <span class="profile-value" id="profileJoined">-</span>
                                 </div>
@@ -1357,15 +1361,39 @@
                     <label>Payment Method *</label>
                     <select id="checkoutPayment" required>
                         <option value="">Select payment method</option>
-                        <option value="cash">💵 Cash</option>
-                        <option value="card">💳 Card</option>
-                        <option value="bank_transfer">🏦 Bank Transfer</option>
+                        <option value="balance">💰 Wallet Balance (Recommended)</option>
+                        <option value="cash">💵 Cash on Delivery</option>
                     </select>
                 </div>
 
                 <div class="modal-buttons">
                     <button type="submit" class="btn-submit">Place Order</button>
                     <button type="button" class="btn-cancel" onclick="closeCheckoutModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========== PAYMENT OTP MODAL ========== -->
+    <div id="paymentOTPModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">💳 Payment Confirmation</div>
+            
+            <div style="background: linear-gradient(135deg, #fff5f5 0%, #ffe8e8 100%); padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+                <p style="margin: 8px 0;"><strong>Order ID:</strong> <span id="otpOrderId">-</span></p>
+                <p style="margin: 8px 0;"><strong>Total Amount:</strong> <span id="otpAmount" style="color:#c41e3a; font-weight:700;">₫0</span></p>
+                <p style="margin: 8px 0; font-size: 13px; color: #666;">An OTP has been sent to your email.</p>
+            </div>
+
+            <form onsubmit="verifyPaymentOTP(event)">
+                <div class="form-group">
+                    <label>Enter OTP Code *</label>
+                    <input type="text" id="paymentOTP" required placeholder="Enter 6-digit code" maxlength="6" pattern="[0-9]{6}">
+                </div>
+
+                <div class="modal-buttons">
+                    <button type="submit" class="btn-submit">Confirm Payment</button>
+                    <button type="button" class="btn-cancel" onclick="closePaymentOTPModal()">Cancel</button>
                 </div>
             </form>
         </div>
@@ -1379,7 +1407,8 @@
             currentCategory: 'all',
             promoApplied: null,
             discountPercent: 0,
-            currentView: 'shop'
+            currentView: 'shop',
+            pendingOrder: null  // Store pending order for payment
         };
 
         const API_URL = 'http://localhost:3000/api';
@@ -1393,9 +1422,18 @@
                     email: localStorage.getItem('userEmail'),
                     name: localStorage.getItem('userName')
                 };
-                showApp();
-                await loadMenu();
-                await loadFavorites();
+                
+                try {
+                    showApp();
+                    await loadMenu();
+                    await loadFavorites();
+                } catch (err) {
+                    console.error('Error loading app:', err);
+                    // Clear invalid user data and show auth screen
+                    localStorage.clear();
+                    state.currentUser = null;
+                    showAuthScreen();
+                }
             } else {
                 showAuthScreen();
             }
@@ -2015,13 +2053,30 @@
         }
 
         // ========== PROFILE VIEW ==========
-        function loadProfileData() {
+        async function loadProfileData() {
             if (!state.currentUser) return;
 
             // Load personal information
             document.getElementById('profileEmail').textContent = state.currentUser.email || '-';
             document.getElementById('profileName').textContent = state.currentUser.name || '-';
             document.getElementById('profilePhone').textContent = state.currentUser.phone || '-';
+            
+            // Load balance
+            try {
+                const res = await fetch(`${API_URL}/user/balance?user_id=${state.currentUser.id}`);
+                const data = await res.json();
+                if (res.ok) {
+                    document.getElementById('profileBalance').textContent = `₫${data.balance.toLocaleString()}`;
+                } else if (res.status === 404) {
+                    // User not found in database - clear session and logout
+                    alert('User session expired. Please login again.');
+                    logout();
+                }
+            } catch (err) {
+                console.error('Error loading balance:', err);
+                // Network error or other issues
+                document.getElementById('profileBalance').textContent = '₫0';
+            }
             
             // Calculate member since (you can store this in database or use a default)
             const joinDate = new Date().toLocaleDateString('en-US', { 
@@ -2150,11 +2205,19 @@
                 return;
             }
 
+            if (!state.currentUser || !state.currentUser.email) {
+                alert('User session invalid. Please login again.');
+                logout();
+                return;
+            }
+
             try {
+                // Step 1: Create order
                 const res = await fetch(`${API_URL}/checkout`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
+                        user_id: state.currentUser.id,
                         items: state.cart,
                         customer_name: name,
                         customer_phone: phone,
@@ -2168,12 +2231,36 @@
                 const data = await res.json();
 
                 if (res.ok) {
-                    alert(`✅ Order placed successfully!\nOrder ID: ${data.order_id}\nTotal: ₫${data.total.toLocaleString()}`);
-                    state.cart = [];
-                    state.discountPercent = 0;
-                    updateCartUI();
+                    // Store pending order
+                    state.pendingOrder = {
+                        order_id: data.order_id,
+                        total: data.total
+                    };
+
+                    // Close checkout modal
                     closeCheckoutModal();
-                    loadOrderHistory();
+
+                    // Step 2: Send payment OTP
+                    const otpRes = await fetch(`${API_URL}/payment/send-otp`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            user_id: state.currentUser.id,
+                            order_id: data.order_id,
+                            amount: data.total
+                        })
+                    });
+
+                    const otpData = await otpRes.json();
+
+                    if (otpRes.ok) {
+                        // Show payment OTP modal
+                        document.getElementById('otpOrderId').textContent = data.order_id;
+                        document.getElementById('otpAmount').textContent = `₫${data.total.toLocaleString()}`;
+                        document.getElementById('paymentOTPModal').classList.add('active');
+                    } else {
+                        alert(`❌ Error: ${otpData.detail}`);
+                    }
                 } else {
                     alert(`❌ Error: ${data.detail}`);
                 }
@@ -2182,6 +2269,61 @@
                 console.error(err);
             }
         }
+
+        function closePaymentOTPModal() {
+            document.getElementById('paymentOTPModal').classList.remove('active');
+            document.getElementById('paymentOTP').value = '';
+            state.pendingOrder = null;
+        }
+
+        async function verifyPaymentOTP(e) {
+            e.preventDefault();
+
+            const otpCode = document.getElementById('paymentOTP').value;
+
+            if (!state.pendingOrder) {
+                alert('No pending order found');
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_URL}/payment/verify-otp`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        user_id: state.currentUser.id,
+                        order_id: state.pendingOrder.order_id,
+                        otp_code: otpCode
+                    })
+                });
+
+                const data = await res.json();
+
+                if (res.ok) {
+                    alert(`✅ Payment successful!\nOrder ID: ${data.order_id}\nNew Balance: ₫${data.new_balance.toLocaleString()}`);
+                    
+                    // Clear cart and state
+                    state.cart = [];
+                    state.discountPercent = 0;
+                    state.pendingOrder = null;
+                    
+                    // Update UI
+                    updateCartUI();
+                    closePaymentOTPModal();
+                    loadOrderHistory();
+                    
+                    // Reload profile to update balance
+                    if (state.currentView === 'profile') {
+                        loadProfileData();
+                    }
+                } else {
+                    alert(`❌ Error: ${data.detail}`);
+                }
+            } catch (err) {
+                alert('❌ Connection error');
+                console.error(err);
+            }
+            }
 
         // Store displayed products for filtering
         let currentDisplayedProducts = [];
