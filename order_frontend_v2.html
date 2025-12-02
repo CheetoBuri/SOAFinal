@@ -561,11 +561,149 @@
             background: #b71c1c;
         }
 
+        .btn-edit {
+            padding: 6px 12px;
+            background: linear-gradient(135deg, #d32f2f, #8b1a1a);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-left: 10px;
+        }
+
+        .btn-edit:hover {
+            background: linear-gradient(135deg, #b71c1c, #6d1414);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(211, 47, 47, 0.3);
+        }
+
         .profile-section p {
             color: #666;
             font-size: 14px;
             margin: 10px 0 0 0;
             text-align: center;
+        }
+
+        /* ========== ORDER STATUS VIEW ========== */
+        .btn-back {
+            padding: 8px 16px;
+            background: #f5f5f5;
+            color: #333;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .btn-back:hover {
+            background: #e0e0e0;
+        }
+
+        .status-filter-tabs {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 10px;
+        }
+
+        .status-tab {
+            padding: 10px 20px;
+            background: transparent;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s;
+        }
+
+        .status-tab:hover {
+            color: #006241;
+        }
+
+        .status-tab.active {
+            color: #006241;
+            border-bottom-color: #006241;
+        }
+
+        .order-status-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-left: 4px solid #ffa500;
+        }
+
+        .order-status-card.delivering {
+            border-left-color: #2196F3;
+        }
+
+        .order-status-card.completed {
+            border-left-color: #4CAF50;
+        }
+
+        .order-status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        .badge-preparing {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+
+        .badge-delivering {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .order-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .btn-cancel {
+            flex: 1;
+            padding: 10px;
+            background: #f44336;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-cancel:hover {
+            background: #d32f2f;
+        }
+
+        .btn-received {
+            flex: 1;
+            padding: 10px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-received:hover {
+            background: #388E3C;
         }
 
         .order-items {
@@ -1146,6 +1284,7 @@
             <h1>☕ Cafe Ordering System</h1>
             <div class="header-buttons">
                 <button onclick="switchView('shop')">🛒 Shop</button>
+                <button onclick="switchView('orderStatus')">📦 Order Status</button>
                 <button onclick="switchView('history')">📜 History</button>
                 <button onclick="switchView('favorites')">❤️ Favorites</button>
                 <button onclick="switchView('profile')">👤 Profile</button>
@@ -1159,30 +1298,25 @@
         <div class="container">
             <!-- SIDEBAR -->
             <div class="sidebar">
-                <!-- SEARCH -->
-                <div class="sidebar-section">
-                    <h3>🔍 Search</h3>
-                    <input type="text" class="search-box" id="searchInput" placeholder="Search menu..." onkeyup="handleSearch()">
-                    <div id="searchResults" style="display:none; margin-top:10px;">
-                        <div id="searchResultsList" style="font-size:13px;"></div>
+                <!-- SHOP CONTROLS (only visible in shop view) -->
+                <div id="shopControls">
+                    <!-- SEARCH -->
+                    <div class="sidebar-section">
+                        <h3>🔍 Search</h3>
+                        <input type="text" class="search-box" id="searchInput" placeholder="Search menu..." onkeyup="handleSearch()">
+                        <div id="searchResults" style="display:none; margin-top:10px;">
+                            <div id="searchResultsList" style="font-size:13px;"></div>
+                        </div>
                     </div>
-                </div>
 
-                <!-- CATEGORIES -->
-                <div class="sidebar-section">
-                    <h3>📂 Categories</h3>
-                    <button class="category-btn active" onclick="filterByCategory('all')">All</button>
-                    <button class="category-btn" onclick="filterByCategory('coffee')">☕ Coffee</button>
-                    <button class="category-btn" onclick="filterByCategory('tea')">🍵 Tea</button>
-                    <button class="category-btn" onclick="filterByCategory('juice')">🧃 Juice</button>
-                    <button class="category-btn" onclick="filterByCategory('food')">🍰 Food</button>
-                </div>
-
-                <!-- FAVORITES (SHORT) -->
-                <div class="sidebar-section" id="favoritesSection">
-                    <h3>❤️ My Favorites</h3>
-                    <div class="favorites-list" id="favoritesList">
-                        <p style="color:#999; font-size:13px;">No favorites yet</p>
+                    <!-- CATEGORIES -->
+                    <div class="sidebar-section">
+                        <h3>📂 Categories</h3>
+                        <button class="category-btn active" onclick="filterByCategory('all')">All</button>
+                        <button class="category-btn" onclick="filterByCategory('coffee')">☕ Coffee</button>
+                        <button class="category-btn" onclick="filterByCategory('tea')">🍵 Tea</button>
+                        <button class="category-btn" onclick="filterByCategory('juice')">🧃 Juice</button>
+                        <button class="category-btn" onclick="filterByCategory('food')">🍰 Food</button>
                     </div>
                 </div>
             </div>
@@ -1226,6 +1360,7 @@
                                 <div class="profile-info-row">
                                     <span class="profile-label">Email:</span>
                                     <span class="profile-value" id="profileEmail">-</span>
+                                    <button class="btn-edit" onclick="openChangeEmailModal()">Edit</button>
                                 </div>
                                 <div class="profile-info-row">
                                     <span class="profile-label">Full Name:</span>
@@ -1234,6 +1369,12 @@
                                 <div class="profile-info-row">
                                     <span class="profile-label">Phone:</span>
                                     <span class="profile-value" id="profilePhone">-</span>
+                                    <button class="btn-edit" onclick="openChangePhoneModal()">Edit</button>
+                                </div>
+                                <div class="profile-info-row">
+                                    <span class="profile-label">Password:</span>
+                                    <span class="profile-value">••••••••</span>
+                                    <button class="btn-edit" onclick="openChangePasswordModal()">Change</button>
                                 </div>
                                 <div class="profile-info-row">
                                     <span class="profile-label">Balance:</span>
@@ -1278,6 +1419,25 @@
                                     You will be logged out and redirected to the login page.
                                 </p>
                             </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ========== ORDER STATUS VIEW ========== -->
+                <div id="orderStatusView" class="view">
+                    <div class="view-content">
+                        <div class="view-header">
+                            <h2>📦 Order Status</h2>
+                            <button class="btn-back" onclick="switchView('shop')">← Back to Menu</button>
+                        </div>
+
+                        <div style="background: linear-gradient(135deg, #fff5f5 0%, #ffe8e8 100%); padding: 15px; border-radius: 8px; margin: 20px 0;">
+                            <h3 style="color: #d32f2f; margin: 0 0 5px 0;">🚚 Out for Delivery Soon</h3>
+                            <p style="color: #666; font-size: 13px; margin: 0;">Your orders are being prepared and will be delivered shortly</p>
+                        </div>
+
+                        <div id="orderStatusList" class="orders-list">
+                            <p style="text-align:center; color:#999; padding:40px;">No active orders</p>
                         </div>
                     </div>
                 </div>
@@ -1326,6 +1486,25 @@
                 <div class="form-group">
                     <label>Phone Number *</label>
                     <input type="tel" id="checkoutPhone" required>
+                </div>
+
+                <div class="form-group">
+                    <label>District / Quận *</label>
+                    <select id="checkoutDistrict" required onchange="loadWards()">
+                        <option value="">Select district...</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Ward / Phường *</label>
+                    <select id="checkoutWard" required disabled>
+                        <option value="">Select district first...</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Street Address / Số nhà, Đường *</label>
+                    <input type="text" id="checkoutStreet" required placeholder="E.g., 123 Nguyễn Văn Linh">
                 </div>
 
                 <div class="form-group">
@@ -1399,6 +1578,83 @@
         </div>
     </div>
 
+    <!-- ========== CHANGE EMAIL MODAL ========== -->
+    <div id="changeEmailModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">✉️ Change Email</div>
+            
+            <form onsubmit="submitChangeEmail(event)">
+                <div class="form-group">
+                    <label>New Email *</label>
+                    <input type="email" id="newEmail" required placeholder="Enter new email">
+                </div>
+
+                <div class="form-group">
+                    <label>Current Password *</label>
+                    <input type="password" id="emailChangePassword" required placeholder="Confirm with password">
+                </div>
+
+                <div class="modal-buttons">
+                    <button type="submit" class="btn-submit">Update Email</button>
+                    <button type="button" class="btn-cancel" onclick="closeChangeEmailModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========== CHANGE PHONE MODAL ========== -->
+    <div id="changePhoneModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">📱 Change Phone Number</div>
+            
+            <form onsubmit="submitChangePhone(event)">
+                <div class="form-group">
+                    <label>New Phone Number *</label>
+                    <input type="tel" id="newPhone" required placeholder="Enter new phone number" pattern="[0-9]{10,15}">
+                </div>
+
+                <div class="form-group">
+                    <label>Current Password *</label>
+                    <input type="password" id="phoneChangePassword" required placeholder="Confirm with password">
+                </div>
+
+                <div class="modal-buttons">
+                    <button type="submit" class="btn-submit">Update Phone</button>
+                    <button type="button" class="btn-cancel" onclick="closeChangePhoneModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========== CHANGE PASSWORD MODAL ========== -->
+    <div id="changePasswordModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">🔒 Change Password</div>
+            
+            <form onsubmit="submitChangePassword(event)">
+                <div class="form-group">
+                    <label>Current Password *</label>
+                    <input type="password" id="currentPassword" required placeholder="Enter current password">
+                </div>
+
+                <div class="form-group">
+                    <label>New Password *</label>
+                    <input type="password" id="newPassword" required placeholder="Enter new password" minlength="6">
+                </div>
+
+                <div class="form-group">
+                    <label>Confirm New Password *</label>
+                    <input type="password" id="confirmNewPassword" required placeholder="Confirm new password" minlength="6">
+                </div>
+
+                <div class="modal-buttons">
+                    <button type="submit" class="btn-submit">Change Password</button>
+                    <button type="button" class="btn-cancel" onclick="closeChangePasswordModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
         // ========== STATE MANAGEMENT ==========
         const state = {
@@ -1420,7 +1676,8 @@
                 state.currentUser = {
                     id: userId,
                     email: localStorage.getItem('userEmail'),
-                    name: localStorage.getItem('userName')
+                    name: localStorage.getItem('userName'),
+                    phone: localStorage.getItem('userPhone') || '-'
                 };
                 
                 try {
@@ -1598,17 +1855,34 @@
             document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
             state.currentView = view;
 
+            // Show/hide shop controls and cart sidebar based on view
+            const shopControls = document.getElementById('shopControls');
+            const cartSidebar = document.querySelector('.cart-sidebar');
+            
             if (view === 'shop') {
                 document.getElementById('shopView').classList.add('active');
+                shopControls.style.display = 'block';
+                cartSidebar.style.display = 'block';
                 filterByCategory('all');
+            } else if (view === 'orderStatus') {
+                document.getElementById('orderStatusView').classList.add('active');
+                shopControls.style.display = 'none';
+                cartSidebar.style.display = 'none';
+                loadOrderStatus('preparing');
             } else if (view === 'history') {
                 document.getElementById('historyView').classList.add('active');
+                shopControls.style.display = 'none';
+                cartSidebar.style.display = 'none';
                 loadOrderHistory();
             } else if (view === 'favorites') {
                 document.getElementById('favoritesView').classList.add('active');
+                shopControls.style.display = 'none';
+                cartSidebar.style.display = 'block';
                 loadFavoritesView();
             } else if (view === 'profile') {
                 document.getElementById('profileView').classList.add('active');
+                shopControls.style.display = 'none';
+                cartSidebar.style.display = 'none';
                 loadProfileData();
             }
         }
@@ -1631,15 +1905,21 @@
                 const data = await res.json();
 
                 if (res.ok) {
+                    // Get full user info including phone
+                    const userRes = await fetch(`${API_URL}/auth/me?user_id=${data.user_id}`);
+                    const userData = await userRes.json();
+                    
                     state.currentUser = {
                         id: data.user_id,
                         email: data.email,
-                        name: data.name
+                        name: data.name,
+                        phone: userData.phone || '-'
                     };
 
                     localStorage.setItem('userId', data.user_id);
                     localStorage.setItem('userEmail', data.email);
                     localStorage.setItem('userName', data.name);
+                    localStorage.setItem('userPhone', userData.phone || '-');
 
                     showApp();
                     await loadMenu();
@@ -1742,6 +2022,7 @@
 
                     showApp();
                     await loadMenu();
+                    await loadFavorites();
                     resetRegisterForm();
                     switchAuthTab('login');
                 } else {
@@ -1772,7 +2053,9 @@
         }
 
         function displayProducts(items) {
-            const grid = document.getElementById('productsGrid');
+            // Xác định grid nào cần hiển thị dựa vào view hiện tại
+            const gridId = state.currentView === 'favorites' ? 'favoritesGrid' : 'productsGrid';
+            const grid = document.getElementById(gridId);
             grid.innerHTML = '';
             
             // Lưu lại danh sách hiện tại để dùng khi toggle favorite
@@ -1787,7 +2070,7 @@
                     <div class="product-name">${item.name}</div>
                     <div class="product-price">₫${item.price.toLocaleString()}</div>
                     <div class="product-buttons">
-                        <button class="btn-small btn-add" onclick="showAddToCart('${item.id}', '${item.name}', ${item.price})">Add</button>
+                        <button class="btn-small btn-add" onclick="showAddToCart('${item.id}', '${item.name}', ${item.price}, '${item.category}')">Add</button>
                         <button class="btn-small btn-favorite ${isFavorited ? 'favorited' : ''}" onclick="toggleFavorite('${item.id}')" title="${isFavorited ? 'Remove from favorites' : 'Add to favorites'}">
                             ${isFavorited ? '❤️' : '🤍'}
                         </button>
@@ -1856,25 +2139,58 @@
         }
 
         // ========== CART MANAGEMENT ==========
-        function showAddToCart(productId, productName, price) {
+        function showAddToCart(productId, productName, price, category) {
+            const isFood = category === 'food';
+            
             const sizeModal = document.createElement('div');
             sizeModal.className = 'modal active';
             sizeModal.style.zIndex = '2000';
             sizeModal.id = 'sizeModal';
             sizeModal.innerHTML = `
-                <div class="modal-content">
+                <div class="modal-content" style="max-width: 500px;">
                     <div class="modal-header">${productName}</div>
+                    
                     <div class="form-group">
-                        <label>Select Size:</label>
-                        <select id="sizeSelect">
+                        <label>Size:</label>
+                        <select id="sizeSelect" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px;">
                             <option value="">Choose size...</option>
-                            <option value="S">Small (90% of price)</option>
-                            <option value="M">Medium (100% of price)</option>
-                            <option value="L">Large (110% of price)</option>
+                            <option value="S">Small (-10%)</option>
+                            <option value="M" selected>Medium (Standard)</option>
+                            <option value="L">Large (+10%)</option>
                         </select>
                     </div>
+                    
+                    ${!isFood ? `
+                    <div class="form-group">
+                        <label>Milk Options (+₫5,000 each):</label>
+                        <div style="display:flex; flex-direction:column; gap:8px; margin-top:8px;">
+                            <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                                <input type="checkbox" id="milkNut" value="nut" style="width:18px; height:18px;">
+                                <span>Sữa hạt (+₫5,000)</span>
+                            </label>
+                            <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                                <input type="checkbox" id="milkCondensed" value="condensed" style="width:18px; height:18px;">
+                                <span>Sữa đặc (+₫5,000)</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Sugar Level:</label>
+                        <select id="sugarSelect" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px;">
+                            <option value="0">0% (No sugar)</option>
+                            <option value="25">25%</option>
+                            <option value="50">50%</option>
+                            <option value="75">75%</option>
+                            <option value="100" selected>100% (Standard)</option>
+                            <option value="125">125%</option>
+                            <option value="150">150%</option>
+                        </select>
+                    </div>
+                    ` : ''}
+                    
                     <div class="modal-buttons">
-                        <button type="button" class="btn-submit" onclick="addToCartFromModal('${productId}', '${productName}', ${price})">Add to Cart</button>
+                        <button type="button" class="btn-submit" onclick="addToCartFromModal('${productId}', '${productName}', ${price}, ${isFood})">Add to Cart</button>
                         <button type="button" class="btn-cancel" onclick="closeSizeModal()">Cancel</button>
                     </div>
                 </div>
@@ -1887,25 +2203,55 @@
             if (modal) modal.remove();
         }
 
-        function addToCartFromModal(productId, productName, price) {
+        function addToCartFromModal(productId, productName, price, isFood) {
             const size = document.getElementById('sizeSelect').value;
             if (!size) {
                 alert('Please select a size');
                 return;
             }
-            addToCart(productId, productName, price, size);
+            
+            let milks = [];
+            let sugar = '100';
+            
+            if (!isFood) {
+                // Get all selected milk options
+                if (document.getElementById('milkNut').checked) milks.push('nut');
+                if (document.getElementById('milkCondensed').checked) milks.push('condensed');
+                sugar = document.getElementById('sugarSelect').value;
+            }
+            
+            addToCart(productId, productName, price, size, milks, sugar);
             closeSizeModal();
         }
 
-        function addToCart(productId, productName, price, size) {
+        function addToCart(productId, productName, price, size, milks = [], sugar = '100') {
             if (!size) return;
+            
+            // Sort milks array for consistent comparison
+            const sortedMilks = Array.isArray(milks) ? milks.sort() : [];
+            const milkKey = sortedMilks.join(',');
 
-            const existingItem = state.cart.find(item => item.id === productId && item.size === size);
+            const existingItem = state.cart.find(item => {
+                const itemMilks = Array.isArray(item.milks) ? item.milks.sort() : [];
+                const itemMilkKey = itemMilks.join(',');
+                return item.id === productId && 
+                    item.size === size && 
+                    itemMilkKey === milkKey && 
+                    item.sugar === sugar;
+            });
 
             if (existingItem) {
                 existingItem.quantity++;
             } else {
-                state.cart.push({ id: productId, name: productName, price, size, quantity: 1 });
+                state.cart.push({ 
+                    id: productId, 
+                    name: productName, 
+                    price, 
+                    size, 
+                    milks: sortedMilks, 
+                    sugar, 
+                    quantity: 1 
+                });
             }
 
             updateCartUI();
@@ -1923,17 +2269,32 @@
 
             cartDiv.innerHTML = state.cart.map(item => {
                 const sizeMultiplier = { 'S': 0.9, 'M': 1, 'L': 1.1 }[item.size] || 1;
-                const itemPrice = item.price * sizeMultiplier * item.quantity;
+                const milks = Array.isArray(item.milks) ? item.milks : [];
+                const milkPrice = milks.length * 5000;
+                const itemPrice = (item.price * sizeMultiplier + milkPrice) * item.quantity;
+                
+                let customizations = `Size: ${item.size}`;
+                if (milks.length > 0) {
+                    const milkNames = { 'nut': 'Sữa hạt', 'condensed': 'Sữa đặc' };
+                    const milkLabels = milks.map(m => milkNames[m]).join(', ');
+                    customizations += ` | ${milkLabels}`;
+                }
+                if (item.sugar && item.sugar !== '100') {
+                    customizations += ` | Sugar: ${item.sugar}%`;
+                }
+                
+                const milksKey = milks.join(',');
+                
                 return `
                     <div class="cart-item">
                         <div class="cart-item-name">${item.name}</div>
-                        <div class="cart-item-details">Size: ${item.size}</div>
+                        <div class="cart-item-details">${customizations}</div>
                         <div class="cart-item-price">₫${itemPrice.toLocaleString()}</div>
                         <div class="cart-item-controls">
-                            <button class="qty-btn" onclick="changeQty('${item.id}', '${item.size}', -1)">-</button>
+                            <button class="qty-btn" onclick='changeQty("${item.id}", "${item.size}", "${milksKey}", "${item.sugar || '100'}", -1)'>-</button>
                             <span style="padding:4px; flex:1; text-align:center;">${item.quantity}</span>
-                            <button class="qty-btn" onclick="changeQty('${item.id}', '${item.size}', 1)">+</button>
-                            <button class="remove-btn" onclick="removeFromCart('${item.id}', '${item.size}')">Remove</button>
+                            <button class="qty-btn" onclick='changeQty("${item.id}", "${item.size}", "${milksKey}", "${item.sugar || '100'}", 1)'>+</button>
+                            <button class="remove-btn" onclick='removeFromCart("${item.id}", "${item.size}", "${milksKey}", "${item.sugar || '100'}")'>Remove</button>
                         </div>
                     </div>
                 `;
@@ -1947,7 +2308,9 @@
             let subtotal = 0;
             state.cart.forEach(item => {
                 const sizeMultiplier = { 'S': 0.9, 'M': 1, 'L': 1.1 }[item.size] || 1;
-                subtotal += item.price * sizeMultiplier * item.quantity;
+                const milks = Array.isArray(item.milks) ? item.milks : [];
+                const milkPrice = milks.length * 5000;
+                subtotal += (item.price * sizeMultiplier + milkPrice) * item.quantity;
             });
 
             const discount = subtotal * (state.discountPercent / 100);
@@ -1975,20 +2338,34 @@
             }
         }
 
-        function changeQty(productId, size, change) {
-            const item = state.cart.find(i => i.id === productId && i.size === size);
+        function changeQty(productId, size, milksKey, sugar, change) {
+            const item = state.cart.find(i => {
+                const itemMilks = Array.isArray(i.milks) ? i.milks.sort().join(',') : '';
+                return i.id === productId && 
+                    i.size === size && 
+                    itemMilks === milksKey && 
+                    i.sugar === sugar;
+            });
             if (item) {
                 item.quantity += change;
                 if (item.quantity <= 0) {
-                    removeFromCart(productId, size);
+                    removeFromCart(productId, size, milksKey, sugar);
                 } else {
                     updateCartUI();
                 }
             }
         }
 
-        function removeFromCart(productId, size) {
-            state.cart = state.cart.filter(item => !(item.id === productId && item.size === size));
+        function removeFromCart(productId, size, milksKey, sugar) {
+            state.cart = state.cart.filter(item => {
+                const itemMilks = Array.isArray(item.milks) ? item.milks.sort().join(',') : '';
+                return !(
+                    item.id === productId && 
+                    item.size === size && 
+                    itemMilks === milksKey && 
+                    item.sugar === sugar
+                );
+            });
             updateCartUI();
         }
 
@@ -2096,18 +2473,65 @@
 
                 if (data.orders && data.orders.length > 0) {
                     ordersList.innerHTML = data.orders.map(order => {
-                        const itemsList = order.items.map(item => `${item.name} x${item.quantity}`).join(', ');
-                        const date = new Date(order.created_at).toLocaleString();
+                        // Format items with details
+                        const itemsList = order.items.map(item => {
+                            let details = item.name;
+                            if (item.size) details += ` (${item.size})`;
+                            
+                            // Add milk details
+                            if (item.milks && Array.isArray(item.milks) && item.milks.length > 0) {
+                                const milkNames = { 'nut': 'Sữa hạt', 'condensed': 'Sữa đặc' };
+                                const milkLabels = item.milks.map(m => milkNames[m] || m).join(', ');
+                                details += `, ${milkLabels}`;
+                            }
+                            
+                            // Add sugar details
+                            if (item.sugar && item.sugar !== '100') {
+                                details += `, Sugar ${item.sugar}%`;
+                            }
+                            
+                            details += ` x${item.quantity}`;
+                            return details;
+                        }).join(', ');
+                        
+                        // Format dates in 24h format
+                        const createdDate = new Date(order.created_at).toLocaleString('en-GB', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            second: '2-digit',
+                            hour12: false
+                        });
+                        
+                        const paymentDate = order.payment_time ? new Date(order.payment_time).toLocaleString('en-GB', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            second: '2-digit',
+                            hour12: false
+                        }) : null;
+                        
+                        // Format delivery address
+                        const address = order.delivery_street && order.delivery_ward && order.delivery_district
+                            ? `${order.delivery_street}, ${order.delivery_ward}, ${order.delivery_district}`
+                            : null;
+                        
                         return `
                             <div class="order-card">
                                 <div class="order-header">
                                     <div>
                                         <div class="order-id">Order #${order.id}</div>
-                                        <div class="order-date">${date}</div>
+                                        <div class="order-date">Created: ${createdDate}</div>
+                                        ${paymentDate ? `<div class="order-date" style="color:#28a745;">💳 Paid: ${paymentDate}</div>` : ''}
                                     </div>
                                     <div class="order-status status-${order.status}">${order.status.toUpperCase()}</div>
                                 </div>
                                 <div class="order-items">${itemsList}</div>
+                                ${address ? `<div style="color:#666; font-size:13px; margin-top:8px;">📍 ${address}</div>` : ''}
                                 ${order.special_notes ? `<div style="color:#999; font-size:12px; margin-top:8px;">📝 ${order.special_notes}</div>` : ''}
                                 <div class="order-footer">
                                     <span>Payment: ${order.payment_method}</span>
@@ -2124,6 +2548,142 @@
             }
         }
 
+        // ========== ORDER STATUS ==========
+        async function loadOrderStatus() {
+            try {
+                const res = await fetch(`${API_URL}/orders?user_id=${state.currentUser.id}`);
+                const data = await res.json();
+                const ordersList = document.getElementById('orderStatusList');
+
+                if (data.orders && data.orders.length > 0) {
+                    // Filter active orders (confirmed/preparing/delivering but not completed/cancelled)
+                    const activeOrders = data.orders.filter(order => 
+                        order.status === 'confirmed' || order.status === 'preparing' || order.status === 'delivering'
+                    );
+
+                    if (activeOrders.length > 0) {
+                        ordersList.innerHTML = activeOrders.map(order => {
+                            // Format items with details
+                            const itemsList = order.items.map(item => {
+                                let details = item.name;
+                                if (item.size) details += ` (${item.size})`;
+                                
+                                // Add milk details
+                                if (item.milks && Array.isArray(item.milks) && item.milks.length > 0) {
+                                    const milkNames = { 'nut': 'Sữa hạt', 'condensed': 'Sữa đặc' };
+                                    const milkLabels = item.milks.map(m => milkNames[m] || m).join(', ');
+                                    details += `, ${milkLabels}`;
+                                }
+                                
+                                // Add sugar details
+                                if (item.sugar && item.sugar !== '100') {
+                                    details += `, Sugar ${item.sugar}%`;
+                                }
+                                
+                                details += ` x${item.quantity}`;
+                                return details;
+                            }).join(', ');
+                            
+                            const address = order.delivery_street && order.delivery_ward && order.delivery_district
+                                ? `${order.delivery_street}, ${order.delivery_ward}, ${order.delivery_district}`
+                                : null;
+                            
+                            return `
+                                <div class="order-status-card">
+                                    <div class="order-header">
+                                        <div>
+                                            <div class="order-id">
+                                                Order #${order.id}
+                                            </div>
+                                            <div class="order-date">${new Date(order.created_at).toLocaleString('en-GB', {
+                                                day: '2-digit',
+                                                month: '2-digit',
+                                                year: 'numeric',
+                                                hour: '2-digit',
+                                                minute: '2-digit',
+                                                hour12: false
+                                            })}</div>
+                                        </div>
+                                        <div class="order-total">₫${order.total.toLocaleString()}</div>
+                                    </div>
+                                    <div class="order-items">${itemsList}</div>
+                                    ${address ? `<div style="color:#666; font-size:13px; margin-top:8px;">📍 ${address}</div>` : ''}
+                                    ${order.special_notes ? `<div style="color:#999; font-size:12px; margin-top:8px;">📝 ${order.special_notes}</div>` : ''}
+                                    <div class="order-actions">
+                                        <button class="btn-cancel" onclick="cancelOrder('${order.id}')">❌ Cancel Order</button>
+                                        <button class="btn-received" onclick="confirmReceived('${order.id}')">✅ Received</button>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('');
+                    } else {
+                        ordersList.innerHTML = '<p style="text-align:center; color:#999; padding:40px;">No active orders</p>';
+                    }
+                } else {
+                    ordersList.innerHTML = '<p style="text-align:center; color:#999; padding:40px;">No active orders</p>';
+                }
+            } catch (err) {
+                console.error('Error loading order status:', err);
+                document.getElementById('orderStatusList').innerHTML = '<p style="color:#f44336;">Error loading orders</p>';
+            }
+        }
+
+        async function cancelOrder(orderId) {
+            if (!confirm('Are you sure you want to cancel this order? Your balance will be refunded.')) {
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_URL}/orders/${orderId}/cancel`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: state.currentUser.id })
+                });
+
+                const data = await res.json();
+
+                if (res.ok) {
+                    alert(`✅ Order cancelled! ₫${data.refund_amount.toLocaleString()} refunded to your balance.`);
+                    loadOrderStatus();
+                    // Reload profile to update balance
+                    if (state.currentView === 'profile') {
+                        loadProfileData();
+                    }
+                } else {
+                    alert(`❌ Error: ${data.detail}`);
+                }
+            } catch (err) {
+                alert('❌ Connection error');
+                console.error(err);
+            }
+        }
+
+        async function confirmReceived(orderId) {
+            if (!confirm('Confirm that you have received your order?')) {
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_URL}/orders/${orderId}/received`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: state.currentUser.id })
+                });
+
+                const data = await res.json();
+
+                if (res.ok) {
+                    alert('✅ Thank you! Order marked as completed.');
+                    loadOrderStatus();
+                } else {
+                    alert(`❌ Error: ${data.detail}`);
+                }
+            } catch (err) {
+                alert('❌ Connection error');
+                console.error(err);
+            }
+        }
+
         // ========== CHECKOUT ==========
         function openCheckoutModal() {
             if (state.cart.length === 0) {
@@ -2132,7 +2692,7 @@
             }
 
             document.getElementById('checkoutName').value = state.currentUser.name || '';
-            document.getElementById('checkoutPhone').value = '';
+            document.getElementById('checkoutPhone').value = state.currentUser.phone || '';
             document.getElementById('checkoutNotes').value = '';
             document.getElementById('checkoutPayment').value = '';
             document.getElementById('checkoutPromo').value = '';
@@ -2144,19 +2704,88 @@
 
             state.cart.forEach(item => {
                 const sizeMultiplier = { 'S': 0.9, 'M': 1, 'L': 1.1 }[item.size] || 1;
-                const itemTotal = item.price * sizeMultiplier * item.quantity;
+                const milks = Array.isArray(item.milks) ? item.milks : [];
+                const milkPrice = milks.length * 5000;
+                const itemTotal = (item.price * sizeMultiplier + milkPrice) * item.quantity;
                 subtotal += itemTotal;
-                html += `<div class="summary-line">${item.name} (${item.size}) x${item.quantity}: ₫${itemTotal.toLocaleString()}</div>`;
+                
+                let details = `Size ${item.size}`;
+                if (milks.length > 0) {
+                    const milkNames = { 'nut': 'Sữa hạt', 'condensed': 'Sữa đặc' };
+                    const milkLabels = milks.map(m => milkNames[m]).join(', ');
+                    details += `, ${milkLabels}`;
+                }
+                if (item.sugar && item.sugar !== '100') {
+                    details += `, Sugar ${item.sugar}%`;
+                }
+                
+                html += `<div class="summary-line">${item.name} (${details}) x${item.quantity}: ₫${itemTotal.toLocaleString()}</div>`;
             });
 
             modalItems.innerHTML = html;
             updateCartTotal();
+
+            // Load districts on open
+            loadDistricts();
 
             document.getElementById('checkoutModal').classList.add('active');
         }
 
         function closeCheckoutModal() {
             document.getElementById('checkoutModal').classList.remove('active');
+        }
+
+        // ========== ADDRESS API FUNCTIONS ==========
+        async function loadDistricts() {
+            try {
+                const res = await fetch('https://provinces.open-api.vn/api/p/79?depth=2');
+                const data = await res.json();
+                
+                const select = document.getElementById('checkoutDistrict');
+                select.innerHTML = '<option value="">Select district...</option>';
+                
+                data.districts.forEach(district => {
+                    const option = document.createElement('option');
+                    option.value = district.code;
+                    option.textContent = district.name;
+                    option.dataset.name = district.name;
+                    select.appendChild(option);
+                });
+            } catch (err) {
+                console.error('Error loading districts:', err);
+            }
+        }
+
+        async function loadWards() {
+            const districtSelect = document.getElementById('checkoutDistrict');
+            const wardSelect = document.getElementById('checkoutWard');
+            const districtCode = districtSelect.value;
+            
+            if (!districtCode) {
+                wardSelect.innerHTML = '<option value="">Select district first...</option>';
+                wardSelect.disabled = true;
+                return;
+            }
+            
+            try {
+                const res = await fetch(`https://provinces.open-api.vn/api/d/${districtCode}?depth=2`);
+                const data = await res.json();
+                
+                wardSelect.innerHTML = '<option value="">Select ward...</option>';
+                
+                data.wards.forEach(ward => {
+                    const option = document.createElement('option');
+                    option.value = ward.code;
+                    option.textContent = ward.name;
+                    option.dataset.name = ward.name;
+                    wardSelect.appendChild(option);
+                });
+                
+                wardSelect.disabled = false;
+            } catch (err) {
+                console.error('Error loading wards:', err);
+                wardSelect.innerHTML = '<option value="">Error loading wards</option>';
+            }
         }
 
         async function validatePromo() {
@@ -2196,6 +2825,9 @@
 
             const name = document.getElementById('checkoutName').value;
             const phone = document.getElementById('checkoutPhone').value;
+            const districtSelect = document.getElementById('checkoutDistrict');
+            const wardSelect = document.getElementById('checkoutWard');
+            const street = document.getElementById('checkoutStreet').value;
             const notes = document.getElementById('checkoutNotes').value;
             const promoCode = document.getElementById('checkoutPromo').value;
             const payment = document.getElementById('checkoutPayment').value;
@@ -2205,11 +2837,20 @@
                 return;
             }
 
+            if (!districtSelect.value || !wardSelect.value || !street) {
+                alert('Please fill in complete delivery address');
+                return;
+            }
+
             if (!state.currentUser || !state.currentUser.email) {
                 alert('User session invalid. Please login again.');
                 logout();
                 return;
             }
+
+            // Get district and ward names
+            const districtName = districtSelect.options[districtSelect.selectedIndex].dataset.name;
+            const wardName = wardSelect.options[wardSelect.selectedIndex].dataset.name;
 
             try {
                 // Step 1: Create order
@@ -2223,6 +2864,9 @@
                         customer_phone: phone,
                         customer_email: state.currentUser.email,
                         payment_method: payment,
+                        delivery_district: districtName,
+                        delivery_ward: wardName,
+                        delivery_street: street,
                         special_notes: notes,
                         promo_code: promoCode
                     })
@@ -2310,9 +2954,11 @@
                     // Update UI
                     updateCartUI();
                     closePaymentOTPModal();
-                    loadOrderHistory();
                     
-                    // Reload profile to update balance
+                    // Redirect to Order Status view
+                    switchView('orderStatus');
+                    
+                    // Reload profile if needed
                     if (state.currentView === 'profile') {
                         loadProfileData();
                     }
@@ -2323,7 +2969,145 @@
                 alert('❌ Connection error');
                 console.error(err);
             }
+        }
+
+        // ========== PROFILE EDIT FUNCTIONS ==========
+        function openChangeEmailModal() {
+            document.getElementById('changeEmailModal').classList.add('active');
+        }
+
+        function closeChangeEmailModal() {
+            document.getElementById('changeEmailModal').classList.remove('active');
+            document.getElementById('newEmail').value = '';
+            document.getElementById('emailChangePassword').value = '';
+        }
+
+        async function submitChangeEmail(e) {
+            e.preventDefault();
+
+            const newEmail = document.getElementById('newEmail').value;
+            const password = document.getElementById('emailChangePassword').value;
+
+            try {
+                const res = await fetch(`${API_URL}/user/change-email`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        user_id: state.currentUser.id,
+                        new_email: newEmail,
+                        password: password
+                    })
+                });
+
+                const data = await res.json();
+
+                if (res.ok) {
+                    alert('✅ Email updated successfully! Please login again.');
+                    closeChangeEmailModal();
+                    logout();
+                } else {
+                    alert(`❌ Error: ${data.detail}`);
+                }
+            } catch (err) {
+                alert('❌ Connection error');
+                console.error(err);
             }
+        }
+
+        function openChangePhoneModal() {
+            document.getElementById('changePhoneModal').classList.add('active');
+        }
+
+        function closeChangePhoneModal() {
+            document.getElementById('changePhoneModal').classList.remove('active');
+            document.getElementById('newPhone').value = '';
+            document.getElementById('phoneChangePassword').value = '';
+        }
+
+        async function submitChangePhone(e) {
+            e.preventDefault();
+
+            const newPhone = document.getElementById('newPhone').value;
+            const password = document.getElementById('phoneChangePassword').value;
+
+            try {
+                const res = await fetch(`${API_URL}/user/change-phone`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        user_id: state.currentUser.id,
+                        new_phone: newPhone,
+                        password: password
+                    })
+                });
+
+                const data = await res.json();
+
+                if (res.ok) {
+                    // Update state and localStorage
+                    state.currentUser.phone = newPhone;
+                    localStorage.setItem('userPhone', newPhone);
+                    
+                    alert('✅ Phone number updated successfully!');
+                    closeChangePhoneModal();
+                    loadProfileData();
+                } else {
+                    alert(`❌ Error: ${data.detail}`);
+                }
+            } catch (err) {
+                alert('❌ Connection error');
+                console.error(err);
+            }
+        }
+
+        function openChangePasswordModal() {
+            document.getElementById('changePasswordModal').classList.add('active');
+        }
+
+        function closeChangePasswordModal() {
+            document.getElementById('changePasswordModal').classList.remove('active');
+            document.getElementById('currentPassword').value = '';
+            document.getElementById('newPassword').value = '';
+            document.getElementById('confirmNewPassword').value = '';
+        }
+
+        async function submitChangePassword(e) {
+            e.preventDefault();
+
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmNewPassword').value;
+
+            if (newPassword !== confirmPassword) {
+                alert('❌ New passwords do not match!');
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_URL}/user/change-password`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        user_id: state.currentUser.id,
+                        current_password: currentPassword,
+                        new_password: newPassword
+                    })
+                });
+
+                const data = await res.json();
+
+                if (res.ok) {
+                    alert('✅ Password changed successfully! Please login again.');
+                    closeChangePasswordModal();
+                    logout();
+                } else {
+                    alert(`❌ Error: ${data.detail}`);
+                }
+            } catch (err) {
+                alert('❌ Connection error');
+                console.error(err);
+            }
+        }
 
         // Store displayed products for filtering
         let currentDisplayedProducts = [];

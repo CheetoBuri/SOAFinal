@@ -10,8 +10,9 @@ services:
       - GMAIL_ADDRESS=huynhnhattien0411@gmail.com
       - GMAIL_PASSWORD=rqdbmyhpfglksotn
     volumes:
-      - ./:/app/data
+      - ./data:/app/data
       - ./backups:/app/backups
+      - ./cafe_orders.db:/app/cafe_orders.db
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
       interval: 30s

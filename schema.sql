@@ -69,7 +69,11 @@ CREATE TABLE IF NOT EXISTS orders (
     payment_method TEXT,
     customer_name TEXT,
     customer_phone TEXT,
+    delivery_district TEXT,
+    delivery_ward TEXT,
+    delivery_street TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    payment_time TIMESTAMP,
     FOREIGN KEY(user_id) REFERENCES users(id)
 );
 
@@ -91,6 +95,23 @@ CREATE TABLE IF NOT EXISTS favorites (
 
 CREATE INDEX IF NOT EXISTS idx_favorites_user_id ON favorites(user_id);
 CREATE INDEX IF NOT EXISTS idx_favorites_product_id ON favorites(product_id);
+
+-- ============================================
+-- CART TABLE (for API testing)
+-- ============================================
+CREATE TABLE IF NOT EXISTS cart (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id TEXT NOT NULL,
+    product_id TEXT NOT NULL,
+    product_name TEXT NOT NULL,
+    price REAL NOT NULL,
+    quantity INTEGER NOT NULL,
+    size TEXT DEFAULT 'M',
+    added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY(user_id) REFERENCES users(id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_cart_user_id ON cart(user_id);
 
 -- ============================================
 -- PAYMENT OTP TABLE

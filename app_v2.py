@@ -11,6 +11,7 @@ import requests
 import random
 import threading
 from datetime import datetime, timedelta
+import pytz
 import uuid
 from typing import List, Optional
 import re
@@ -21,6 +22,13 @@ from email.mime.multipart import MIMEMultipart
 
 # ============= CONFIGURATION =============
 load_dotenv()  # Load from .env file if it exists
+
+# Timezone configuration
+VIETNAM_TZ = pytz.timezone('Asia/Ho_Chi_Minh')
+
+def get_vietnam_time():
+    """Get current time in Vietnam timezone"""
+    return datetime.now(VIETNAM_TZ)
 
 # Simple SMTP-based email configuration (no domain auth required)
 SMTP_HOST = os.getenv("SMTP_HOST", "")
@@ -104,6 +112,13 @@ init_db()
 # ============= MODELS =============
 class OTPRequest(BaseModel):
     email: str
+    
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "email": "user@example.com"
+            }
+        }
 
 class VerifyOTPRequest(BaseModel):
     email: str
@@ -111,15 +126,43 @@ class VerifyOTPRequest(BaseModel):
     full_name: str
     phone: str
     password: str = None  # Optional - for registration
+    
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "email": "user@example.com",
+                "otp_code": "123456",
+                "full_name": "John Doe",
+                "phone": "0123456789",
+                "password": "password123"
+            }
+        }
 
 class LoginRequest(BaseModel):
     email: str
     password: str
+    
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "email": "user@example.com",
+                "password": "password123"
+            }
+        }
 
 class ResetPasswordRequest(BaseModel):
     email: str
     otp_code: str
     new_password: str
+    
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "email": "user@example.com",
+                "otp_code": "123456",
+                "new_password": "newpassword123"
+            }
+        }
 
 class CheckoutRequest(BaseModel):
     user_id: str
@@ -128,25 +171,166 @@ class CheckoutRequest(BaseModel):
     customer_phone: str
     customer_email: str
     payment_method: str
+    delivery_district: Optional[str] = ""
+    delivery_ward: Optional[str] = ""
+    delivery_street: Optional[str] = ""
     special_notes: Optional[str] = ""
     promo_code: Optional[str] = ""
+    
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "user_id": "1",
+                "items": [
+                    {
+                        "id": "cf_1",
+                        "name": "Espresso",
+                        "price": 25000,
+                        "quantity": 2,
+                        "size": "L",
+                        "milks": ["nut", "condensed"],
+                        "sugar": "75"
+                    }
+                ],
+                "customer_name": "John Doe",
+                "customer_phone": "0123456789",
+                "customer_email": "john@example.com",
+                "payment_method": "balance",
+                "delivery_district": "Quận 1",
+                "delivery_ward": "Phường Bến Nghé",
+                "delivery_street": "123 Nguyễn Huệ",
+                "special_notes": "Less sugar",
+                "promo_code": "COFFEE20"
+            }
+        }
 
 class PromoCodeRequest(BaseModel):
     code: str
+    
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "code": "COFFEE20"
+            }
+        }
 
 class FavoriteRequest(BaseModel):
     user_id: str
     product_id: str
+    
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "user_id": "1",
+                "product_id": "cf_1"
+            }
+        }
 
 class PaymentOTPRequest(BaseModel):
     user_id: str
     order_id: str
     amount: float
+    
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "user_id": "1",
+                "order_id": "ORD12345",
+                "amount": 50000
+            }
+        }
 
 class VerifyPaymentOTPRequest(BaseModel):
     user_id: str
     order_id: str
     otp_code: str
+    
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "user_id": "1",
+                "order_id": "ORD12345",
+                "otp_code": "123456"
+            }
+        }
+
+class CartItem(BaseModel):
+    id: str
+    name: str
+    price: float
+    quantity: int
+    size: str = "M"
+    milks: Optional[List[str]] = []
+    sugar: Optional[str] = "100"
+    
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "id": "cf_1",
+                "name": "Espresso",
+                "price": 25000,
+                "quantity": 2,
+                "size": "L",
+                "milks": ["nut"],
+                "sugar": "75"
+            }
+        }
+
+class AddToCartRequest(BaseModel):
+    user_id: str
+    item: CartItem
+
+class ChangeEmailRequest(BaseModel):
+    user_id: str
+    new_email: str
+    password: str
+    
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "user_id": "1",
+                "new_email": "newemail@example.com",
+                "password": "password123"
+            }
+        }
+
+class ChangePhoneRequest(BaseModel):
+    user_id: str
+    new_phone: str
+    password: str
+    
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "user_id": "1",
+                "new_phone": "0987654321",
+                "password": "password123"
+            }
+        }
+
+class ChangePasswordRequest(BaseModel):
+    user_id: str
+    current_password: str
+    new_password: str
+    
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "user_id": "1",
+                "current_password": "oldpassword123",
+                "new_password": "newpassword123"
+            }
+        }
+
+class OrderActionRequest(BaseModel):
+    user_id: str
+    
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "user_id": "1"
+            }
+        }
 
 # ============= MENU DATA =============
 MENU_PRODUCTS = {
@@ -260,7 +444,92 @@ def get_user_from_token(token: str) -> Optional[dict]:
         return None
 
 # ============= FASTAPI APP =============
-app = FastAPI(title="Cafe Ordering System v2", version="2.0.0")
+app = FastAPI(
+    title="Cafe Ordering System API",
+    version="2.0.0",
+    description="""
+    ## Highlands Coffee Ordering System
+    
+    Complete API for cafe ordering with features:
+    * **Authentication** - OTP-based registration and login
+    * **Menu Management** - Browse products and categories
+    * **Favorites** - Save favorite items
+    * **Cart & Checkout** - Place orders with multiple payment methods
+    * **Payment System** - Wallet balance with OTP verification
+    * **Promo Codes** - Apply discounts to orders
+    * **Order Management** - Track and update order status
+    
+    ### 🔄 Complete Order Flow (Step by Step)
+    
+    #### 1️⃣ Register New Account
+    - **POST** `/api/auth/send-otp`
+      - Body: `{"email": "user@example.com"}`
+      - Response: OTP sent to email
+    
+    - **POST** `/api/auth/verify-otp`
+      - Body: `{"email": "user@example.com", "otp_code": "123456", "full_name": "John Doe", "phone": "0123456789", "password": "yourpassword"}`
+      - Response: Get `user_id` (save this!)
+    
+    #### 2️⃣ Login Existing User
+    - **POST** `/api/auth/login`
+      - Body: `{"email": "user@example.com", "password": "yourpassword"}`
+      - Response: Get `user_id`
+    
+    #### 3️⃣ Get User Info (Check Balance)
+    - **GET** `/api/auth/me?user_id={user_id}`
+      - Response: User details + current balance
+    
+    #### 4️⃣ Browse Menu
+    - **GET** `/api/menu` → Get all products
+    - **GET** `/api/menu/search?q=coffee` → Search products
+    - **GET** `/api/menu/{category}` → Get by category
+    
+    #### 5️⃣ Add Items to Cart
+    - **POST** `/api/cart/add`
+      - Body: `{"user_id": "ABC12345", "item": {"id": "cf_1", "name": "Espresso", "price": 25000, "quantity": 1, "size": "M"}}`
+      - Repeat for each item you want
+    
+    - **GET** `/api/cart?user_id={user_id}` → View cart items
+    
+    #### 6️⃣ Checkout (Create Order)
+    - **POST** `/api/checkout`
+      - Body: Include `user_id`, `items` array, customer details, payment method
+      - Response: Get `order_id` and `total` amount
+    
+    #### 7️⃣ Payment with OTP
+    - **POST** `/api/payment/send-otp`
+      - Body: `{"user_id": "ABC12345", "order_id": "E050F91B", "amount": 50000}`
+      - Check your email for 6-digit OTP
+    
+    - **POST** `/api/payment/verify-otp`
+      - Body: `{"user_id": "ABC12345", "order_id": "E050F91B", "otp_code": "123456"}`
+      - Payment completed! Balance deducted
+    
+    #### 8️⃣ View Orders
+    - **GET** `/api/orders?user_id={user_id}` → Order history
+    - **GET** `/api/orders/{order_id}` → Order details
+    
+    7. **View Orders**
+       - GET `/api/orders?user_id={user_id}` → Order history
+    
+    ### ⚠️ Important Notes
+    - Cart management is handled by frontend (localStorage)
+    - Always use `user_id` from login/register response
+    - Payment requires wallet balance (default: ₫1,000,000)
+    - OTP expires in 10 minutes
+    
+    ### 📧 Email Configuration
+    - SMTP Host: Gmail (smtp.gmail.com:465)
+    - Default Balance: ₫1,000,000
+    """,
+    contact={
+        "name": "Cafe Ordering System",
+        "email": "huynhnhattien0411@gmail.com",
+    },
+    license_info={
+        "name": "MIT",
+    },
+)
 
 app.add_middleware(
     CORSMiddleware,
@@ -271,14 +540,26 @@ app.add_middleware(
 )
 
 # ============= HEALTH CHECK =============
-@app.get("/api/health")
+@app.get("/api/health", tags=["Health"], summary="Health Check")
 def health_check():
+    """Check if the API server is running"""
     return {"status": "ok", "message": "Server running v2"}
 
 # ============= AUTHENTICATION ENDPOINTS =============
-@app.post("/api/auth/send-otp")
+@app.post("/api/auth/send-otp", tags=["1️⃣ Authentication"], summary="Send OTP for Registration")
 def send_otp(request: OTPRequest, background_tasks: BackgroundTasks):
-    """Send OTP to email"""
+    """
+    **Step 1: Send OTP to email for registration**
+    
+    Example Request:
+    ```json
+    {
+        "email": "user@example.com"
+    }
+    ```
+    
+    Response: OTP sent to email (check inbox, valid for 10 minutes)
+    """
     email = request.email.lower().strip()
     
     if not re.match(r"^[^@]+@[^@]+\.[^@]+$", email):
@@ -328,9 +609,24 @@ def send_otp(request: OTPRequest, background_tasks: BackgroundTasks):
         "note": "For demo: OTP is shown in console logs"
     }
 
-@app.post("/api/auth/verify-otp")
+@app.post("/api/auth/verify-otp", tags=["1️⃣ Authentication"], summary="Verify OTP and Complete Registration")
 def verify_otp(request: VerifyOTPRequest):
-    """Verify OTP and register user"""
+    """
+    **Step 2: Verify OTP and complete registration**
+    
+    Example Request:
+    ```json
+    {
+        "email": "user@example.com",
+        "otp_code": "123456",
+        "full_name": "John Doe",
+        "phone": "0123456789",
+        "password": "your_secure_password"
+    }
+    ```
+    
+    Response: Returns `user_id` - **SAVE THIS** for all subsequent API calls!
+    """
     email = request.email.lower().strip()
     otp_code = request.otp_code.strip()
     
@@ -362,8 +658,12 @@ def verify_otp(request: VerifyOTPRequest):
     if existing:
         user_id = existing[0]
     else:
-        # Create new user
-        user_id = str(uuid.uuid4())[:8].upper()
+        # Create new user with auto-increment ID
+        # Get max user_id and increment
+        c.execute("SELECT MAX(CAST(id AS INTEGER)) FROM users WHERE id GLOB '[0-9]*'")
+        max_id = c.fetchone()[0]
+        user_id = str((max_id or 0) + 1)
+        
         # Use provided password or generate random one
         password_hash = hash_password(request.password) if request.password else hash_password(secrets.token_hex(16))
         c.execute("""
@@ -385,7 +685,7 @@ def verify_otp(request: VerifyOTPRequest):
         "name": request.full_name
     }
 
-@app.post("/api/auth/login")
+@app.post("/api/auth/login", tags=["1️⃣ Authentication"], summary="Login with Email and Password")
 def login(request: LoginRequest):
     """Login with email and password"""
     email = request.email.lower().strip()
@@ -419,7 +719,122 @@ def login(request: LoginRequest):
         "name": result[1]
     }
 
-@app.post("/api/auth/send-reset-otp")
+@app.get("/api/auth/me", tags=["1️⃣ Authentication"], summary="Get Current User Info")
+def get_current_user(user_id: str):
+    """Get current user information by user_id"""
+    if not user_id:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    conn = sqlite3.connect(DATABASE)
+    c = conn.cursor()
+    
+    c.execute("SELECT id, email, full_name, phone, balance FROM users WHERE id = ?", (user_id,))
+    result = c.fetchone()
+    conn.close()
+    
+    if not result:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    return {
+        "user_id": result[0],
+        "email": result[1],
+        "name": result[2],
+        "phone": result[3],
+        "balance": result[4]
+    }
+
+@app.post("/api/user/change-email", tags=["6️⃣ User Profile"], summary="Change User Email")
+def change_email(request: ChangeEmailRequest):
+    """Change user email address with password verification"""
+    conn = sqlite3.connect(DATABASE)
+    c = conn.cursor()
+    
+    # Verify current password
+    c.execute("SELECT password_hash FROM users WHERE id = ?", (request.user_id,))
+    result = c.fetchone()
+    
+    if not result:
+        conn.close()
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    stored_hash = result[0]
+    provided_hash = hashlib.sha256(request.password.encode()).hexdigest()
+    if provided_hash != stored_hash:
+        conn.close()
+        raise HTTPException(status_code=401, detail="Invalid password")
+    
+    # Check if new email already exists
+    new_email = request.new_email.lower().strip()
+    c.execute("SELECT id FROM users WHERE email = ? AND id != ?", (new_email, request.user_id))
+    if c.fetchone():
+        conn.close()
+        raise HTTPException(status_code=400, detail="Email already registered")
+    
+    # Update email
+    c.execute("UPDATE users SET email = ? WHERE id = ?", (new_email, request.user_id))
+    conn.commit()
+    conn.close()
+    
+    return {"status": "success", "message": "Email updated successfully", "new_email": new_email}
+
+@app.post("/api/user/change-phone", tags=["6️⃣ User Profile"], summary="Change User Phone")
+def change_phone(request: ChangePhoneRequest):
+    """Change user phone number with password verification"""
+    conn = sqlite3.connect(DATABASE)
+    c = conn.cursor()
+    
+    # Verify current password
+    c.execute("SELECT password_hash FROM users WHERE id = ?", (request.user_id,))
+    result = c.fetchone()
+    
+    if not result:
+        conn.close()
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    stored_hash = result[0]
+    provided_hash = hashlib.sha256(request.password.encode()).hexdigest()
+    if provided_hash != stored_hash:
+        conn.close()
+        raise HTTPException(status_code=401, detail="Invalid password")
+    
+    # Update phone
+    c.execute("UPDATE users SET phone = ? WHERE id = ?", (request.new_phone, request.user_id))
+    conn.commit()
+    conn.close()
+    
+    return {"status": "success", "message": "Phone number updated successfully", "new_phone": request.new_phone}
+
+@app.post("/api/user/change-password", tags=["6️⃣ User Profile"], summary="Change User Password")
+def change_password(request: ChangePasswordRequest):
+    """Change user password with current password verification"""
+    conn = sqlite3.connect(DATABASE)
+    c = conn.cursor()
+    
+    # Verify current password
+    c.execute("SELECT password_hash FROM users WHERE id = ?", (request.user_id,))
+    result = c.fetchone()
+    
+    if not result:
+        conn.close()
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    stored_hash = result[0]
+    provided_hash = hashlib.sha256(request.current_password.encode()).hexdigest()
+    if provided_hash != stored_hash:
+        conn.close()
+        raise HTTPException(status_code=401, detail="Current password is incorrect")
+    
+    # Hash new password
+    new_hash = hashlib.sha256(request.new_password.encode()).hexdigest()
+    
+    # Update password
+    c.execute("UPDATE users SET password_hash = ? WHERE id = ?", (new_hash, request.user_id))
+    conn.commit()
+    conn.close()
+    
+    return {"status": "success", "message": "Password changed successfully"}
+
+@app.post("/api/auth/send-reset-otp", tags=["1️⃣ Authentication"], summary="Send OTP for Password Reset")
 def send_reset_otp(request: OTPRequest, background_tasks: BackgroundTasks):
     """Send OTP for password reset"""
     email = request.email.lower().strip()
@@ -471,7 +886,7 @@ def send_reset_otp(request: OTPRequest, background_tasks: BackgroundTasks):
         "email": email
     }
 
-@app.post("/api/auth/reset-password")
+@app.post("/api/auth/reset-password", tags=["1️⃣ Authentication"], summary="Reset Password with OTP")
 def reset_password(request: ResetPasswordRequest):
     """Reset password using OTP"""
     email = request.email.lower().strip()
@@ -517,7 +932,7 @@ def reset_password(request: ResetPasswordRequest):
     }
 
 # ============= MENU ENDPOINTS =============
-@app.get("/api/menu")
+@app.get("/api/menu", tags=["2️⃣ Menu"], summary="Get All Menu Items")
 def get_menu():
     """Get all menu items"""
     all_items = []
@@ -525,7 +940,7 @@ def get_menu():
         all_items.extend(category_items)
     return {"items": all_items}
 
-@app.get("/api/menu/search")
+@app.get("/api/menu/search", tags=["2️⃣ Menu"], summary="Search Menu Items")
 def search_menu(q: str):
     """Search menu items by name"""
     query = q.lower().strip()
@@ -540,7 +955,7 @@ def search_menu(q: str):
     
     return {"query": q, "results": results}
 
-@app.get("/api/menu/{category}")
+@app.get("/api/menu/{category}", tags=["2️⃣ Menu"], summary="Get Menu Items by Category")
 def get_category(category: str):
     """Get items by category"""
     category_lower = category.lower()
@@ -550,7 +965,7 @@ def get_category(category: str):
     return {"category": category, "items": MENU_PRODUCTS[category_lower]}
 
 # ============= PROMO CODE ENDPOINTS =============
-@app.post("/api/promo/validate")
+@app.post("/api/promo/validate", tags=["3️⃣ Checkout & Promo"], summary="Validate Promo Code")
 def validate_promo(request: PromoCodeRequest, user_id: Optional[str] = None):
     """Validate promo code"""
     code = request.code.upper().strip()
@@ -589,7 +1004,7 @@ def validate_promo(request: PromoCodeRequest, user_id: Optional[str] = None):
     }
 
 # ============= FAVORITES ENDPOINTS =============
-@app.post("/api/favorites/add")
+@app.post("/api/favorites/add", tags=["7️⃣ Favorites"], summary="Add Item to Favorites")
 def add_favorite(request: FavoriteRequest):
     """Add product to favorites"""
     if not request.user_id:
@@ -621,7 +1036,7 @@ def add_favorite(request: FavoriteRequest):
     
     return {"status": "success", "message": "Added to favorites"}
 
-@app.delete("/api/favorites/{product_id}")
+@app.delete("/api/favorites/{product_id}", tags=["7️⃣ Favorites"], summary="Remove Item from Favorites")
 def remove_favorite(product_id: str, user_id: str):
     """Remove product from favorites"""
     if not user_id:
@@ -635,7 +1050,7 @@ def remove_favorite(product_id: str, user_id: str):
     
     return {"status": "success", "message": "Removed from favorites"}
 
-@app.get("/api/favorites")
+@app.get("/api/favorites", tags=["7️⃣ Favorites"], summary="Get User's Favorite Items")
 def get_favorites(user_id: str):
     """Get user's favorite products"""
     if not user_id:
@@ -659,10 +1074,154 @@ def get_favorites(user_id: str):
     
     return {"favorites": favorite_items}
 
+# ============= CART ENDPOINTS =============
+@app.post("/api/cart/add", tags=["8️⃣ Cart (Optional)"], summary="Add Item to Cart")
+def add_to_cart(request: AddToCartRequest):
+    """
+    Add item to cart (for API testing)
+    
+    **Example Request:**
+    ```json
+    {
+        "user_id": "ABC12345",
+        "item": {
+            "id": "cf_1",
+            "name": "Espresso",
+            "price": 25000,
+            "quantity": 1,
+            "size": "M"
+        }
+    }
+    ```
+    """
+    if not request.user_id:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    conn = sqlite3.connect(DATABASE)
+    c = conn.cursor()
+    
+    # Check if item already in cart
+    c.execute("""
+        SELECT id, quantity FROM cart 
+        WHERE user_id = ? AND product_id = ? AND size = ?
+    """, (request.user_id, request.item.id, request.item.size))
+    
+    existing = c.fetchone()
+    
+    if existing:
+        # Update quantity
+        new_quantity = existing[1] + request.item.quantity
+        c.execute("UPDATE cart SET quantity = ? WHERE id = ?", (new_quantity, existing[0]))
+    else:
+        # Insert new item
+        c.execute("""
+            INSERT INTO cart (user_id, product_id, product_name, price, quantity, size)
+            VALUES (?, ?, ?, ?, ?, ?)
+        """, (request.user_id, request.item.id, request.item.name, 
+              request.item.price, request.item.quantity, request.item.size))
+    
+    conn.commit()
+    conn.close()
+    
+    return {"status": "success", "message": "Item added to cart"}
+
+@app.get("/api/cart", tags=["8️⃣ Cart (Optional)"], summary="Get Cart Items")
+def get_cart(user_id: str):
+    """Get all items in user's cart"""
+    if not user_id:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    conn = sqlite3.connect(DATABASE)
+    c = conn.cursor()
+    
+    c.execute("""
+        SELECT product_id, product_name, price, quantity, size
+        FROM cart
+        WHERE user_id = ?
+        ORDER BY added_at DESC
+    """, (user_id,))
+    
+    items = c.fetchall()
+    conn.close()
+    
+    cart_items = []
+    for item in items:
+        cart_items.append({
+            "id": item[0],
+            "name": item[1],
+            "price": item[2],
+            "quantity": item[3],
+            "size": item[4]
+        })
+    
+    return {"cart": cart_items}
+
+@app.delete("/api/cart/clear", tags=["8️⃣ Cart (Optional)"], summary="Clear Cart")
+def clear_cart(user_id: str):
+    """Clear all items from cart"""
+    if not user_id:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    conn = sqlite3.connect(DATABASE)
+    c = conn.cursor()
+    c.execute("DELETE FROM cart WHERE user_id = ?", (user_id,))
+    conn.commit()
+    conn.close()
+    
+    return {"status": "success", "message": "Cart cleared"}
+
+@app.delete("/api/cart/{product_id}", tags=["8️⃣ Cart (Optional)"], summary="Remove Item from Cart")
+def remove_from_cart(product_id: str, user_id: str, size: str = "M"):
+    """Remove specific item from cart"""
+    if not user_id:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    conn = sqlite3.connect(DATABASE)
+    c = conn.cursor()
+    c.execute("DELETE FROM cart WHERE user_id = ? AND product_id = ? AND size = ?", 
+              (user_id, product_id, size))
+    conn.commit()
+    conn.close()
+    
+    return {"status": "success", "message": "Item removed from cart"}
+
 # ============= ORDER ENDPOINTS =============
-@app.post("/api/checkout")
+@app.post("/api/checkout", tags=["3️⃣ Checkout & Promo"], summary="Create Order (Checkout)")
 def checkout(request: CheckoutRequest):
-    """Create new order"""
+    """
+    Create new order from cart items
+    
+    **Example Request:**
+    ```json
+    {
+        "user_id": "ABC12345",
+        "items": [
+            {
+                "id": "cf_1",
+                "name": "Espresso",
+                "price": 25000,
+                "quantity": 2,
+                "size": "M"
+            },
+            {
+                "id": "cf_2",
+                "name": "Americano",
+                "price": 30000,
+                "quantity": 1,
+                "size": "L"
+            }
+        ],
+        "customer_name": "John Doe",
+        "customer_phone": "0123456789",
+        "customer_email": "john@example.com",
+        "payment_method": "balance",
+        "special_notes": "Less sugar",
+        "promo_code": ""
+    }
+    ```
+    
+    **Response:** Returns `order_id` and `total` for payment
+    """
     if not request.items or len(request.items) == 0:
         raise HTTPException(status_code=400, detail="Cart is empty")
     
@@ -674,10 +1233,15 @@ def checkout(request: CheckoutRequest):
         price = item.get("price", 0)
         quantity = item.get("quantity", 1)
         size = item.get("size", "M")
+        milks = item.get("milks", [])
         
         # Size multiplier
         size_multiplier = {"S": 0.9, "M": 1.0, "L": 1.1}.get(size, 1.0)
-        total += price * quantity * size_multiplier
+        
+        # Milk price (5000 per milk type)
+        milk_price = len(milks) * 5000 if isinstance(milks, list) else 0
+        
+        total += (price * size_multiplier + milk_price) * quantity
     
     discount = 0
     promo_code = request.promo_code.upper().strip() if request.promo_code else None
@@ -723,11 +1287,12 @@ def checkout(request: CheckoutRequest):
     
     import json
     items_json = json.dumps(request.items)
+    created_at = get_vietnam_time().isoformat()
     
     c.execute("""
         INSERT INTO orders
-        (id, user_id, items, total, special_notes, promo_code, discount, payment_method, customer_name, customer_phone, status)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        (id, user_id, items, total, special_notes, promo_code, discount, payment_method, customer_name, customer_phone, delivery_district, delivery_ward, delivery_street, status, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, (
         order_id,
         user_id,
@@ -739,7 +1304,11 @@ def checkout(request: CheckoutRequest):
         request.payment_method,
         request.customer_name,
         request.customer_phone,
-        "pending_payment"  # Change to pending_payment instead of pending
+        request.delivery_district,
+        request.delivery_ward,
+        request.delivery_street,
+        "pending_payment",  # Change to pending_payment instead of pending
+        created_at
     ))
     
     conn.commit()
@@ -753,7 +1322,7 @@ def checkout(request: CheckoutRequest):
         "message": "Order created. Please confirm payment with OTP."
     }
 
-@app.get("/api/orders")
+@app.get("/api/orders", tags=["5️⃣ Orders & History"], summary="Get User's Order History")
 def get_orders(user_id: str):
     """Get user's order history"""
     if not user_id:
@@ -763,7 +1332,7 @@ def get_orders(user_id: str):
     c = conn.cursor()
     
     c.execute("""
-        SELECT id, items, total, status, special_notes, promo_code, discount, payment_method, customer_name, created_at
+        SELECT id, items, total, status, special_notes, promo_code, discount, payment_method, customer_name, created_at, payment_time, delivery_district, delivery_ward, delivery_street
         FROM orders
         WHERE user_id = ?
         ORDER BY created_at DESC
@@ -785,19 +1354,23 @@ def get_orders(user_id: str):
             "discount": order[6],
             "payment_method": order[7],
             "customer_name": order[8],
-            "created_at": order[9]
+            "created_at": order[9],
+            "payment_time": order[10],
+            "delivery_district": order[11],
+            "delivery_ward": order[12],
+            "delivery_street": order[13]
         })
     
     return {"orders": result}
 
-@app.get("/api/orders/{order_id}")
+@app.get("/api/orders/{order_id}", tags=["Orders"], summary="Get Order Details by ID")
 def get_order_detail(order_id: str, user_id: Optional[str] = None):
     """Get order details"""
     conn = sqlite3.connect(DATABASE)
     c = conn.cursor()
     
     c.execute("""
-        SELECT id, user_id, items, total, status, special_notes, promo_code, discount, payment_method, customer_name, created_at
+        SELECT id, user_id, items, total, status, special_notes, promo_code, discount, payment_method, customer_name, created_at, payment_time
         FROM orders
         WHERE id = ?
     """, (order_id,))
@@ -820,10 +1393,92 @@ def get_order_detail(order_id: str, user_id: Optional[str] = None):
         "discount": order[7],
         "payment_method": order[8],
         "customer_name": order[9],
-        "created_at": order[10]
+        "created_at": order[10],
+        "payment_time": order[11]
     }
 
-@app.put("/api/orders/{order_id}/status")
+@app.post("/api/orders/{order_id}/cancel", tags=["5️⃣ Orders & History"], summary="Cancel Order and Refund")
+def cancel_order(order_id: str, request: OrderActionRequest):
+    """Cancel order and refund to user balance"""
+    user_id = request.user_id
+    
+    if not user_id:
+        raise HTTPException(status_code=401, detail="User ID required")
+    
+    conn = sqlite3.connect(DATABASE)
+    c = conn.cursor()
+    
+    # Get order details
+    c.execute("SELECT user_id, total, status FROM orders WHERE id = ?", (order_id,))
+    order = c.fetchone()
+    
+    if not order:
+        conn.close()
+        raise HTTPException(status_code=404, detail="Order not found")
+    
+    if order[0] != user_id:
+        conn.close()
+        raise HTTPException(status_code=403, detail="Not authorized to cancel this order")
+    
+    if order[2] in ['completed', 'cancelled']:
+        conn.close()
+        raise HTTPException(status_code=400, detail="Order cannot be cancelled")
+    
+    # Refund to balance
+    refund_amount = order[1]
+    c.execute("UPDATE users SET balance = balance + ? WHERE id = ?", (refund_amount, user_id))
+    
+    # Update order status
+    c.execute("UPDATE orders SET status = 'cancelled' WHERE id = ?", (order_id,))
+    
+    conn.commit()
+    conn.close()
+    
+    return {
+        "status": "success",
+        "message": "Order cancelled and refunded",
+        "refund_amount": refund_amount
+    }
+
+@app.post("/api/orders/{order_id}/received", tags=["5️⃣ Orders & History"], summary="Mark Order as Received")
+def mark_order_received(order_id: str, request: OrderActionRequest):
+    """Mark order as completed/received by customer"""
+    user_id = request.user_id
+    
+    if not user_id:
+        raise HTTPException(status_code=401, detail="User ID required")
+    
+    conn = sqlite3.connect(DATABASE)
+    c = conn.cursor()
+    
+    # Get order details
+    c.execute("SELECT user_id, status FROM orders WHERE id = ?", (order_id,))
+    order = c.fetchone()
+    
+    if not order:
+        conn.close()
+        raise HTTPException(status_code=404, detail="Order not found")
+    
+    if order[0] != user_id:
+        conn.close()
+        raise HTTPException(status_code=403, detail="Not authorized")
+    
+    if order[1] == 'cancelled':
+        conn.close()
+        raise HTTPException(status_code=400, detail="Cancelled order cannot be marked as received")
+    
+    # Update order status to completed
+    c.execute("UPDATE orders SET status = 'completed' WHERE id = ?", (order_id,))
+    
+    conn.commit()
+    conn.close()
+    
+    return {
+        "status": "success",
+        "message": "Order marked as completed"
+    }
+
+@app.put("/api/orders/{order_id}/status", tags=["Orders"], summary="Update Order Status")
 def update_order_status(order_id: str, status: str = None):
     """Update order status (for admin)"""
     # Accept both query parameter and path parameter
@@ -845,7 +1500,7 @@ def update_order_status(order_id: str, status: str = None):
     return {"status": "success", "order_id": order_id, "new_status": status}
 
 # ============= PAYMENT WITH OTP =============
-@app.post("/api/payment/send-otp")
+@app.post("/api/payment/send-otp", tags=["Payment"], summary="Send OTP for Payment Confirmation")
 def send_payment_otp(request: PaymentOTPRequest):
     """Send OTP for payment confirmation"""
     # Get user email
@@ -913,7 +1568,7 @@ def send_payment_otp(request: PaymentOTPRequest):
     
     return {"status": "success", "message": "OTP sent to your email"}
 
-@app.post("/api/payment/verify-otp")
+@app.post("/api/payment/verify-otp", tags=["Payment"], summary="Verify OTP and Complete Payment")
 def verify_payment_otp(request: VerifyPaymentOTPRequest):
     """Verify OTP and complete payment"""
     conn = sqlite3.connect(DATABASE)
@@ -966,8 +1621,9 @@ def verify_payment_otp(request: VerifyPaymentOTPRequest):
     # Mark OTP as verified
     c.execute("UPDATE payment_otp SET verified = 1 WHERE id = ?", (otp_id,))
     
-    # Update order status
-    c.execute("UPDATE orders SET status = 'confirmed' WHERE id = ?", (request.order_id,))
+    # Update order status and payment time (Vietnam timezone)
+    payment_time = get_vietnam_time().isoformat()
+    c.execute("UPDATE orders SET status = 'confirmed', payment_time = ? WHERE id = ?", (payment_time, request.order_id,))
     
     # Get order details for confirmation email
     c.execute("SELECT total, special_notes FROM orders WHERE id = ?", (request.order_id,))
@@ -1009,7 +1665,7 @@ def verify_payment_otp(request: VerifyPaymentOTPRequest):
         "order_id": request.order_id
     }
 
-@app.get("/api/user/balance")
+@app.get("/api/user/balance", tags=["User"], summary="Get User Balance")
 def get_user_balance(user_id: str):
     """Get user's current balance"""
     if not user_id:
