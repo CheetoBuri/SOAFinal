@@ -1,0 +1,160 @@
+/* ========== AUTH SCREEN ========== */
+.auth-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #c41e3a 0%, #a01729 100%);
+    padding: 20px;
+}
+
+.auth-box {
+    background: white;
+    padding: 45px;
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    width: 100%;
+    max-width: 440px;
+}
+
+.auth-box h2 {
+    color: #c41e3a;
+    margin-bottom: 30px;
+    text-align: center;
+    font-size: 28px;
+    font-weight: 700;
+}
+
+.auth-box .form-group {
+    margin-bottom: 15px;
+}
+
+.auth-tabs {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 25px;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+.auth-tab {
+    flex: 1;
+    padding: 12px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 700;
+    color: #999;
+    border-bottom: 3px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.auth-tab.active {
+    color: #c41e3a;
+    border-bottom-color: #c41e3a;
+}
+
+.auth-form {
+    display: none;
+}
+
+.auth-form.active {
+    display: block;
+}
+
+.auth-submit {
+    width: 100%;
+    padding: 15px;
+    background: linear-gradient(135deg, #c41e3a 0%, #a01729 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 17px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 15px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(196, 30, 58, 0.3);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.auth-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(196, 30, 58, 0.4);
+}
+
+/* Password toggle eye */
+.password-field {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.password-field input {
+    flex: 1;
+    padding: 10px 35px 10px 10px;
+}
+
+.password-toggle {
+    position: absolute;
+    right: 10px;
+    cursor: pointer;
+    font-size: 18px;
+    color: #666;
+    background: none;
+    border: none;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.password-toggle:hover {
+    color: #333;
+}
+
+.forgot-password-link {
+    text-align: right;
+    margin-top: 8px;
+}
+
+.forgot-password-link a {
+    color: #c41e3a;
+    text-decoration: none;
+    font-size: 14px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.forgot-password-link a:hover {
+    text-decoration: underline;
+    color: #a01729;
+}
+
+.error-message {
+    background: #f8d7da;
+    color: #721c24;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    font-size: 13px;
+}
+
+.success-message {
+    background: #d4edda;
+    color: #155724;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    font-size: 13px;
+}
+
+.otp-sent-message {
+    background: #cfe2ff;
+    color: #084298;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    font-size: 13px;
+}

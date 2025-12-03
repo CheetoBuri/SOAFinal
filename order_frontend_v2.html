@@ -1215,8 +1215,12 @@
                         <input type="text" id="registerName" placeholder="Your name">
                     </div>
                     <div class="form-group">
-                        <label>Phone</label>
-                        <input type="tel" id="registerPhone" placeholder="Your phone">
+                        <label>Username (Optional)</label>
+                        <input type="text" id="registerUsername" placeholder="Username for login">
+                    </div>
+                    <div class="form-group">
+                        <label>Phone (Optional)</label>
+                        <input type="tel" id="registerPhone" placeholder="Your phone (optional)">
                     </div>
                     <div class="form-group">
                         <label>Password</label>
@@ -1298,7 +1302,7 @@
         <div class="container">
             <!-- SIDEBAR -->
             <div class="sidebar">
-                <!-- SHOP CONTROLS (only visible in shop view) -->
+                <!-- SHOP & FAVORITES CONTROLS (visible in shop and favorites views) -->
                 <div id="shopControls">
                     <!-- SEARCH -->
                     <div class="sidebar-section">
@@ -1677,7 +1681,8 @@
                     id: userId,
                     email: localStorage.getItem('userEmail'),
                     name: localStorage.getItem('userName'),
-                    phone: localStorage.getItem('userPhone') || '-'
+                    phone: localStorage.getItem('userPhone') || '-',
+                    username: localStorage.getItem('userUsername')
                 };
                 
                 try {
@@ -1705,7 +1710,9 @@
         function showApp() {
             document.getElementById('authScreen').style.display = 'none';
             document.getElementById('appScreen').style.display = 'block';
-            document.getElementById('userEmail').textContent = state.currentUser.email;
+            // Display username if available, otherwise fallback to email
+            const displayText = state.currentUser.username || state.currentUser.email;
+            document.getElementById('userEmail').textContent = displayText;
         }
 
         function switchAuthTab(tab) {
@@ -1876,7 +1883,7 @@
                 loadOrderHistory();
             } else if (view === 'favorites') {
                 document.getElementById('favoritesView').classList.add('active');
-                shopControls.style.display = 'none';
+                shopControls.style.display = 'block';  // Show controls for filtering
                 cartSidebar.style.display = 'block';
                 loadFavoritesView();
             } else if (view === 'profile') {
@@ -1913,13 +1920,15 @@
                         id: data.user_id,
                         email: data.email,
                         name: data.name,
-                        phone: userData.phone || '-'
+                        phone: userData.phone || '-',
+                        username: data.username
                     };
 
                     localStorage.setItem('userId', data.user_id);
                     localStorage.setItem('userEmail', data.email);
                     localStorage.setItem('userName', data.name);
                     localStorage.setItem('userPhone', userData.phone || '-');
+                    localStorage.setItem('userUsername', data.username || '');
 
                     showApp();
                     await loadMenu();
@@ -1978,6 +1987,7 @@
             const email = document.getElementById('registerEmail').value;
             const otp = document.getElementById('otpCode').value;
             const name = document.getElementById('registerName').value;
+            const username = document.getElementById('registerUsername').value;
             const phone = document.getElementById('registerPhone').value;
             const password = document.getElementById('registerPassword').value;
             const passwordConfirm = document.getElementById('registerPasswordConfirm').value;
@@ -2001,8 +2011,9 @@
                     body: JSON.stringify({ 
                         email, 
                         otp_code: otp, 
-                        full_name: name, 
-                        phone,
+                        full_name: name,
+                        username: username || null,
+                        phone: phone || null,
                         password: password
                     })
                 });
@@ -2013,12 +2024,16 @@
                     state.currentUser = {
                         id: data.user_id,
                         email: data.email,
-                        name: data.name
+                        name: data.name,
+                        phone: phone || '-',
+                        username: username || null
                     };
 
                     localStorage.setItem('userId', data.user_id);
                     localStorage.setItem('userEmail', data.email);
                     localStorage.setItem('userName', data.name);
+                    localStorage.setItem('userPhone', phone || '-');
+                    localStorage.setItem('userUsername', username || '');
 
                     showApp();
                     await loadMenu();
@@ -2065,6 +2080,7 @@
                 const isFavorited = state.favorites && state.favorites.includes(item.id);
                 const card = document.createElement('div');
                 card.className = 'product-card';
+                card.setAttribute('data-product-id', item.id);
                 card.innerHTML = `
                     <div class="product-icon">${item.icon}</div>
                     <div class="product-name">${item.name}</div>
@@ -2094,8 +2110,8 @@
                 const res = await fetch(`${API_URL}/menu/search?q=${encodeURIComponent(query)}`);
                 const data = await res.json();
 
-                if (data.results && data.results.length > 0) {
-                    resultsList.innerHTML = data.results.map(item => 
+                if (data.items && data.items.length > 0) {
+                    resultsList.innerHTML = data.items.map(item => 
                         `<div style="padding:8px; background:#f0f0f0; border-radius:4px; margin:5px 0; cursor:pointer;" onclick="selectSearchResult('${item.id}')">
                             ${item.icon} ${item.name} - ₫${item.price.toLocaleString()}
                         </div>`
@@ -2111,10 +2127,23 @@
         }
 
         function selectSearchResult(productId) {
-            // Find product and scroll to it
+            // Clear search and hide results
             document.getElementById('searchInput').value = '';
             document.getElementById('searchResults').style.display = 'none';
-            filterByCategory('all');
+            
+            // Find and scroll to the product card
+            const productCard = document.querySelector(`[data-product-id="${productId}"]`);
+            if (productCard) {
+                productCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                // Highlight the card briefly
+                productCard.style.boxShadow = '0 0 20px rgba(196, 30, 58, 0.6)';
+                setTimeout(() => {
+                    productCard.style.boxShadow = '';
+                }, 2000);
+            } else {
+                // If not found, might be in different category - show all
+                filterByCategory('all');
+            }
         }
 
         async function filterByCategory(category) {
@@ -2376,7 +2405,8 @@
             try {
                 const res = await fetch(`${API_URL}/favorites?user_id=${state.currentUser.id}`);
                 const data = await res.json();
-                state.favorites = data.favorites ? data.favorites.map(f => f.id) : [];
+                // API returns array of strings: ["cf_1", "cf_2"]
+                state.favorites = data.favorites || [];
             } catch (err) {
                 console.error('Error loading favorites:', err);
             }
@@ -2415,13 +2445,26 @@
 
         async function loadFavoritesView() {
             try {
+                // Load menu first
+                const menuRes = await fetch(`${API_URL}/menu`);
+                const menuData = await menuRes.json();
+                const allProducts = menuData.items || [];
+                
+                // Store all products for filtering
+                state.allFavoriteProducts = allProducts;
+                
+                // Then load favorites
                 const res = await fetch(`${API_URL}/favorites?user_id=${state.currentUser.id}`);
                 const data = await res.json();
                 const grid = document.getElementById('favoritesGrid');
 
                 if (data.favorites && data.favorites.length > 0) {
-                    displayProducts(data.favorites);
+                    // API returns array of IDs, need to get full product objects from menu
+                    const favoriteProducts = allProducts.filter(p => data.favorites.includes(p.id));
+                    state.favoriteProducts = favoriteProducts;
+                    displayProducts(favoriteProducts);
                 } else {
+                    state.favoriteProducts = [];
                     grid.innerHTML = '<p style="color:#999; grid-column:1/-1;">No favorites yet. Add some from the shop!</p>';
                 }
             } catch (err) {
@@ -2432,6 +2475,10 @@
         // ========== PROFILE VIEW ==========
         async function loadProfileData() {
             if (!state.currentUser) return;
+
+            // Update header display with username
+            const displayText = state.currentUser.username || state.currentUser.email;
+            document.getElementById('userEmail').textContent = displayText;
 
             // Load personal information
             document.getElementById('profileEmail').textContent = state.currentUser.email || '-';
@@ -2549,6 +2596,9 @@
         }
 
         // ========== ORDER STATUS ==========
+        // Alias for backward compatibility
+        const loadUserOrders = loadOrderStatus;
+
         async function loadOrderStatus() {
             try {
                 const res = await fetch(`${API_URL}/orders?user_id=${state.currentUser.id}`);
@@ -2903,14 +2953,16 @@
                         document.getElementById('otpAmount').textContent = `₫${data.total.toLocaleString()}`;
                         document.getElementById('paymentOTPModal').classList.add('active');
                     } else {
-                        alert(`❌ Error: ${otpData.detail}`);
+                        const errorMsg = otpData.detail || (Array.isArray(otpData.detail) ? JSON.stringify(otpData.detail) : 'Payment OTP error');
+                        alert(`❌ Payment Error: ${errorMsg}`);
+                        console.error('Payment OTP Error:', otpData);
                     }
                 } else {
                     alert(`❌ Error: ${data.detail}`);
                 }
             } catch (err) {
-                alert('❌ Connection error');
-                console.error(err);
+                alert('❌ Connection error during checkout: ' + err.message);
+                console.error('Checkout error:', err);
             }
         }
 
@@ -2924,11 +2976,17 @@
             e.preventDefault();
 
             const otpCode = document.getElementById('paymentOTP').value;
+            const submitBtn = e.target.querySelector('button[type="submit"]');
 
             if (!state.pendingOrder) {
                 alert('No pending order found');
                 return;
             }
+
+            // Prevent double submission
+            if (submitBtn.disabled) return;
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Processing...';
 
             try {
                 const res = await fetch(`${API_URL}/payment/verify-otp`, {
@@ -2958,16 +3016,31 @@
                     // Redirect to Order Status view
                     switchView('orderStatus');
                     
-                    // Reload profile if needed
-                    if (state.currentView === 'profile') {
-                        loadProfileData();
+                    // Reload orders
+                    await loadUserOrders();
+                    
+                    // Reload profile to update balance
+                    if (state.currentUser) {
+                        const profileRes = await fetch(`${API_URL}/auth/me?user_id=${state.currentUser.id}`);
+                        if (profileRes.ok) {
+                            const profileData = await profileRes.json();
+                            state.currentUser.balance = profileData.balance;
+                        }
                     }
                 } else {
-                    alert(`❌ Error: ${data.detail}`);
+                    const errorMsg = data.detail || 'Payment verification failed';
+                    alert(`❌ ${errorMsg}`);
+                    console.error('Payment error:', data);
                 }
             } catch (err) {
-                alert('❌ Connection error');
+                alert('❌ Connection error: ' + err.message);
                 console.error(err);
+            } finally {
+                // Re-enable button
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Confirm Payment';
+                }
             }
         }
 

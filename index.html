@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Cafe Ordering System - Refactored</title>
+    
+    <!-- CSS Imports -->
+    <link rel="stylesheet" href="frontend/css/base.css?v=2.2">
+    <link rel="stylesheet" href="frontend/css/header.css?v=2.2">
+    <link rel="stylesheet" href="frontend/css/sidebar.css?v=2.2">
+    <link rel="stylesheet" href="frontend/css/products.css?v=2.2">
+    <link rel="stylesheet" href="frontend/css/cart.css?v=2.2">
+    <link rel="stylesheet" href="frontend/css/modal.css?v=2.2">
+    <link rel="stylesheet" href="frontend/css/auth.css?v=2.2">
+    <link rel="stylesheet" href="frontend/css/orders.css?v=2.2">
+    <link rel="stylesheet" href="frontend/css/profile.css?v=2.2">
+    <link rel="stylesheet" href="frontend/css/responsive.css?v=2.2">
+</head>
+<body>
+    <!-- ========== AUTH SCREEN ========== -->
+    <div id="authScreen" class="auth-container">
+        <div class="auth-box">
+            <h2>☕ Cafe Order</h2>
+            
+            <div class="auth-tabs">
+                <button class="auth-tab active" onclick="switchAuthTab('login')">Login</button>
+                <button class="auth-tab" onclick="switchAuthTab('register')">Register</button>
+                <button class="auth-tab" onclick="switchAuthTab('forgot')">Forgot Password</button>
+            </div>
+
+            <!-- LOGIN FORM -->
+            <form id="loginForm" class="auth-form active" onsubmit="handleLogin(event)">
+                <div id="loginError"></div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="loginEmail" required placeholder="your@email.com">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <div class="password-field">
+                        <input type="password" id="loginPassword" required placeholder="Enter password">
+                        <button type="button" class="password-toggle" onclick="togglePasswordVisibility('loginPassword')">👁️</button>
+                    </div>
+                </div>
+                <div class="forgot-password-link">
+                    <a onclick="switchAuthTab('forgot')">Forgot password?</a>
+                </div>
+                <button type="submit" class="auth-submit">Login</button>
+            </form>
+
+            <!-- REGISTER FORM -->
+            <form id="registerForm" class="auth-form" onsubmit="handleRegister(event)">
+                <div id="registerError"></div>
+                <div id="registerSuccess"></div>
+
+                <div id="registerStep1">
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="registerEmail" required placeholder="your@email.com">
+                    </div>
+                    <button type="button" class="auth-submit" onclick="sendOTP()">Send OTP Code</button>
+                </div>
+
+                <div id="registerStep2" style="display:none;">
+                    <div class="otp-sent-message">✅ OTP code sent to your email! Check spam folder if not found.</div>
+                    <div class="form-group">
+                        <label>OTP Code (6 digits)</label>
+                        <input type="text" id="otpCode" maxlength="6" placeholder="000000">
+                    </div>
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" id="registerName" placeholder="Your name">
+                    </div>
+                    <div class="form-group">
+                        <label>Username (Optional)</label>
+                        <input type="text" id="registerUsername" placeholder="Username for login">
+                    </div>
+                    <div class="form-group">
+                        <label>Phone (Optional)</label>
+                        <input type="tel" id="registerPhone" placeholder="Your phone (optional)">
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <div class="password-field">
+                            <input type="password" id="registerPassword" placeholder="Create a strong password" required>
+                            <button type="button" class="password-toggle" onclick="togglePasswordVisibility('registerPassword')">👁️</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Confirm Password</label>
+                        <div class="password-field">
+                            <input type="password" id="registerPasswordConfirm" placeholder="Confirm password" required>
+                            <button type="button" class="password-toggle" onclick="togglePasswordVisibility('registerPasswordConfirm')">👁️</button>
+                        </div>
+                    </div>
+                    <button type="submit" class="auth-submit">Create Account</button>
+                    <button type="button" class="auth-submit" style="background:#999; margin-top:8px;" onclick="resetRegisterForm()">Back</button>
+                </div>
+            </form>
+
+            <!-- FORGOT PASSWORD FORM -->
+            <form id="forgotForm" class="auth-form" onsubmit="handleForgotPassword(event)">
+                <div id="forgotError"></div>
+                
+                <div id="forgotStep1">
+                    <p style="color:#666; font-size:14px; margin-bottom:15px;">Enter your email to reset password</p>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="forgotEmail" required placeholder="your@email.com">
+                    </div>
+                    <button type="button" class="auth-submit" onclick="sendForgotOTP()">Send OTP Code</button>
+                </div>
+
+                <div id="forgotStep2" style="display:none;">
+                    <div class="otp-sent-message">✅ OTP code sent to your email!</div>
+                    <div class="form-group">
+                        <label>OTP Code</label>
+                        <input type="text" id="forgotOTP" maxlength="6" placeholder="000000">
+                    </div>
+                    <div class="form-group">
+                        <label>New Password</label>
+                        <div class="password-field">
+                            <input type="password" id="forgotNewPassword" placeholder="Create new password" required>
+                            <button type="button" class="password-toggle" onclick="togglePasswordVisibility('forgotNewPassword')">👁️</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Confirm New Password</label>
+                        <div class="password-field">
+                            <input type="password" id="forgotConfirmPassword" placeholder="Confirm password" required>
+                            <button type="button" class="password-toggle" onclick="togglePasswordVisibility('forgotConfirmPassword')">👁️</button>
+                        </div>
+                    </div>
+                    <button type="submit" class="auth-submit">Reset Password</button>
+                    <button type="button" class="auth-submit" style="background:#999; margin-top:8px;" onclick="resetForgotForm()">Back</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========== MAIN APP ========== -->
+    <div id="appScreen" style="display:none;">
+        <!-- HEADER -->
+        <header>
+            <h1>☕ Cafe Ordering System</h1>
+            <div class="header-buttons">
+                <button onclick="switchView('shop')">🛒 Shop</button>
+                <button onclick="switchView('orderStatus')">📦 Order Status</button>
+                <button onclick="switchView('history')">📜 History</button>
+                <button onclick="switchView('favorites')">❤️ Favorites</button>
+                <button onclick="switchView('profile')">👤 Profile</button>
+                <div class="user-info">
+                    <span id="userEmail"></span>
+                </div>
+            </div>
+        </header>
+
+        <!-- MAIN CONTENT -->
+        <div class="container">
+            <!-- SIDEBAR -->
+            <div class="sidebar">
+                <!-- SHOP & FAVORITES CONTROLS -->
+                <div id="shopControls">
+                    <!-- SEARCH -->
+                    <div class="sidebar-section">
+                        <h3>🔍 Search</h3>
+                        <input type="text" class="search-box" id="searchInput" placeholder="Search menu..." onkeyup="handleSearch()">
+                        <div id="searchResults" style="display:none; margin-top:10px;">
+                            <div id="searchResultsList" style="font-size:13px;"></div>
+                        </div>
+                    </div>
+
+                    <!-- CATEGORIES -->
+                    <div class="sidebar-section">
+                        <h3>📂 Categories</h3>
+                        <button class="category-btn active" onclick="filterByCategory('all', event)">All</button>
+                        <button class="category-btn" onclick="filterByCategory('coffee', event)">☕ Coffee</button>
+                        <button class="category-btn" onclick="filterByCategory('tea', event)">🍵 Tea</button>
+                        <button class="category-btn" onclick="filterByCategory('juice', event)">🧃 Juice</button>
+                        <button class="category-btn" onclick="filterByCategory('food', event)">🍰 Food</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MAIN CONTENT AREA -->
+            <div class="main-content">
+                <!-- SHOP VIEW -->
+                <div id="shopView" class="view active">
+                    <div class="products-grid" id="productsGrid">
+                        <!-- Products will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- ORDER HISTORY VIEW -->
+                <div id="historyView" class="view">
+                    <h2 style="color:#006241; margin-bottom:20px;">📜 Your Orders</h2>
+                    <div class="order-list" id="ordersList">
+                        <p style="color:#999;">Loading orders...</p>
+                    </div>
+                </div>
+
+                <!-- FAVORITES VIEW -->
+                <div id="favoritesView" class="view">
+                    <h2 style="color:#006241; margin-bottom:20px;">❤️ Your Favorites</h2>
+                    <div class="products-grid" id="favoritesGrid">
+                        <p style="color:#999;">No favorites yet. Add some from the shop!</p>
+                    </div>
+                </div>
+
+                <!-- PROFILE VIEW -->
+                <div id="profileView" class="view">
+                    <h2 style="color:#006241; margin-bottom:20px;">👤 My Profile</h2>
+                    
+                    <div style="max-width:800px; margin:0 auto;">
+                        <!-- Personal Information Section -->
+                        <div class="profile-section">
+                            <h3>📋 Personal Information</h3>
+                            <div class="profile-info-card">
+                                <div class="profile-info-row">
+                                    <span class="profile-label">Email:</span>
+                                    <span class="profile-value" id="profileEmail">-</span>
+                                    <button class="btn-edit" onclick="openChangeEmailModal()">Edit</button>
+                                </div>
+                                <div class="profile-info-row">
+                                    <span class="profile-label">Username:</span>
+                                    <span class="profile-value" id="profileUsername">-</span>
+                                    <button class="btn-edit" onclick="openChangeUsernameModal()">Edit</button>
+                                </div>
+                                <div class="profile-info-row">
+                                    <span class="profile-label">Full Name:</span>
+                                    <span class="profile-value" id="profileName">-</span>
+                                </div>
+                                <div class="profile-info-row">
+                                    <span class="profile-label">Phone:</span>
+                                    <span class="profile-value" id="profilePhone">-</span>
+                                    <button class="btn-edit" onclick="openChangePhoneModal()">Edit</button>
+                                </div>
+                                <div class="profile-info-row">
+                                    <span class="profile-label">Password:</span>
+                                    <span class="profile-value">••••••••</span>
+                                    <button class="btn-edit" onclick="openChangePasswordModal()">Change</button>
+                                </div>
+                                <div class="profile-info-row">
+                                    <span class="profile-label">Balance:</span>
+                                    <span class="profile-value" id="profileBalance" style="color:#c41e3a; font-weight:700;">₫0</span>
+                                </div>
+                                <div class="profile-info-row">
+                                    <span class="profile-label">Member Since:</span>
+                                    <span class="profile-value" id="profileJoined">-</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Logout Section -->
+                        <div class="profile-section">
+                            <h3>🚪 Account Actions</h3>
+                            <button class="btn-logout" onclick="logout()">🚪 Logout</button>
+                            <p>You will be logged out and redirected to the login page.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ORDER STATUS VIEW -->
+                <div id="orderStatusView" class="view">
+                    <h2 style="color:#006241; margin-bottom:20px;">📦 Order Status</h2>
+                    <div id="orderStatusList" class="orders-list">
+                        <p style="text-align:center; color:#999; padding:40px;">No active orders</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CART SIDEBAR -->
+            <div class="cart-sidebar">
+                <div class="cart-title">🛒 Cart</div>
+                <div id="cartItems">
+                    <div class="cart-empty">Cart is empty</div>
+                </div>
+                <div class="cart-summary" id="cartSummary" style="display:none;">
+                    <div class="summary-row">
+                        <span>Subtotal:</span>
+                        <span id="subtotal">₫0</span>
+                    </div>
+                    <div class="summary-row" id="discountRow" style="display:none;">
+                        <span>Discount:</span>
+                        <span id="discountAmount">-₫0</span>
+                    </div>
+                    <div class="summary-row total">
+                        <span>Total:</span>
+                        <span id="totalPrice">₫0</span>
+                    </div>
+                    <button class="checkout-btn" onclick="openCheckoutModal()">Checkout</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Checkout Modal -->
+    <div id="checkoutModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">🛒 Checkout</div>
+            <form onsubmit="processCheckout(event)">
+                <div class="form-group">
+                    <label>Customer Name *</label>
+                    <input type="text" id="customerName" required placeholder="Your full name">
+                </div>
+                <div class="form-group">
+                    <label>Phone Number *</label>
+                    <input type="tel" id="customerPhone" required placeholder="Your phone number">
+                </div>
+                <div class="form-group">
+                    <label>Email *</label>
+                    <input type="email" id="customerEmail" required placeholder="Your email">
+                </div>
+                <div class="form-group">
+                    <label>District / Quận *</label>
+                    <select id="deliveryDistrict" required onchange="loadWards()">
+                        <option value="">Choose district...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Ward / Phường *</label>
+                    <select id="deliveryWard" required>
+                        <option value="">Choose ward...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Street Address *</label>
+                    <input type="text" id="deliveryStreet" required placeholder="123 Nguyễn Huệ">
+                </div>
+                <div class="form-group">
+                    <label>Payment Method *</label>
+                    <select id="paymentMethod" required>
+                        <option value="">Choose payment method...</option>
+                        <option value="balance">Account Balance</option>
+                        <option value="cash">Cash on Delivery</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Special Notes (Optional)</label>
+                    <textarea id="orderNotes" rows="3" placeholder="Any special requests? (e.g., less sugar, no ice)"></textarea>
+                </div>
+                
+                <!-- Order Items Summary -->
+                <div id="checkoutOrderItems" style="background:#fff; border:1px solid #ddd; border-radius:8px; padding:15px; margin:15px 0; max-height:200px; overflow-y:auto;">
+                    <h4 style="margin:0 0 10px 0; color:#006241; font-size:16px;">📋 Order Items</h4>
+                    <div id="checkoutItemsList"></div>
+                </div>
+                
+                <div id="checkoutSummary" style="background:#f5f5f5; padding:15px; border-radius:8px; margin:15px 0;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                        <span>Subtotal:</span>
+                        <span id="checkoutSubtotal">₫0</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                        <span>Discount:</span>
+                        <span id="checkoutDiscount">-₫0</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:18px; color:#c41e3a; padding-top:8px; border-top:2px solid #ddd;">
+                        <span>Total:</span>
+                        <span id="checkoutTotal">₫0</span>
+                    </div>
+                </div>
+                <div class="modal-buttons">
+                    <button type="submit" class="btn-submit">Place Order</button>
+                    <button type="button" class="btn-cancel" onclick="closeCheckoutModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Profile Modals -->
+    <div id="changeEmailModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">✉️ Change Email</div>
+            <form onsubmit="submitChangeEmail(event)">
+                <div class="form-group">
+                    <label>New Email *</label>
+                    <input type="email" id="newEmail" required placeholder="Enter new email">
+                </div>
+                <div class="form-group">
+                    <label>Current Password *</label>
+                    <input type="password" id="emailChangePassword" required placeholder="Confirm with password">
+                </div>
+                <div class="modal-buttons">
+                    <button type="submit" class="btn-submit">Update Email</button>
+                    <button type="button" class="btn-cancel" onclick="closeChangeEmailModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="changeUsernameModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">👤 Change Username</div>
+            <form onsubmit="submitChangeUsername(event)">
+                <div class="form-group">
+                    <label>New Username *</label>
+                    <input type="text" id="newUsername" required placeholder="Enter new username" minlength="3">
+                </div>
+                <div class="form-group">
+                    <label>Current Password *</label>
+                    <input type="password" id="usernameChangePassword" required placeholder="Confirm with password">
+                </div>
+                <div class="modal-buttons">
+                    <button type="submit" class="btn-submit">Update Username</button>
+                    <button type="button" class="btn-cancel" onclick="closeChangeUsernameModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="changePhoneModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">📱 Change Phone Number</div>
+            <form onsubmit="submitChangePhone(event)">
+                <div class="form-group">
+                    <label>New Phone Number *</label>
+                    <input type="tel" id="newPhone" required placeholder="Enter new phone number">
+                </div>
+                <div class="form-group">
+                    <label>Current Password *</label>
+                    <input type="password" id="phoneChangePassword" required placeholder="Confirm with password">
+                </div>
+                <div class="modal-buttons">
+                    <button type="submit" class="btn-submit">Update Phone</button>
+                    <button type="button" class="btn-cancel" onclick="closeChangePhoneModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="changePasswordModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">🔒 Change Password</div>
+            <form onsubmit="submitChangePassword(event)">
+                <div class="form-group">
+                    <label>Current Password *</label>
+                    <input type="password" id="currentPassword" required placeholder="Enter current password">
+                </div>
+                <div class="form-group">
+                    <label>New Password *</label>
+                    <input type="password" id="newPassword" required placeholder="Enter new password" minlength="6">
+                </div>
+                <div class="form-group">
+                    <label>Confirm New Password *</label>
+                    <input type="password" id="confirmNewPassword" required placeholder="Confirm new password" minlength="6">
+                </div>
+                <div class="modal-buttons">
+                    <button type="submit" class="btn-submit">Change Password</button>
+                    <button type="button" class="btn-cancel" onclick="closeChangePasswordModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- JavaScript Imports (ES6 Modules) -->
+    <script type="module" src="frontend/js/main.js?v=2.2"></script>
+</body>
+</html>

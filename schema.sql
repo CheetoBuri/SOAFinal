@@ -15,14 +15,17 @@
 CREATE TABLE IF NOT EXISTS users (
     id TEXT PRIMARY KEY,
     email TEXT UNIQUE NOT NULL,
+    username TEXT UNIQUE,
     password_hash TEXT NOT NULL,
     full_name TEXT,
-    phone TEXT,
+    phone TEXT UNIQUE,
     balance REAL DEFAULT 1000000.0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
+CREATE INDEX IF NOT EXISTS idx_users_phone ON users(phone);
 
 -- ============================================
 -- OTP CODES TABLE
