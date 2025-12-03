@@ -4,6 +4,7 @@ import * as storage from '../utils/storage.js';
 import * as ui from '../utils/ui.js';
 import { setCurrentUser } from '../utils/state.js';
 import { loadMenu, loadFavorites } from './menu.js';
+import { switchView } from './navigation.js';
 
 export function initAuth() {
     // Check if user is already logged in
@@ -80,6 +81,7 @@ export async function handleLogin(e) {
         showApp();
         await loadMenu();
         await loadFavorites();
+        switchView('shop');  // Go to shop view (menu)
         ui.clearForm('loginForm');
     } else {
         ui.displayError('loginError', result.data.detail);
@@ -158,6 +160,7 @@ export async function handleRegister(e) {
         showApp();
         await loadMenu();
         await loadFavorites();
+        switchView('shop');  // Go to shop view (menu)
         resetRegisterForm();
         switchAuthTab('login');
     } else {

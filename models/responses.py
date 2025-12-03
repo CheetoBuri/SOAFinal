@@ -2,7 +2,7 @@
 Response models for API documentation
 """
 from pydantic import BaseModel
-from typing import List, Optional, Any
+from typing import List, Optional, Any, Union
 
 
 class StatusResponse(BaseModel):
@@ -240,6 +240,7 @@ class Product(BaseModel):
     category: str
     price: float
     icon: str
+    defaultSugar: Optional[str] = "0"
 
 
 class MenuResponse(BaseModel):
@@ -315,12 +316,15 @@ class FavoritesResponse(BaseModel):
 
 class CartItemResponse(BaseModel):
     """Cart item details"""
-    product_id: str
+    id: Optional[str] = None
+    product_id: Optional[str] = None
+    name: Optional[str] = None
+    price: Optional[float] = None
     quantity: int
     size: str
-    sugar: int
-    ice: int
-    milks: List[str]
+    sugar: Optional[Union[str, int]] = "100"
+    ice: Optional[int] = 100
+    milks: Optional[List[str]] = []
 
 
 class CartResponse(BaseModel):
@@ -338,6 +342,65 @@ class CartResponse(BaseModel):
                         "sugar": 75,
                         "ice": 100,
                         "milks": ["nut"]
+                    }
+                ]
+            }
+        }
+
+
+class Transaction(BaseModel):
+    """Single transaction record"""
+    id: str
+    type: str
+    amount: float
+    balance_before: float
+    balance_after: float
+    order_id: Optional[str] = None
+    description: Optional[str] = None
+    created_at: str
+    
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "id": "txn_12345",
+                "type": "payment",
+                "amount": -50000,
+                "balance_before": 1000000,
+                "balance_after": 950000,
+                "order_id": "ORD123",
+                "description": "Payment for Order #ORD123",
+                "created_at": "2025-12-04T10:30:00+07:00"
+            }
+        }
+
+
+class TransactionHistoryResponse(BaseModel):
+    """List of user transactions"""
+    transactions: List[Transaction]
+    
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "transactions": [
+                    {
+                        "id": "txn_1",
+                        "type": "payment",
+                        "amount": -50000,
+                        "balance_before": 1000000,
+                        "balance_after": 950000,
+                        "order_id": "ABC123",
+                        "description": "Payment for Order #ABC123",
+                        "created_at": "2025-12-04T10:30:00+07:00"
+                    },
+                    {
+                        "id": "txn_2",
+                        "type": "refund",
+                        "amount": 30000,
+                        "balance_before": 950000,
+                        "balance_after": 980000,
+                        "order_id": "XYZ789",
+                        "description": "Refund for cancelled Order #XYZ789",
+                        "created_at": "2025-12-04T11:00:00+07:00"
                     }
                 ]
             }

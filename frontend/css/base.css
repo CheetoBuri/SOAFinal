@@ -44,12 +44,12 @@ body {
 /* ========== COMMON BUTTONS ========== */
 .btn-small {
     flex: 1;
-    padding: 12px;
+    padding: 14px;
     border: none;
-    border-radius: 10px;
+    border-radius: 8px;
     cursor: pointer;
     transition: all 0.3s ease;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 600;
 }
 

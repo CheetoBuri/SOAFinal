@@ -6,6 +6,7 @@ from models.schemas import OTPRequest, VerifyOTPRequest, LoginRequest, ResetPass
 from models.responses import OTPSentResponse, UserResponse, UserDetailResponse, StatusResponse
 from database import get_db
 from utils.security import hash_password, verify_password, generate_otp, send_email
+from utils.timezone import get_vietnam_time
 import re
 import secrets
 from datetime import datetime, timedelta
@@ -40,7 +41,7 @@ def send_otp(request: OTPRequest, background_tasks: BackgroundTasks):
     
     # Generate OTP
     otp = generate_otp()
-    expires_at = (datetime.now() + timedelta(minutes=10)).isoformat()
+    expires_at = (get_vietnam_time() + timedelta(minutes=10)).isoformat()
     
     # Save OTP
     c.execute("""
@@ -266,7 +267,7 @@ def send_reset_otp(request: OTPRequest, background_tasks: BackgroundTasks):
     
     # Generate OTP
     otp = generate_otp()
-    expires_at = (datetime.now() + timedelta(minutes=10)).isoformat()
+    expires_at = (get_vietnam_time() + timedelta(minutes=10)).isoformat()
     
     # Save OTP
     c.execute("""
@@ -324,7 +325,7 @@ def reset_password(request: ResetPasswordRequest):
         raise HTTPException(status_code=400, detail="Invalid or expired OTP")
     
     expires_at = datetime.fromisoformat(result[1])
-    if datetime.now() > expires_at:
+    if get_vietnam_time() > expires_at:
         conn.close()
         raise HTTPException(status_code=400, detail="OTP expired")
     

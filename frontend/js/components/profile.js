@@ -158,3 +158,42 @@ export async function submitChangePassword(e) {
         ui.showError(result.data.detail);
     }
 }
+
+export async function loadTransactionHistory() {
+    if (!state.currentUser) return;
+    
+    const result = await api.apiCall(`/transactions?user_id=${state.currentUser.id}`);
+    const transactionList = document.getElementById('transactionHistoryList');
+    
+    if (!transactionList) return;
+    
+    if (result.ok && result.data.transactions && result.data.transactions.length > 0) {
+        transactionList.innerHTML = result.data.transactions.map(formatTransaction).join('');
+    } else {
+        transactionList.innerHTML = '<p style="color:#999; text-align:center; padding:20px;">No transaction history yet</p>';
+    }
+}
+
+function formatTransaction(txn) {
+    const isPositive = txn.amount >= 0;
+    const amountClass = isPositive ? 'positive' : 'negative';
+    const amountPrefix = isPositive ? '+' : '';
+    const typeIcon = txn.type === 'payment' ? '💳' : txn.type === 'refund' ? '↩️' : '💰';
+    
+    return `
+        <div class="transaction-item">
+            <div style="display:flex; align-items:center; gap:12px;">
+                <div style="font-size:24px;">${typeIcon}</div>
+                <div style="flex:1;">
+                    <div style="font-weight:600; color:#333;">${txn.description || txn.type}</div>
+                    <div style="font-size:12px; color:#999;">${ui.formatDate(txn.created_at)}</div>
+                    ${txn.order_id ? `<div style="font-size:12px; color:#666;">Order #${txn.order_id}</div>` : ''}
+                </div>
+                <div style="text-align:right;">
+                    <div class="transaction-amount ${amountClass}">${amountPrefix}${ui.formatCurrency(Math.abs(txn.amount))}</div>
+                    <div style="font-size:11px; color:#999;">Balance: ${ui.formatCurrency(txn.balance_after)}</div>
+                </div>
+            </div>
+        </div>
+    `;
+}

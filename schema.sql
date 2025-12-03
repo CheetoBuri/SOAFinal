@@ -104,13 +104,9 @@ CREATE INDEX IF NOT EXISTS idx_favorites_product_id ON favorites(product_id);
 -- ============================================
 CREATE TABLE IF NOT EXISTS cart (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id TEXT NOT NULL,
-    product_id TEXT NOT NULL,
-    product_name TEXT NOT NULL,
-    price REAL NOT NULL,
-    quantity INTEGER NOT NULL,
-    size TEXT DEFAULT 'M',
-    added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    user_id TEXT NOT NULL UNIQUE,
+    items TEXT NOT NULL DEFAULT '[]',
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY(user_id) REFERENCES users(id)
 );
 

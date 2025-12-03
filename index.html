@@ -148,7 +148,7 @@
         <header>
             <h1>☕ Cafe Ordering System</h1>
             <div class="header-buttons">
-                <button onclick="switchView('shop')">🛒 Shop</button>
+                <button onclick="switchView('shop')">🍽️ Menu</button>
                 <button onclick="switchView('orderStatus')">📦 Order Status</button>
                 <button onclick="switchView('history')">📜 History</button>
                 <button onclick="switchView('favorites')">❤️ Favorites</button>
@@ -190,7 +190,7 @@
             <div class="main-content">
                 <!-- SHOP VIEW -->
                 <div id="shopView" class="view active">
-                    <div class="products-grid" id="productsGrid">
+                    <div id="productsGrid">
                         <!-- Products will be loaded here -->
                     </div>
                 </div>
@@ -252,6 +252,14 @@
                                     <span class="profile-label">Member Since:</span>
                                     <span class="profile-value" id="profileJoined">-</span>
                                 </div>
+                            </div>
+                        </div>
+
+                        <!-- Transaction History Section -->
+                        <div class="profile-section">
+                            <h3>💳 Transaction History</h3>
+                            <div id="transactionHistoryList" class="transaction-list">
+                                <p style="color:#999; text-align:center; padding:20px;">Loading transactions...</p>
                             </div>
                         </div>
 

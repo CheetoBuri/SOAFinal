@@ -16,35 +16,18 @@ def add_to_cart(request: AddToCartRequest):
     Add a product to user's shopping cart.
     
     - **user_id**: User ID (required)
-    - **product_id**: Product ID to add (required)
-    - **quantity**: Item quantity (default: 1)
-    - **size**: Product size (M, L, etc., default: M)
-    - **sugar**: Sugar level 0-100 (default: 100)
-    - **ice**: Ice level 0-100 (default: 100)
-    - **milks**: Array of milk additions (default: [])
+    - **item**: Cart item object with product details (required)
     
     Returns success status message.
     """
     user_id = request.user_id
-    product_id = request.product_id
-    quantity = request.quantity or 1
-    size = request.size or "M"
-    sugar = request.sugar or 100
-    ice = request.ice or 100
-    milks = request.milks or []
+    item = request.item
     
-    if not user_id or not product_id:
-        raise HTTPException(status_code=400, detail="user_id and product_id required")
+    if not user_id:
+        raise HTTPException(status_code=400, detail="user_id required")
     
-    # Create cart item
-    cart_item = {
-        "product_id": product_id,
-        "quantity": quantity,
-        "size": size,
-        "sugar": sugar,
-        "ice": ice,
-        "milks": milks
-    }
+    # Convert item to dict
+    cart_item = item.dict() if hasattr(item, 'dict') else item
     
     conn = get_db()
     c = conn.cursor()
@@ -57,10 +40,12 @@ def add_to_cart(request: AddToCartRequest):
         # Update existing cart
         items = json.loads(result[0])
         items.append(cart_item)
-        c.execute("UPDATE cart SET items = ? WHERE user_id = ?", (json.dumps(items), user_id))
+        c.execute("UPDATE cart SET items = ?, updated_at = CURRENT_TIMESTAMP WHERE user_id = ?", 
+                 (json.dumps(items), user_id))
     else:
         # Create new cart
-        c.execute("INSERT INTO cart (user_id, items) VALUES (?, ?)", (user_id, json.dumps([cart_item])))
+        c.execute("INSERT INTO cart (user_id, items) VALUES (?, ?)", 
+                 (user_id, json.dumps([cart_item])))
     
     conn.commit()
     conn.close()
@@ -94,7 +79,13 @@ def get_cart(user_id: str):
     if not result:
         return {"items": []}
     
-    return {"items": json.loads(result[0])}
+    items = json.loads(result[0])
+    # Ensure product_id is set for backward compatibility with remove endpoint
+    for item in items:
+        if "id" in item and not item.get("product_id"):
+            item["product_id"] = item["id"]
+    
+    return {"items": items}
 
 
 @router.delete("/clear", summary="Clear Cart", response_model=StatusResponse)
@@ -148,10 +139,10 @@ def remove_from_cart(product_id: str, user_id: str):
     
     items = json.loads(result[0])
     
-    # Remove first occurrence of product_id
+    # Remove first occurrence of product with matching id
     found = False
     for i, item in enumerate(items):
-        if item.get("product_id") == product_id:
+        if item.get("id") == product_id or item.get("product_id") == product_id:
             items.pop(i)
             found = True
             break

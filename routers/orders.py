@@ -42,7 +42,7 @@ def validate_promo(request: PromoCodeRequest):
     discount_percent, max_uses, used_count, expires_at = result
     
     # Check validity
-    if expires_at and datetime.fromisoformat(expires_at) < datetime.now():
+    if expires_at and datetime.fromisoformat(expires_at) < get_vietnam_time():
         raise HTTPException(status_code=400, detail="Promo code expired")
     
     if max_uses and used_count >= max_uses:
@@ -77,14 +77,14 @@ def checkout(request: CheckoutRequest):
     if not request.items or len(request.items) == 0:
         raise HTTPException(status_code=400, detail="Cart is empty")
     
-    # Calculate total - use unit_price from frontend (already includes size & extras)
+    # Calculate total - use price from frontend (already includes size & extras)
     total = 0
     for item in request.items:
-        unit_price = item.get("unit_price", 0)
+        price = item.get("price", 0)
         quantity = item.get("quantity", 1)
         
-        # unit_price already includes size modifier and milk extras
-        total += unit_price * quantity
+        # price already includes size modifier and milk extras
+        total += price * quantity
     
     discount = 0
     promo_code = request.promo_code.upper().strip() if request.promo_code else None
@@ -106,7 +106,7 @@ def checkout(request: CheckoutRequest):
             
             # Check validity
             valid = True
-            if expires_at and datetime.fromisoformat(expires_at) < datetime.now():
+            if expires_at and datetime.fromisoformat(expires_at) < get_vietnam_time():
                 valid = False
             if max_uses and used_count >= max_uses:
                 valid = False
@@ -129,6 +129,9 @@ def checkout(request: CheckoutRequest):
     items_json = json.dumps(request.items)
     created_at = get_vietnam_time().isoformat()
     
+    # All orders start as 'pending_payment'
+    # Balance: need OTP verification -> then 'paid'
+    # COD: will be 'paid' when user clicks 'Received'
     c.execute("""
         INSERT INTO orders
         (id, user_id, items, total, special_notes, promo_code, discount, payment_method, customer_name, customer_phone, delivery_district, delivery_ward, delivery_street, status, created_at)
@@ -211,12 +214,13 @@ def get_orders(user_id: str):
 @router.post("/orders/{order_id}/cancel", summary="Cancel Order and Refund")
 def cancel_order(order_id: str, request: OrderActionRequest):
     """
-    Cancel order and refund amount to user balance.
+    Cancel order and refund amount to user balance (only for balance payments).
+    COD orders are cancelled without refund.
     
     - **order_id**: Order ID to cancel (path parameter, required)
     - **user_id**: User ID for authorization (in request body, required)
     
-    Returns success status with refund confirmation.
+    Returns success status with refund confirmation (if applicable).
     """
     user_id = request.user_id
     
@@ -228,7 +232,7 @@ def cancel_order(order_id: str, request: OrderActionRequest):
     
     # Get order details and user info
     c.execute("""
-        SELECT o.user_id, o.total, o.status, u.email, u.full_name 
+        SELECT o.user_id, o.total, o.status, o.payment_method, u.email, u.full_name 
         FROM orders o
         JOIN users u ON o.user_id = u.id
         WHERE o.id = ?
@@ -239,19 +243,56 @@ def cancel_order(order_id: str, request: OrderActionRequest):
         conn.close()
         raise HTTPException(status_code=404, detail="Order not found")
     
-    order_user_id, total, status, user_email, user_name = order
+    order_user_id, total, status, payment_method, user_email, user_name = order
     
     if order_user_id != user_id:
         conn.close()
         raise HTTPException(status_code=403, detail="Not authorized to cancel this order")
     
-    if status in ['completed', 'cancelled']:
+    if status in ['completed', 'delivered', 'cancelled']:
         conn.close()
         raise HTTPException(status_code=400, detail="Order cannot be cancelled")
     
-    # Refund to balance
-    refund_amount = total
-    c.execute("UPDATE users SET balance = balance + ? WHERE id = ?", (refund_amount, user_id))
+    # Only refund for balance payments that were actually paid
+    refund_amount = 0
+    needs_refund = False
+    
+    if payment_method == 'balance' and status in ['paid', 'preparing', 'in_transit']:
+        # Balance payment was completed - refund needed
+        needs_refund = True
+        refund_amount = total
+        
+        # Get current balance
+        c.execute("SELECT balance FROM users WHERE id = ?", (user_id,))
+        current_balance = c.fetchone()[0]
+        new_balance = current_balance + refund_amount
+        
+        c.execute("UPDATE users SET balance = balance + ? WHERE id = ?", (refund_amount, user_id))
+        
+        # Record transaction
+        import uuid
+        from utils.timezone import get_vietnam_time
+        transaction_id = str(uuid.uuid4())[:12].upper()
+        transaction_time = get_vietnam_time().isoformat()
+        
+        c.execute("""
+            INSERT INTO transactions 
+            (id, user_id, type, amount, balance_before, balance_after, order_id, description, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            transaction_id,
+            user_id,
+            "refund",
+            refund_amount,
+            current_balance,
+            new_balance,
+            order_id,
+            f"Refund for cancelled Order #{order_id}",
+            transaction_time
+        ))
+    
+    # COD orders or unpaid balance orders - no refund needed
+    # Just cancel the order
     
     # Update order status
     c.execute("UPDATE orders SET status = 'cancelled' WHERE id = ?", (order_id,))
@@ -259,20 +300,23 @@ def cancel_order(order_id: str, request: OrderActionRequest):
     conn.commit()
     conn.close()
     
-    # Send refund email notification
-    try:
-        send_refund_email(
-            recipient_email=user_email,
-            recipient_name=user_name,
-            order_id=order_id,
-            refund_amount=refund_amount
-        )
-    except Exception as e:
-        print(f"⚠️ Email sending failed but refund was successful: {str(e)}")
+    # Send refund email notification only if refund was processed
+    if needs_refund:
+        try:
+            send_refund_email(
+                recipient_email=user_email,
+                recipient_name=user_name,
+                order_id=order_id,
+                refund_amount=refund_amount
+            )
+        except Exception as e:
+            print(f"⚠️ Email sending failed but refund was successful: {str(e)}")
+    
+    message = "Order cancelled and refunded" if needs_refund else "Order cancelled"
     
     return {
         "status": "success",
-        "message": "Order cancelled and refunded",
+        "message": message,
         "refund_amount": refund_amount
     }
 
@@ -281,6 +325,7 @@ def cancel_order(order_id: str, request: OrderActionRequest):
 def mark_order_received(order_id: str, request: OrderActionRequest):
     """
     Mark order as received/completed by customer.
+    For COD orders: this also completes the payment.
     
     - **order_id**: Order ID to mark as received (path parameter, required)
     - **user_id**: User ID for authorization (in request body, required)
@@ -296,7 +341,7 @@ def mark_order_received(order_id: str, request: OrderActionRequest):
     c = conn.cursor()
     
     # Get order details
-    c.execute("SELECT user_id, status FROM orders WHERE id = ?", (order_id,))
+    c.execute("SELECT user_id, status, payment_method FROM orders WHERE id = ?", (order_id,))
     order = c.fetchone()
     
     if not order:
@@ -311,8 +356,13 @@ def mark_order_received(order_id: str, request: OrderActionRequest):
         conn.close()
         raise HTTPException(status_code=400, detail="Cancelled order cannot be marked as received")
     
-    # Update order status to completed
-    c.execute("UPDATE orders SET status = 'completed' WHERE id = ?", (order_id,))
+    # Update order status to delivered (completed)
+    # For COD: this marks payment as successful
+    payment_time = get_vietnam_time().isoformat()
+    c.execute(
+        "UPDATE orders SET status = 'delivered', payment_time = ? WHERE id = ?", 
+        (payment_time, order_id)
+    )
     
     conn.commit()
     conn.close()

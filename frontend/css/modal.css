@@ -173,3 +173,78 @@
     background: #e8e8e8;
     border-color: #d0d0d0;
 }
+
+/* ========== CUSTOMIZATION MODAL STYLES ========== */
+.option-card {
+    transition: all 0.3s ease;
+}
+
+.option-card.selected {
+    border-color: #c41e3a !important;
+    background: linear-gradient(135deg, #fff5f5 0%, #ffe8e8 100%);
+    transform: scale(1.05);
+}
+
+.checkbox-option {
+    transition: all 0.3s ease;
+}
+
+.checkbox-option.selected {
+    border-color: #c41e3a !important;
+    background: linear-gradient(135deg, #fff5f5 0%, #ffe8e8 100%);
+}
+
+.checkbox-option input[type="checkbox"],
+.checkbox-option input[type="radio"] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    accent-color: #c41e3a;
+}
+
+.form-select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 40px;
+}
+
+.size-options {
+    display: flex;
+    gap: 10px;
+}
+
+.milk-options,
+.upsells-options,
+.toppings-options {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+/* Scrollbar styling */
+.milk-options::-webkit-scrollbar,
+.upsells-options::-webkit-scrollbar,
+.toppings-options::-webkit-scrollbar {
+    width: 8px;
+}
+
+.milk-options::-webkit-scrollbar-track,
+.upsells-options::-webkit-scrollbar-track,
+.toppings-options::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.milk-options::-webkit-scrollbar-thumb,
+.upsells-options::-webkit-scrollbar-thumb,
+.toppings-options::-webkit-scrollbar-thumb {
+    background: #c41e3a;
+    border-radius: 10px;
+}
+
+.milk-options::-webkit-scrollbar-thumb:hover,
+.upsells-options::-webkit-scrollbar-thumb:hover,
+.toppings-options::-webkit-scrollbar-thumb:hover {
+    background: #a01729;
+}

@@ -179,6 +179,7 @@ class CartItem(BaseModel):
     quantity: int
     size: str = "M"
     milks: Optional[List[str]] = []
+    toppings: Optional[List[str]] = []
     sugar: Optional[str] = "100"
     
     class Config:
@@ -190,6 +191,7 @@ class CartItem(BaseModel):
                 "quantity": 2,
                 "size": "L",
                 "milks": ["nut"],
+                "toppings": [],
                 "sugar": "75"
             }
         }

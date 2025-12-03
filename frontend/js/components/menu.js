@@ -18,23 +18,66 @@ export function displayProducts(items) {
     
     grid.innerHTML = '';
     
+    // Group items by category for better display
+    const categories = {
+        coffee: { title: '☕ Coffee', items: [] },
+        tea: { title: '🍵 Tea', items: [] },
+        juice: { title: '🧃 Juice & Smoothies', items: [] },
+        food: { title: '🥐 Food & Desserts', items: [] }
+    };
+    
     items.forEach(item => {
-        const favorited = isFavorite(item.id);
-        const card = document.createElement('div');
-        card.className = 'product-card';
-        card.setAttribute('data-product-id', item.id);
-        card.innerHTML = `
-            <div class="product-icon">${item.icon}</div>
-            <div class="product-name">${item.name}</div>
-            <div class="product-price">${ui.formatCurrency(item.price)}</div>
-            <div class="product-buttons">
-                <button class="btn-small btn-add" onclick="window.showAddToCart('${item.id}', '${item.name}', ${item.price}, '${item.category}')">Add</button>
-                <button class="btn-small btn-favorite ${favorited ? 'favorited' : ''}" onclick="window.toggleFavorite('${item.id}')" title="${favorited ? 'Remove from favorites' : 'Add to favorites'}">
-                    ${favorited ? '❤️' : '🤍'}
-                </button>
-            </div>
-        `;
-        grid.appendChild(card);
+        if (categories[item.category]) {
+            categories[item.category].items.push(item);
+        }
+    });
+    
+    // Display each category
+    Object.entries(categories).forEach(([catKey, catData]) => {
+        if (catData.items.length === 0) return;
+        
+        const categorySection = document.createElement('div');
+        categorySection.className = 'category-section';
+        categorySection.innerHTML = `<h3 class="category-title">${catData.title}</h3>`;
+        
+        const categoryGrid = document.createElement('div');
+        categoryGrid.className = 'category-products-grid';
+        
+        catData.items.forEach(item => {
+            const favorited = isFavorite(item.id);
+            const card = document.createElement('div');
+            card.className = 'product-card';
+            card.setAttribute('data-product-id', item.id);
+            
+            // Show type badge for coffee (Italian vs Vietnamese)
+            let typeBadge = '';
+            if (item.category === 'coffee' && item.type) {
+                typeBadge = `<span class="type-badge ${item.type}">${item.type === 'italian' ? '🇮🇹' : '🇻🇳'}</span>`;
+            }
+            
+            // Show food type badge
+            if (item.category === 'food' && item.type) {
+                const typeLabels = { savory: '🥐', sweet: '🍪', cake: '🍰' };
+                typeBadge = `<span class="type-badge food-${item.type}">${typeLabels[item.type] || ''}</span>`;
+            }
+            
+            card.innerHTML = `
+                <div class="product-icon">${item.icon}</div>
+                ${typeBadge}
+                <div class="product-name">${item.name}</div>
+                <div class="product-price">${ui.formatCurrency(item.price)}</div>
+                <div class="product-buttons">
+                    <button class="btn-small btn-add" onclick="window.showAddToCart('${item.id}')">Add</button>
+                    <button class="btn-small btn-favorite ${favorited ? 'favorited' : ''}" onclick="window.toggleFavorite('${item.id}')" title="${favorited ? 'Remove from favorites' : 'Add to favorites'}">
+                        ${favorited ? '❤️' : '🤍'}
+                    </button>
+                </div>
+            `;
+            categoryGrid.appendChild(card);
+        });
+        
+        categorySection.appendChild(categoryGrid);
+        grid.appendChild(categorySection);
     });
 }
 

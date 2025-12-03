@@ -2,17 +2,19 @@
 Main FastAPI application - Modular structure
 Cafe Ordering System with OTP Authentication
 """
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
+from starlette.middleware.base import BaseHTTPMiddleware
+from utils.timezone import get_vietnam_time
 import os
 
 # Import database initialization
 from database import init_db
 
 # Import all routers
-from routers import auth, menu, profile, orders, payment, favorites, cart, locations
+from routers import auth, menu, profile, orders, payment, favorites, cart, locations, transactions
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -20,6 +22,18 @@ app = FastAPI(
     description="Complete cafe ordering system with OTP authentication, menu browsing, orders, and payments",
     version="2.0.0"
 )
+
+# Custom middleware to add Vietnam timezone to response headers
+class VietnamTimezoneMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        response = await call_next(request)
+        # Add custom header with Vietnam time
+        vn_time = get_vietnam_time().strftime("%a, %d %b %Y %H:%M:%S GMT+0700")
+        response.headers["X-Vietnam-Time"] = vn_time
+        return response
+
+# Add custom middleware first (before CORS)
+app.add_middleware(VietnamTimezoneMiddleware)
 
 # CORS middleware
 app.add_middleware(
@@ -63,6 +77,7 @@ app.include_router(payment.router)
 app.include_router(favorites.router)
 app.include_router(cart.router)
 app.include_router(locations.router)
+app.include_router(transactions.router)
 
 # Serve static files (CSS, JS)
 app.mount("/frontend", StaticFiles(directory="frontend"), name="frontend")

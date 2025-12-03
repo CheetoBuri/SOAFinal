@@ -190,12 +190,13 @@ def verify_payment_otp(request: VerifyPaymentOTPRequest):
         raise HTTPException(status_code=400, detail="Insufficient balance")
     
     # Process payment
+    new_balance = user_balance - order_total
     c.execute("UPDATE users SET balance = balance - ? WHERE id = ?", (order_total, user_id))
     
     payment_time = get_vietnam_time().isoformat()
     c.execute("""
         UPDATE orders
-        SET status = 'confirmed', payment_time = ?
+        SET status = 'paid', payment_time = ?
         WHERE id = ?
     """, (payment_time, order_id))
     
@@ -206,6 +207,25 @@ def verify_payment_otp(request: VerifyPaymentOTPRequest):
         WHERE order_id = ? AND user_id = ? AND code = ?
     """, (order_id, user_id, otp))
     
+    # Record transaction
+    import uuid
+    transaction_id = str(uuid.uuid4())[:12].upper()
+    c.execute("""
+        INSERT INTO transactions 
+        (id, user_id, type, amount, balance_before, balance_after, order_id, description, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, (
+        transaction_id,
+        user_id,
+        "payment",
+        -order_total,
+        user_balance,
+        new_balance,
+        order_id,
+        f"Payment for Order #{order_id}",
+        payment_time
+    ))
+    
     conn.commit()
     conn.close()
     
@@ -214,6 +234,6 @@ def verify_payment_otp(request: VerifyPaymentOTPRequest):
         "message": "Payment successful!",
         "order_id": order_id,
         "amount_paid": order_total,
-        "new_balance": user_balance - order_total,
-        "remaining_balance": user_balance - order_total
+        "new_balance": new_balance,
+        "remaining_balance": new_balance
     }

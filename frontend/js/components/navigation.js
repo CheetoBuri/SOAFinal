@@ -3,7 +3,7 @@ import * as ui from '../utils/ui.js';
 import { state, setCurrentView } from '../utils/state.js';
 import { loadOrderHistory, loadOrderStatus } from './orders.js';
 import { loadFavoritesView } from './menu.js';
-import { loadProfileData } from './profile.js';
+import { loadProfileData, loadTransactionHistory } from './profile.js';
 
 export function switchView(view) {
     ui.setActive('.view', null);
@@ -36,5 +36,6 @@ export function switchView(view) {
         if (shopControls) shopControls.style.display = 'none';
         if (cartSidebar) cartSidebar.style.display = 'none';
         loadProfileData();
+        loadTransactionHistory();
     }
 }
