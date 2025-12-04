@@ -6,6 +6,7 @@ import { switchView } from './components/navigation.js';
 import { cancelOrder, confirmReceived } from './components/orders.js';
 import * as profileComponent from './components/profile.js';
 import * as ui from './utils/ui.js';
+import { initDarkMode, toggleDarkMode } from './utils/darkmode.js';
 
 // Expose functions to window for onclick handlers
 window.handleLogin = handleLogin;
@@ -34,6 +35,8 @@ window.processCheckout = processCheckout;
 window.cancelOrder = cancelOrder;
 window.confirmReceived = confirmReceived;
 window.togglePasswordVisibility = ui.togglePasswordVisibility;
+window.closeModal = ui.closeModal;
+window.toggleDarkMode = toggleDarkMode;
 
 // Profile functions
 window.openChangeUsernameModal = profileComponent.openChangeUsernameModal;
@@ -54,4 +57,5 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('Cafe Ordering System - Refactored Version');
     setupAuthListeners();
     initAuth();
+    initDarkMode();
 });

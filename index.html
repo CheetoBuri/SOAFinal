@@ -17,10 +17,11 @@
     <link rel="stylesheet" href="frontend/css/hero.css?v=20251205">
     <link rel="stylesheet" href="frontend/css/products.css?v=20251205">
     <link rel="stylesheet" href="frontend/css/cart.css?v=20251205">
-    <link rel="stylesheet" href="frontend/css/modal.css?v=20251205">
-    <link rel="stylesheet" href="frontend/css/auth.css?v=20251205">
+    <link rel="stylesheet" href="frontend/css/modal.css?v=20251205e">
+    <link rel="stylesheet" href="frontend/css/auth.css?v=20251205d">
     <link rel="stylesheet" href="frontend/css/orders.css?v=20251205b">
     <link rel="stylesheet" href="frontend/css/profile.css?v=20251205d">
+    <link rel="stylesheet" href="frontend/css/dark-mode.css?v=20251205">
     <link rel="stylesheet" href="frontend/css/responsive.css?v=20251205">
 </head>
 <body>
@@ -249,6 +250,7 @@
                 <!-- PROFILE MODAL -->
                 <div id="profileModal" class="modal">
                     <div class="modal-content" style="max-inline-size: 560px;">
+                        <button class="modal-close" onclick="closeModal('profileModal')" aria-label="Close">×</button>
                         <h2 class="modal-header">👤 My Profile</h2>
                     
                         <!-- Personal Information Section -->
@@ -298,6 +300,20 @@
                             </div>
                         </div>
 
+                        <!-- Settings Section -->
+                        <div class="profile-section">
+                            <h3>⚙️ Settings</h3>
+                            <div class="profile-info-card">
+                                <div class="profile-info-row">
+                                    <span class="profile-label">🌙 Dark Mode:</span>
+                                    <label class="dark-mode-toggle">
+                                        <input type="checkbox" id="darkModeToggle" onchange="toggleDarkMode()">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Logout Button -->
                         <button id="logoutBtn" onclick="logout()">🚪 Logout</button>
                     </div>
@@ -340,6 +356,7 @@
     <!-- Checkout Modal -->
     <div id="checkoutModal" class="modal">
         <div class="modal-content">
+            <button class="modal-close" onclick="closeCheckoutModal()" aria-label="Close">×</button>
             <div class="modal-header">🛒 Checkout</div>
             <form onsubmit="processCheckout(event)">
                 <div class="form-group">

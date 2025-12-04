@@ -40,6 +40,7 @@ function showCustomizationModal(product, customization) {
     
     let modalContent = `
         <div class="modal-content" style="max-width: 600px; max-height: 90vh; overflow-y: auto;">
+            <button class="modal-close" onclick="window.closeSizeModal()" aria-label="Close">×</button>
             <div class="modal-header">
                 <span>${product.icon} ${product.name}</span>
                 <span style="color: #c41e3a; font-size: 18px;">${ui.formatCurrency(product.price)}</span>
@@ -167,6 +168,13 @@ function showCustomizationModal(product, customization) {
     
     modal.innerHTML = modalContent;
     document.body.appendChild(modal);
+    
+    // Add backdrop click to close
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            closeSizeModal();
+        }
+    });
     
     // Add event listeners for option-card selection styling
     addOptionCardListeners();
@@ -479,7 +487,16 @@ export function openCheckoutModal() {
 
     // Open modal
     const modal = document.getElementById('checkoutModal');
-    if (modal) modal.classList.add('active');
+    if (modal) {
+        modal.classList.add('active');
+        
+        // Add backdrop click to close
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                closeCheckoutModal();
+            }
+        });
+    }
 }
 
 function displayCheckoutItems() {

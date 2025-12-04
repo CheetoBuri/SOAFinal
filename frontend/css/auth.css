@@ -4,25 +4,30 @@
     align-items: center;
     justify-content: center;
     min-height: 100vh;
-    background: linear-gradient(135deg, #c41e3a 0%, #a01729 100%);
+    background: #fafafa;
     padding: 20px;
 }
 
 .auth-box {
     background: white;
-    padding: 45px;
-    border-radius: 20px;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    padding: 48px;
+    border-radius: 24px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
     width: 100%;
     max-width: 440px;
+    border: 1px solid #f0f0f0;
 }
 
 .auth-box h2 {
-    color: #c41e3a;
-    margin-bottom: 30px;
+    color: #1a1a1a;
+    margin-bottom: 32px;
     text-align: center;
     font-size: 28px;
-    font-weight: 700;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
 }
 
 .auth-box .form-group {
@@ -31,9 +36,9 @@
 
 .auth-tabs {
     display: flex;
-    gap: 12px;
-    margin-bottom: 25px;
-    border-bottom: 2px solid #f0f0f0;
+    gap: 8px;
+    margin-bottom: 28px;
+    border-bottom: 1px solid #f0f0f0;
 }
 
 .auth-tab {
@@ -43,15 +48,15 @@
     border: none;
     cursor: pointer;
     font-size: 15px;
-    font-weight: 700;
+    font-weight: 600;
     color: #999;
-    border-bottom: 3px solid transparent;
-    transition: all 0.3s ease;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s ease;
 }
 
 .auth-tab.active {
-    color: #c41e3a;
-    border-bottom-color: #c41e3a;
+    color: #1a1a1a;
+    border-bottom-color: #1a1a1a;
 }
 
 .auth-form {
@@ -64,24 +69,24 @@
 
 .auth-submit {
     width: 100%;
-    padding: 15px;
-    background: linear-gradient(135deg, #c41e3a 0%, #a01729 100%);
+    padding: 16px;
+    background: #1a1a1a;
     color: white;
     border: none;
     border-radius: 12px;
-    font-size: 17px;
-    font-weight: 700;
+    font-size: 15px;
+    font-weight: 600;
     cursor: pointer;
-    margin-top: 15px;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 12px rgba(196, 30, 58, 0.3);
+    margin-top: 20px;
+    transition: all 0.2s ease;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
 
 .auth-submit:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 18px rgba(196, 30, 58, 0.4);
+    background: #333;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
 /* Password toggle eye */
@@ -120,41 +125,44 @@
 }
 
 .forgot-password-link a {
-    color: #c41e3a;
+    color: #1a1a1a;
     text-decoration: none;
     font-size: 14px;
     cursor: pointer;
-    font-weight: 600;
+    font-weight: 500;
 }
 
 .forgot-password-link a:hover {
     text-decoration: underline;
-    color: #a01729;
+    color: #000;
 }
 
 .error-message {
-    background: #f8d7da;
-    color: #721c24;
-    padding: 10px;
-    border-radius: 5px;
-    margin-bottom: 15px;
-    font-size: 13px;
+    background: #fee;
+    color: #c33;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    font-size: 14px;
+    border-left: 3px solid #c33;
 }
 
 .success-message {
-    background: #d4edda;
-    color: #155724;
-    padding: 10px;
-    border-radius: 5px;
-    margin-bottom: 15px;
-    font-size: 13px;
+    background: #efe;
+    color: #3a3;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    font-size: 14px;
+    border-left: 3px solid #3a3;
 }
 
 .otp-sent-message {
-    background: #cfe2ff;
-    color: #084298;
-    padding: 10px;
-    border-radius: 5px;
-    margin-bottom: 15px;
-    font-size: 13px;
+    background: #eef;
+    color: #33a;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    font-size: 14px;
+    border-left: 3px solid #33a;
 }
