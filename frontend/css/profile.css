@@ -1,47 +1,77 @@
+/* Center the whole Profile view and its header */
+#profileView {
+    max-inline-size: 880px;
+    margin-inline-start: auto;
+    margin-inline-end: auto;
+}
+
+#profileView > h2 {
+    max-inline-size: 880px;
+    margin-inline-start: auto;
+    margin-inline-end: auto;
+}
+
+/* Ensure the internal wrapper div is centered and consistent width */
+#profileView > div {
+    max-inline-size: 880px !important;
+    margin-inline-start: auto !important;
+    margin-inline-end: auto !important;
+}
 /* ========== PROFILE VIEW ========== */
 .profile-section {
     background: white;
-    border-radius: 10px;
-    padding: 20px;
-    margin-bottom: 20px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    border-radius: 20px;
+    padding: 32px;
+    margin-block-end: 24px;
+    max-inline-size: 880px;
+    margin-inline-start: auto;
+    margin-inline-end: auto;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    border: 1px solid #f0f0f0;
 }
 
 .profile-section h3 {
-    color: #006241;
-    margin: 0 0 15px 0;
-    font-size: 18px;
-    border-bottom: 2px solid #00754a;
-    padding-bottom: 10px;
+    color: #1a1a1a;
+    margin: 0 0 24px 0;
+    font-size: 20px;
+    font-weight: 600;
+    border-block-end: none;
+    padding-block-end: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .profile-info-card {
-    background: #f8f9fa;
-    border-radius: 8px;
-    padding: 15px;
+    background: transparent;
+    border-radius: 0;
+    padding: 0;
 }
 
 .profile-info-row {
     display: flex;
     justify-content: space-between;
-    padding: 12px 0;
-    border-bottom: 1px solid #e0e0e0;
+    align-items: center;
+    padding: 16px 0;
+    border-block-end: 1px solid #f0f0f0;
 }
 
 .profile-info-row:last-child {
-    border-bottom: none;
+    border-block-end: none;
 }
 
 .profile-label {
-    font-weight: 600;
-    color: #555;
-    min-width: 120px;
+    font-weight: 500;
+    color: #666;
+    font-size: 15px;
 }
 
 .profile-value {
-    color: #333;
-    text-align: right;
+    color: #1a1a1a;
+    text-align: end;
     flex: 1;
+    font-weight: 500;
+    font-size: 15px;
 }
 
 .transaction-list {
@@ -51,18 +81,58 @@
 }
 
 .transaction-item {
-    background: #f8f9fa;
-    border-radius: 8px;
-    padding: 15px;
-    border-left: 4px solid #00754a;
-    text-align: center;
-    color: #666;
-    font-style: italic;
+    background: #fafafa;
+    border-radius: 16px;
+    padding: 20px;
+    border-inline-start: 4px solid #1a1a1a;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .profile-section p {
-    color: #666;
+    color: #999;
     font-size: 14px;
-    margin: 10px 0 0 0;
+    margin: 20px 0 0 0;
     text-align: center;
 }
+
+/* Profile Edit Buttons */
+.profile-info-row button {
+    background: #1a1a1a;
+    color: white;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.profile-info-row button:hover {
+    background: #333;
+    transform: translateY(-1px);
+}
+
+/* Logout Button */
+#logoutBtn {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 16px;
+    border-radius: 16px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    inline-size: 100%;
+    transition: all 0.2s ease;
+    margin-block-start: 8px;
+}
+
+#logoutBtn:hover {
+    background: #c82333;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(220,53,69,0.3);
+}
+

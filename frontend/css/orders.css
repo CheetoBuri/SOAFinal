@@ -2,108 +2,128 @@
 .order-list {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 16px;
+    max-width: 880px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .order-card {
     background: white;
-    border-radius: 10px;
-    padding: 15px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    border: 1px solid #f0f0f0;
+    transition: all 0.2s ease;
+}
+
+.order-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 }
 
 .order-header {
     display: flex;
     justify-content: space-between;
     align-items: start;
-    margin-bottom: 10px;
-    border-bottom: 1px solid #e0e0e0;
-    padding-bottom: 10px;
+    margin-bottom: 16px;
+    border-bottom: 1px solid #f0f0f0;
+    padding-bottom: 16px;
 }
 
 .order-id {
-    font-weight: bold;
-    color: #006241;
-    font-size: 16px;
+    font-weight: 600;
+    color: #1a1a1a;
+    font-size: 17px;
 }
 
 .order-date {
     color: #999;
     font-size: 13px;
+    margin-top: 4px;
 }
 
 .order-status {
-    padding: 4px 12px;
+    padding: 6px 16px;
     border-radius: 20px;
     font-size: 12px;
-    font-weight: bold;
+    font-weight: 600;
 }
 
 .status-pending {
-    background: #fff3cd;
-    color: #856404;
+    background: #f5f5f5;
+    color: #666;
 }
 
 .status-preparing {
-    background: #cfe2ff;
-    color: #084298;
+    background: #f5f5f5;
+    color: #666;
 }
 
 .status-ready {
-    background: #d1e7dd;
-    color: #0f5132;
+    background: #1a1a1a;
+    color: white;
 }
 
 .status-completed {
-    background: #d1e7dd;
-    color: #0f5132;
+    background: #1a1a1a;
+    color: white;
 }
 
 /* ========== ORDER STATUS VIEW ========== */
 .status-filter-tabs {
     display: flex;
-    gap: 10px;
-    margin: 20px 0;
-    border-bottom: 2px solid #f0f0f0;
-    padding-bottom: 10px;
+    gap: 8px;
+    margin: 24px 0;
+    border-bottom: none;
+    padding-bottom: 0;
 }
 
 .status-tab {
-    padding: 10px 20px;
-    background: transparent;
+    padding: 12px 24px;
+    background: #f5f5f5;
     border: none;
-    border-bottom: 3px solid transparent;
+    border-radius: 12px;
     cursor: pointer;
     font-size: 14px;
-    font-weight: 600;
+    font-weight: 500;
     color: #666;
-    transition: all 0.3s;
+    transition: all 0.2s;
 }
 
 .status-tab:hover {
-    color: #006241;
+    background: #e8e8e8;
 }
 
 .status-tab.active {
-    color: #006241;
-    border-bottom-color: #006241;
+    background: #1a1a1a;
+    color: white;
 }
 
 .order-status-card {
     background: white;
-    border-radius: 12px;
-    padding: 20px;
-    margin-bottom: 15px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    border-left: 4px solid #ffa500;
+    border-radius: 20px;
+    padding: 28px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    border: 1px solid #f0f0f0;
+    margin-bottom: 20px;
+    max-width: 880px;
+    margin-left: auto;
+    margin-right: auto;
+    border-left: 4px solid #e0e0e0;
+    transition: all 0.2s ease;
+}
+
+.order-status-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    border-left-color: #1a1a1a;
 }
 
 .order-status-card.delivering {
-    border-left-color: #2196F3;
+    border-left-color: #999;
 }
 
 .order-status-card.completed {
-    border-left-color: #4CAF50;
+    border-left-color: #1a1a1a;
 }
 
 .order-status-badge {
@@ -116,51 +136,57 @@
 }
 
 .badge-preparing {
-    background: #fff3e0;
-    color: #f57c00;
+    background: #f5f5f5;
+    color: #666;
 }
 
 .badge-delivering {
-    background: #e3f2fd;
-    color: #1976d2;
+    background: #e8e8e8;
+    color: #333;
 }
 
 .order-actions {
     display: flex;
-    gap: 10px;
-    margin-top: 15px;
+    gap: 12px;
+    margin-top: 20px;
 }
 
 .btn-cancel {
     flex: 1;
-    padding: 10px;
-    background: #f44336;
-    color: white;
-    border: none;
-    border-radius: 6px;
+    padding: 14px;
+    background: transparent;
+    color: #666;
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
     cursor: pointer;
     font-weight: 600;
-    transition: all 0.3s;
+    transition: all 0.2s;
+    font-size: 14px;
 }
 
 .btn-cancel:hover {
-    background: #d32f2f;
+    background: #f5f5f5;
+    border-color: #ccc;
+    transform: translateY(-1px);
 }
 
 .btn-received {
     flex: 1;
-    padding: 10px;
-    background: #4CAF50;
+    padding: 14px;
+    background: #1a1a1a;
     color: white;
-    border: none;
-    border-radius: 6px;
+    border: 2px solid #1a1a1a;
+    border-radius: 12px;
     cursor: pointer;
     font-weight: 600;
-    transition: all 0.3s;
+    transition: all 0.2s;
+    font-size: 14px;
 }
 
 .btn-received:hover {
-    background: #388E3C;
+    background: #000;
+    border-color: #000;
+    transform: translateY(-1px);
 }
 
 .order-items {
@@ -181,7 +207,7 @@
 .order-total {
     font-size: 16px;
     font-weight: bold;
-    color: #006241;
+    color: #1a1a1a;
 }
 
 /* ========== LOADING SPINNER ========== */
