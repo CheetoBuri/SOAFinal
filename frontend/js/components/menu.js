@@ -86,6 +86,33 @@ export async function filterByCategory(category, event) {
         ui.setActive('.category-btn', event.target);
     }
     
+    // If in favorites view, filter favorites by category
+    if (state.currentView === 'favorites') {
+        if (!state.currentUser) return;
+        
+        const result = await api.getFavorites(state.currentUser.id);
+        
+        if (result.ok && result.data.length > 0) {
+            let favoriteProducts = state.menuItems.filter(item => 
+                result.data.some(f => f.product_id === item.id)
+            );
+            
+            // Filter by category if not "all"
+            if (category !== 'all') {
+                favoriteProducts = favoriteProducts.filter(item => item.category === category);
+            }
+            
+            displayProducts(favoriteProducts, 'favoritesGrid');
+        } else {
+            const grid = document.getElementById('favoritesGrid');
+            if (grid) {
+                grid.innerHTML = '<div style="text-align:center; padding:40px; color:#999;">No favorites in this category</div>';
+            }
+        }
+        return;
+    }
+    
+    // For shop view, proceed normally
     let result;
     if (category === 'all') {
         result = await api.getMenu();

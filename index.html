@@ -20,7 +20,7 @@
     <link rel="stylesheet" href="frontend/css/modal.css?v=20251205">
     <link rel="stylesheet" href="frontend/css/auth.css?v=20251205">
     <link rel="stylesheet" href="frontend/css/orders.css?v=20251205b">
-    <link rel="stylesheet" href="frontend/css/profile.css?v=20251205">
+    <link rel="stylesheet" href="frontend/css/profile.css?v=20251205d">
     <link rel="stylesheet" href="frontend/css/responsive.css?v=20251205">
 </head>
 <body>
@@ -246,10 +246,11 @@
                 </div>
 
                 <!-- PROFILE VIEW -->
-                <div id="profileView" class="view">
-                    <h2 style="color:#006241; margin-block-end:20px;">👤 My Profile</h2>
+                <!-- PROFILE MODAL -->
+                <div id="profileModal" class="modal">
+                    <div class="modal-content" style="max-inline-size: 560px;">
+                        <h2 class="modal-header">👤 My Profile</h2>
                     
-                    <div style="max-inline-size:800px; margin:0 auto;">
                         <!-- Personal Information Section -->
                         <div class="profile-section">
                             <h3>📋 Personal Information</h3>
@@ -280,7 +281,7 @@
                                 </div>
                                 <div class="profile-info-row">
                                     <span class="profile-label">Balance:</span>
-                                    <span class="profile-value" id="profileBalance" style="color:#c41e3a; font-weight:700;">₫0</span>
+                                    <span class="profile-value" id="profileBalance" style="color:#1a1a1a; font-weight:700;">₫0</span>
                                 </div>
                                 <div class="profile-info-row">
                                     <span class="profile-label">Member Since:</span>
@@ -297,12 +298,8 @@
                             </div>
                         </div>
 
-                        <!-- Logout Section -->
-                        <div class="profile-section">
-                            <h3>🚪 Account Actions</h3>
-                            <button class="btn-logout" onclick="logout()">🚪 Logout</button>
-                            <p>You will be logged out and redirected to the login page.</p>
-                        </div>
+                        <!-- Logout Button -->
+                        <button id="logoutBtn" onclick="logout()">🚪 Logout</button>
                     </div>
                 </div>
 
