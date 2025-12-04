@@ -89,6 +89,7 @@ class CheckoutRequest(BaseModel):
     delivery_street: Optional[str] = ""
     special_notes: Optional[str] = ""
     promo_code: Optional[str] = ""
+    reuse_address: Optional[bool] = False
     
     class Config:
         json_schema_extra = {
@@ -114,6 +115,8 @@ class CheckoutRequest(BaseModel):
                 "delivery_street": "123 Nguyễn Huệ",
                 "special_notes": "Less sugar",
                 "promo_code": "COFFEE20"
+                ,
+                "reuse_address": false
             }
         }
 

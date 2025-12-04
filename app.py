@@ -14,7 +14,16 @@ import os
 from database import init_db
 
 # Import all routers
-from routers import auth, menu, profile, orders, payment, favorites, cart, locations, transactions
+from routers import auth, menu, profile, orders, payment, favorites, cart
+# Optional routers: import if present
+try:
+    from routers import locations  # type: ignore
+except Exception:
+    locations = None
+try:
+    from routers import transactions  # type: ignore
+except Exception:
+    transactions = None
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -76,8 +85,10 @@ app.include_router(orders.router)
 app.include_router(payment.router)
 app.include_router(favorites.router)
 app.include_router(cart.router)
-app.include_router(locations.router)
-app.include_router(transactions.router)
+if locations is not None:
+    app.include_router(locations.router)
+if transactions is not None:
+    app.include_router(transactions.router)
 
 # Serve static files (CSS, JS)
 app.mount("/frontend", StaticFiles(directory="frontend"), name="frontend")

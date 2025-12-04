@@ -119,6 +119,17 @@ def checkout(request: CheckoutRequest):
         conn.close()
     
     final_total = total - discount
+
+    # Normalize delivery address
+    # If client does not explicitly request to reuse address, clear to NULL to avoid carry-over
+    if getattr(request, 'reuse_address', False):
+        delivery_district = (request.delivery_district or "").strip() or None
+        delivery_ward = (request.delivery_ward or "").strip() or None
+        delivery_street = (request.delivery_street or "").strip() or None
+    else:
+        delivery_district = None
+        delivery_ward = None
+        delivery_street = None
     
     # Create order
     order_id = str(uuid.uuid4())[:8].upper()
@@ -147,9 +158,9 @@ def checkout(request: CheckoutRequest):
         request.payment_method,
         request.customer_name,
         request.customer_phone,
-        request.delivery_district,
-        request.delivery_ward,
-        request.delivery_street,
+        delivery_district,
+        delivery_ward,
+        delivery_street,
         "pending_payment",
         created_at
     ))
