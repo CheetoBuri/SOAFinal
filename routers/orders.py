@@ -120,16 +120,28 @@ def checkout(request: CheckoutRequest):
     
     final_total = total - discount
 
-    # Normalize delivery address
-    # If client does not explicitly request to reuse address, clear to NULL to avoid carry-over
-    if getattr(request, 'reuse_address', False):
-        delivery_district = (request.delivery_district or "").strip() or None
-        delivery_ward = (request.delivery_ward or "").strip() or None
-        delivery_street = (request.delivery_street or "").strip() or None
-    else:
-        delivery_district = None
-        delivery_ward = None
-        delivery_street = None
+    # Check balance for balance payment BEFORE creating order
+    if request.payment_method == "balance":
+        conn = get_db()
+        c = conn.cursor()
+        c.execute("SELECT balance FROM users WHERE id = ?", (request.user_id,))
+        user = c.fetchone()
+        conn.close()
+        
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        user_balance = user[0]
+        if user_balance < final_total:
+            raise HTTPException(
+                status_code=400, 
+                detail=f"Insufficient balance. You need {final_total:,.0f}đ but only have {user_balance:,.0f}đ"
+            )
+
+    # Normalize delivery address - strip whitespace and convert empty strings to None
+    delivery_district = (request.delivery_district or "").strip() or None
+    delivery_ward = (request.delivery_ward or "").strip() or None
+    delivery_street = (request.delivery_street or "").strip() or None
     
     # Create order
     order_id = str(uuid.uuid4())[:8].upper()

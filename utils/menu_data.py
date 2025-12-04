@@ -5,16 +5,16 @@ Menu data and utilities - Complete Cafe Menu System
 MENU_PRODUCTS = {
     "coffee": [
         # Italian Coffee
-        {"id": "cf_1", "name": "Espresso", "category": "coffee", "price": 25000, "icon": "☕", "defaultSugar": "0", "type": "italian"},
-        {"id": "cf_2", "name": "Americano", "category": "coffee", "price": 30000, "icon": "☕", "defaultSugar": "0", "type": "italian"},
-        {"id": "cf_3", "name": "Cappuccino", "category": "coffee", "price": 40000, "icon": "☕", "defaultSugar": "0", "type": "italian"},
-        {"id": "cf_4", "name": "Latte", "category": "coffee", "price": 40000, "icon": "☕", "defaultSugar": "0", "type": "italian"},
-        {"id": "cf_5", "name": "Cold Brew", "category": "coffee", "price": 35000, "icon": "☕", "defaultSugar": "0", "type": "italian"},
-        {"id": "cf_10", "name": "Mocha", "category": "coffee", "price": 45000, "icon": "☕", "defaultSugar": "0", "type": "italian", "upsells": ["whipped_cream"]},
-        {"id": "cf_11", "name": "Caramel Macchiato", "category": "coffee", "price": 45000, "icon": "☕", "defaultSugar": "0", "type": "italian", "upsells": ["vanilla_syrup"]},
+        {"id": "cf_1", "name": "Espresso", "category": "coffee", "price": 25000, "icon": "☕", "defaultSugar": "0", "type": "italian", "noDefaultMilk": True},
+        {"id": "cf_2", "name": "Americano", "category": "coffee", "price": 30000, "icon": "☕", "defaultSugar": "0", "type": "italian", "noDefaultMilk": True},
+        {"id": "cf_3", "name": "Cappuccino", "category": "coffee", "price": 40000, "icon": "☕", "defaultSugar": "0", "type": "italian", "noDefaultMilk": True},
+        {"id": "cf_4", "name": "Latte", "category": "coffee", "price": 40000, "icon": "☕", "defaultSugar": "0", "type": "italian", "noDefaultMilk": True},
+        {"id": "cf_5", "name": "Cold Brew", "category": "coffee", "price": 35000, "icon": "☕", "defaultSugar": "0", "type": "italian", "noDefaultMilk": True},
+        {"id": "cf_10", "name": "Mocha", "category": "coffee", "price": 45000, "icon": "☕", "defaultSugar": "0", "type": "italian", "upsells": ["whipped_cream"], "noDefaultMilk": True},
+        {"id": "cf_11", "name": "Caramel Macchiato", "category": "coffee", "price": 45000, "icon": "☕", "defaultSugar": "0", "type": "italian", "upsells": ["vanilla_syrup"], "noDefaultMilk": True},
         # Vietnamese Coffee
-        {"id": "cf_6", "name": "Cà phê sữa đá", "category": "coffee", "price": 25000, "icon": "☕", "defaultSugar": "none", "type": "vietnamese"},
-        {"id": "cf_7", "name": "Cà phê đen đá", "category": "coffee", "price": 20000, "icon": "☕", "defaultSugar": "0", "type": "vietnamese"},
+        {"id": "cf_6", "name": "Cà phê sữa đá", "category": "coffee", "price": 25000, "icon": "☕", "defaultSugar": "none", "type": "vietnamese", "noDefaultMilk": True},
+        {"id": "cf_7", "name": "Cà phê đen đá", "category": "coffee", "price": 20000, "icon": "☕", "defaultSugar": "0", "type": "vietnamese", "noDefaultMilk": True},
         {"id": "cf_8", "name": "Bạc xỉu", "category": "coffee", "price": 28000, "icon": "☕", "defaultSugar": "none", "type": "vietnamese", "onlyMilkOption": True},
     ],
     "tea": [
@@ -35,25 +35,25 @@ MENU_PRODUCTS = {
     ],
     "food": [
         # Savory
-        {"id": "f_1", "name": "Croissant", "category": "food", "price": 35000, "icon": "🥐", "type": "savory", 
+        {"id": "f_1", "name": "Croissant", "category": "food", "price": 35000, "icon": "🥐", "type": "savory", "defaultSugar": "none",
          "toppings": ["jam", "salted_butter", "almond_slices", "cream_cheese"]},
-        {"id": "f_2", "name": "Sandwich (Cheese & Ham)", "category": "food", "price": 45000, "icon": "🥪", "type": "savory",
+        {"id": "f_2", "name": "Sandwich (Cheese & Ham)", "category": "food", "price": 45000, "icon": "🥪", "type": "savory", "defaultSugar": "none",
          "toppings": ["extra_egg", "extra_cheese", "bacon"]},
-        {"id": "f_7", "name": "Banana Bread", "category": "food", "price": 30000, "icon": "🍌", "type": "savory",
+        {"id": "f_7", "name": "Banana Bread", "category": "food", "price": 30000, "icon": "🍌", "type": "savory", "defaultSugar": "none",
          "toppings": ["cream_cheese"]},
         # Sweet
-        {"id": "f_3", "name": "Brownie", "category": "food", "price": 35000, "icon": "🍫", "type": "sweet",
+        {"id": "f_3", "name": "Brownie", "category": "food", "price": 35000, "icon": "🍫", "type": "sweet", "defaultSugar": "none",
          "toppings": ["chocolate_drizzle", "whipped_cream"]},
-        {"id": "f_4", "name": "Cookies (2 pcs)", "category": "food", "price": 20000, "icon": "🍪", "type": "sweet",
+        {"id": "f_4", "name": "Cookies (2 pcs)", "category": "food", "price": 20000, "icon": "🍪", "type": "sweet", "defaultSugar": "none",
          "variants": ["chocolate_chip", "butter"], "toppings": ["extra_cookie"]},
-        {"id": "f_5", "name": "Muffin", "category": "food", "price": 30000, "icon": "🧁", "type": "sweet",
+        {"id": "f_5", "name": "Muffin", "category": "food", "price": 30000, "icon": "🧁", "type": "sweet", "defaultSugar": "none",
          "variants": ["chocolate", "blueberry"]},
         # Cakes
-        {"id": "f_8", "name": "Tiramisu", "category": "food", "price": 45000, "icon": "🍰", "type": "cake",
+        {"id": "f_8", "name": "Tiramisu", "category": "food", "price": 45000, "icon": "🍰", "type": "cake", "defaultSugar": "none",
          "toppings": ["cocoa_powder", "chocolate_sauce"]},
-        {"id": "f_9", "name": "Red Velvet", "category": "food", "price": 45000, "icon": "🍰", "type": "cake",
+        {"id": "f_9", "name": "Red Velvet", "category": "food", "price": 45000, "icon": "🍰", "type": "cake", "defaultSugar": "none",
          "toppings": ["extra_cream_cheese"]},
-        {"id": "f_10", "name": "Mousse Chanh Dây", "category": "food", "price": 40000, "icon": "🍰", "type": "cake",
+        {"id": "f_10", "name": "Passion Fruit Mousse", "category": "food", "price": 40000, "icon": "🍰", "type": "cake", "defaultSugar": "none",
          "toppings": ["passionfruit_topping"]},
     ]
 }
@@ -73,39 +73,58 @@ COFFEE_UPSELLS = {
 
 # Tea Upsells
 TEA_UPSELLS = {
-    "pearls": {"name": "Trân châu", "price": 10000},
-    "peach_chunks": {"name": "Topping đào miếng", "price": 10000},
-    "honey": {"name": "Mật ong", "price": 5000},
+    "pearls": {"name": "Pearls (Boba)", "price": 10000},
+    "peach_chunks": {"name": "Peach Chunks", "price": 10000},
+    "honey": {"name": "Honey", "price": 5000},
 }
 
 # Food Toppings
 FOOD_TOPPINGS = {
     # Savory toppings
-    "jam": {"name": "Mứt dâu/cam", "price": 5000},
-    "salted_butter": {"name": "Bơ mặn", "price": 5000},
-    "cream_cheese": {"name": "Kem phô mai", "price": 10000},
-    "almond_slices": {"name": "Hạnh nhân lát", "price": 5000},
-    "extra_egg": {"name": "Thêm trứng", "price": 10000},
-    "extra_cheese": {"name": "Thêm phô mai", "price": 10000},
-    "bacon": {"name": "Thêm bacon", "price": 15000},
+    "jam": {"name": "Strawberry/Orange Jam", "price": 5000},
+    "salted_butter": {"name": "Salted Butter", "price": 5000},
+    "cream_cheese": {"name": "Cream Cheese", "price": 10000},
+    "almond_slices": {"name": "Almond Slices", "price": 5000},
+    "extra_egg": {"name": "Extra Egg", "price": 10000},
+    "extra_cheese": {"name": "Extra Cheese", "price": 10000},
+    "bacon": {"name": "Extra Bacon", "price": 15000},
     # Sweet toppings
     "whipped_cream": {"name": "Whipped Cream", "price": 5000},
-    "chocolate_sauce": {"name": "Sốt Chocolate", "price": 5000},
-    "caramel_sauce": {"name": "Sốt Caramel", "price": 5000},
-    "cocoa_powder": {"name": "Bột Cocoa", "price": 5000},
-    "extra_cream_cheese": {"name": "Kem phô mai thêm", "price": 10000},
-    "passionfruit_topping": {"name": "Topping chanh dây", "price": 7000},
-    "extra_cookie": {"name": "Thêm 1 cái cookie", "price": 10000},
+    "chocolate_sauce": {"name": "Chocolate Sauce", "price": 5000},
+    "caramel_sauce": {"name": "Caramel Sauce", "price": 5000},
+    "cocoa_powder": {"name": "Cocoa Powder", "price": 5000},
+    "extra_cream_cheese": {"name": "Extra Cream Cheese", "price": 10000},
+    "passionfruit_topping": {"name": "Passionfruit Topping", "price": 7000},
+    "extra_cookie": {"name": "Extra Cookie", "price": 10000},
 }
 
 # Milk Options
 MILK_OPTIONS = {
-    "fresh_milk": {"name": "Sữa tươi không đường", "price": 0, "default": True},
-    "low_fat_milk": {"name": "Sữa tươi ít béo", "price": 0},
-    "oat_milk": {"name": "Sữa Oat", "price": 10000},
-    "almond_milk": {"name": "Sữa Almond", "price": 10000},
-    "lactose_free": {"name": "Sữa Lactose-free", "price": 10000},
-    "condensed_milk": {"name": "Sữa đặc", "price": 0, "vn_only": True},  # Only for Vietnamese coffee
+    "fresh_milk": {"name": "Fresh Milk (No Sugar)", "price": 0},
+    "low_fat_milk": {"name": "Low Fat Milk", "price": 0},
+    "oat_milk": {"name": "Oat Milk", "price": 10000},
+    "almond_milk": {"name": "Almond Milk", "price": 10000},
+    "lactose_free": {"name": "Lactose-free Milk", "price": 10000},
+    "condensed_milk": {"name": "Add Condensed Milk", "price": 5000},
+}
+
+# Milk Options for Italian Coffee (with default Fresh Milk)
+MILK_OPTIONS_ITALIAN = {
+    "fresh_milk": {"name": "Fresh Milk (No Sugar)", "price": 0, "default": True},
+    "low_fat_milk": {"name": "Low Fat Milk", "price": 0},
+    "oat_milk": {"name": "Oat Milk", "price": 10000},
+    "almond_milk": {"name": "Almond Milk", "price": 10000},
+    "lactose_free": {"name": "Lactose-free Milk", "price": 10000},
+    "condensed_milk": {"name": "Add Condensed Milk", "price": 5000},
+}
+
+# Milk Options for Bac Xiu (already has fresh milk, can change or add condensed milk)
+MILK_OPTIONS_BAC_XIU = {
+    "low_fat_milk": {"name": "Low Fat Milk", "price": 0},
+    "oat_milk": {"name": "Oat Milk", "price": 10000},
+    "almond_milk": {"name": "Almond Milk", "price": 10000},
+    "lactose_free": {"name": "Lactose-free Milk", "price": 10000},
+    "condensed_milk": {"name": "Add Condensed Milk", "price": 5000},
 }
 
 # Size options (for beverages)
@@ -176,14 +195,16 @@ def get_milk_options(product_id: str):
     if not product or product.get("category") != "coffee":
         return {}
     
-    # Vietnamese coffee only gets condensed milk option
-    if product.get("type") == "vietnamese":
-        return {
-            "condensed_milk": MILK_OPTIONS["condensed_milk"]
-        }
+    # Bac Xiu (cf_8) - already has fresh milk, exclude it from options
+    if product_id == "cf_8":
+        return MILK_OPTIONS_BAC_XIU
     
-    # Italian coffee gets all milk options except condensed
-    return {k: v for k, v in MILK_OPTIONS.items() if not v.get("vn_only", False)}
+    # Vietnamese coffee with no default milk (cf_6, cf_7)
+    if product.get("noDefaultMilk"):
+        return MILK_OPTIONS
+    
+    # Italian coffee - Fresh Milk is default
+    return MILK_OPTIONS_ITALIAN
 
 
 def has_sugar_option(product_id: str):

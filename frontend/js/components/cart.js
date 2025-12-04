@@ -72,15 +72,14 @@ function showCustomizationModal(product, customization) {
     
     // Milk options (for coffee)
     if (isCoffee && Object.keys(customization.milkOptions).length > 0) {
-        const milkTitle = isVNCoffee ? '🥛 Sữa đặc' : '🥛 Loại Sữa';
         modalContent += `
             <div class="form-group">
-                <label><strong>${milkTitle}:</strong></label>
+                <label><strong>🥛 Milk Options (Optional - Max 2):</strong></label>
                 <div class="milk-options" style="display: flex; flex-direction: column; gap: 8px; margin-top: 8px;">
                     ${Object.entries(customization.milkOptions).map(([key, data]) => `
-                        <label class="checkbox-option ${data.default ? 'selected' : ''}" style="cursor: pointer; display: flex; align-items: center; gap: 10px; padding: 10px; border: 2px solid #ddd; border-radius: 8px; transition: all 0.3s;">
-                            <input type="radio" name="milk" value="${key}" ${data.default ? 'checked' : ''}
-                                   data-price="${data.price}" onchange="window.updateModalPrice()">
+                        <label class="checkbox-option ${data.default ? 'selected' : ''}" style="cursor: pointer; display: flex; align-items: center; gap: 10px; padding: 10px; border: 2px solid #ddd; border-radius: 8px; transition: all 0.3s;" data-milk-key="${key}">
+                            <input type="checkbox" class="milk-checkbox" value="${key}" ${data.default ? 'checked' : ''}
+                                   data-price="${data.price}">
                             <span style="flex: 1;">${data.name}</span>
                             ${data.price > 0 ? `<span style="color: #c41e3a; font-weight: 600;">+${ui.formatCurrency(data.price)}</span>` : ''}
                         </label>
@@ -95,15 +94,15 @@ function showCustomizationModal(product, customization) {
         const defaultSugar = product.defaultSugar || '0';
         modalContent += `
             <div class="form-group">
-                <label><strong>🍬 Đường:</strong></label>
+                <label><strong>🍬 Sugar Level:</strong></label>
                 <select id="sugarSelect" class="form-select" style="width:100%; padding:12px; border:2px solid #ddd; border-radius:8px; margin-top:8px; font-size: 14px;">
-                    <option value="0" ${defaultSugar === '0' ? 'selected' : ''}>0% (Không đường)</option>
+                    <option value="0" ${defaultSugar === '0' ? 'selected' : ''}>0% (No Sugar)</option>
                     <option value="25" ${defaultSugar === '25' ? 'selected' : ''}>25%</option>
                     <option value="50" ${defaultSugar === '50' ? 'selected' : ''}>50%</option>
                     <option value="75" ${defaultSugar === '75' ? 'selected' : ''}>75%</option>
                     <option value="100" ${defaultSugar === '100' ? 'selected' : ''}>100%</option>
-                    <option value="125" ${defaultSugar === '125' ? 'selected' : ''}>125% (Thêm ngọt)</option>
-                    <option value="150" ${defaultSugar === '150' ? 'selected' : ''}>150% (Rất ngọt)</option>
+                    <option value="125" ${defaultSugar === '125' ? 'selected' : ''}>125% (Extra Sweet)</option>
+                    <option value="150" ${defaultSugar === '150' ? 'selected' : ''}>150% (Very Sweet)</option>
                 </select>
             </div>
         `;
@@ -111,7 +110,7 @@ function showCustomizationModal(product, customization) {
     
     // Upsells (for coffee/tea)
     if (Object.keys(customization.upsells).length > 0) {
-        const upsellTitle = isCoffee ? '✨ Thêm Topping Cafe' : '✨ Thêm Topping Trà';
+        const upsellTitle = isCoffee ? '✨ Add Coffee Toppings' : '✨ Add Tea Toppings';
         modalContent += `
             <div class="form-group">
                 <label><strong>${upsellTitle}:</strong></label>
@@ -150,17 +149,17 @@ function showCustomizationModal(product, customization) {
     modalContent += `
             <div class="form-group" style="margin-top: 20px; padding: 15px; background: linear-gradient(135deg, #f8f8f8 0%, #e8e8e8 100%); border-radius: 12px; border: 2px solid #c41e3a;">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <label style="font-weight: bold; font-size: 18px; margin: 0; color: #333;">Tổng tiền:</label>
+                    <label style="font-weight: bold; font-size: 18px; margin: 0; color: #333;">Total:</label>
                     <span id="modalFinalPrice" style="font-size: 24px; font-weight: bold; color: #c41e3a;">${ui.formatCurrency(product.price)}</span>
                 </div>
             </div>
             
             <div class="modal-buttons" style="margin-top: 20px; display: flex; gap: 10px;">
                 <button class="btn-submit" onclick="window.addToCartFromModal()" style="flex: 2; padding: 14px; font-size: 16px;">
-                    🛒 Thêm vào giỏ
+                    🛒 Add to Cart
                 </button>
                 <button class="btn-cancel" onclick="window.closeSizeModal()" style="flex: 1; padding: 14px; font-size: 16px;">
-                    Hủy
+                    Cancel
                 </button>
             </div>
         </div>
@@ -183,16 +182,28 @@ function addOptionCardListeners() {
         });
     });
     
-    // Milk option cards
-    document.querySelectorAll('.milk-options input[type="radio"]').forEach(radio => {
-        radio.addEventListener('change', function() {
-            document.querySelectorAll('.milk-options .checkbox-option').forEach(opt => opt.classList.remove('selected'));
-            this.closest('.checkbox-option').classList.add('selected');
+    // Milk option cards - Allow selecting up to 2 milk options
+    document.querySelectorAll('.milk-options .milk-checkbox').forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            const checkedMilks = document.querySelectorAll('.milk-options .milk-checkbox:checked');
+            
+            if (this.checked) {
+                // If trying to select more than 2, uncheck this one and show warning
+                if (checkedMilks.length > 2) {
+                    this.checked = false;
+                    alert('You can select up to 2 milk options only.');
+                    return;
+                }
+                this.closest('.checkbox-option').classList.add('selected');
+            } else {
+                this.closest('.checkbox-option').classList.remove('selected');
+            }
+            updateModalPrice();
         });
     });
     
     // Checkbox options (upsells/toppings)
-    document.querySelectorAll('.checkbox-option input[type="checkbox"]').forEach(checkbox => {
+    document.querySelectorAll('.checkbox-option input[type="checkbox"]:not(.milk-checkbox)').forEach(checkbox => {
         checkbox.addEventListener('change', function() {
             if (this.checked) {
                 this.closest('.checkbox-option').classList.add('selected');
@@ -214,11 +225,10 @@ export function updateModalPrice() {
         finalPrice += parseFloat(sizeRadio.dataset.price || 0);
     }
     
-    // Milk option
-    const milkRadio = document.querySelector('input[name="milk"]:checked');
-    if (milkRadio) {
-        finalPrice += parseFloat(milkRadio.dataset.price || 0);
-    }
+    // Milk options - can have multiple selected (up to 2)
+    document.querySelectorAll('.milk-checkbox:checked').forEach(milkCheckbox => {
+        finalPrice += parseFloat(milkCheckbox.dataset.price || 0);
+    });
     
     // Upsells
     document.querySelectorAll('.upsell-checkbox:checked').forEach(checkbox => {
@@ -248,7 +258,7 @@ export function addToCartFromModal() {
     
     // Collect selections
     const size = document.querySelector('input[name="size"]:checked')?.value || 'M';
-    const milk = document.querySelector('input[name="milk"]:checked')?.value;
+    const milks = Array.from(document.querySelectorAll('.milk-checkbox:checked')).map(cb => cb.value);
     const sugar = document.getElementById('sugarSelect')?.value || '0';
     
     const upsells = Array.from(document.querySelectorAll('.upsell-checkbox:checked')).map(cb => cb.value);
@@ -259,8 +269,9 @@ export function addToCartFromModal() {
     const sizeRadio = document.querySelector('input[name="size"]:checked');
     if (sizeRadio) finalPrice += parseFloat(sizeRadio.dataset.price || 0);
     
-    const milkRadio = document.querySelector('input[name="milk"]:checked');
-    if (milkRadio) finalPrice += parseFloat(milkRadio.dataset.price || 0);
+    document.querySelectorAll('.milk-checkbox:checked').forEach(milkCheckbox => {
+        finalPrice += parseFloat(milkCheckbox.dataset.price || 0);
+    });
     
     document.querySelectorAll('.upsell-checkbox:checked').forEach(cb => {
         finalPrice += parseFloat(cb.dataset.price || 0);
@@ -279,7 +290,7 @@ export function addToCartFromModal() {
         category: category,
         size: size,
         sugar: sugar,
-        milk: milk,
+        milks: milks,
         upsells: upsells,
         toppings: toppings
     };
@@ -315,7 +326,7 @@ export function updateCartUI() {
     if (!cartItemsDiv) return;
     
     if (cartItems.length === 0) {
-        cartItemsDiv.innerHTML = '<div class="cart-empty">Giỏ hàng trống</div>';
+        cartItemsDiv.innerHTML = '<div class="cart-empty">Cart is empty</div>';
         if (cartSummary) cartSummary.style.display = 'none';
         return;
     }
@@ -327,8 +338,8 @@ export function updateCartUI() {
         // Build customization summary
         let customizations = [];
         if (item.size && item.size !== 'M') customizations.push(`Size: ${item.size}`);
-        if (item.sugar) customizations.push(`Đường: ${item.sugar}%`);
-        if (item.milk) customizations.push(`Sữa: ${item.milk}`);
+        if (item.sugar) customizations.push(`Sugar: ${item.sugar}%`);
+        if (item.milk) customizations.push(`Milk: ${item.milk}`);
         if (item.upsells && item.upsells.length > 0) customizations.push(`+${item.upsells.length} topping`);
         if (item.toppings && item.toppings.length > 0) customizations.push(`+${item.toppings.length} topping`);
         
@@ -421,7 +432,7 @@ export function removeFromCart(index) {
 // ========== CHECKOUT MODAL ==========
 export function openCheckoutModal() {
     if (state.cart.length === 0) {
-        alert('Giỏ hàng trống!');
+        alert('Cart is empty!');
         return;
     }
 
@@ -436,6 +447,20 @@ export function openCheckoutModal() {
         if (emailField) emailField.value = user.email || '';
         if (phoneField && user.phone) phoneField.value = user.phone;
     }
+    
+    // Reset address fields before loading districts
+    const districtSelect = document.getElementById('deliveryDistrict');
+    const wardSelect = document.getElementById('deliveryWard');
+    const streetInput = document.getElementById('deliveryStreet');
+    const notesInput = document.getElementById('specialNotes');
+    
+    if (districtSelect) districtSelect.selectedIndex = 0;
+    if (wardSelect) {
+        wardSelect.innerHTML = '<option value="">Choose ward...</option>';
+        wardSelect.disabled = true;
+    }
+    if (streetInput) streetInput.value = '';
+    if (notesInput) notesInput.value = '';
 
     // Load districts
     loadDistricts();
@@ -464,8 +489,8 @@ function displayCheckoutItems() {
     itemsList.innerHTML = state.cart.map(item => {
         const details = [];
         if (item.size) details.push(`Size: ${item.size}`);
-        if (item.sugar) details.push(`Đường: ${item.sugar}%`);
-        if (item.milk) details.push(`Sữa: ${item.milk}`);
+        if (item.sugar) details.push(`Sugar: ${item.sugar}%`);
+        if (item.milk) details.push(`Milk: ${item.milk}`);
         if (item.upsells && item.upsells.length > 0) details.push(`+${item.upsells.length} topping`);
         if (item.toppings && item.toppings.length > 0) details.push(`+${item.toppings.length} topping`);
         
@@ -490,6 +515,21 @@ function displayCheckoutItems() {
 export function closeCheckoutModal() {
     const modal = document.getElementById('checkoutModal');
     if (modal) modal.classList.remove('active');
+    
+    // Reset address and notes fields
+    const districtSelect = document.getElementById('deliveryDistrict');
+    const wardSelect = document.getElementById('deliveryWard');
+    const streetInput = document.getElementById('deliveryStreet');
+    const notesInput = document.getElementById('specialNotes');
+    
+    if (districtSelect) districtSelect.selectedIndex = 0;
+    if (wardSelect) {
+        wardSelect.innerHTML = '<option value="">Choose ward...</option>';
+        wardSelect.selectedIndex = 0;
+        wardSelect.disabled = true;
+    }
+    if (streetInput) streetInput.value = '';
+    if (notesInput) notesInput.value = '';
 }
 
 export async function processCheckout(event) {
@@ -510,7 +550,7 @@ export async function processCheckout(event) {
     }
 
     if (state.cart.length === 0) {
-        alert('Giỏ hàng trống!');
+        alert('Cart is empty!');
         return;
     }
 
@@ -537,6 +577,10 @@ export async function processCheckout(event) {
         special_notes: notes
     };
 
+    console.log('=== ORDER DATA DEBUG ===');
+    console.log('District:', deliveryDistrict, 'Ward:', deliveryWard, 'Street:', deliveryStreet);
+    console.log('Full orderData:', JSON.stringify(orderData, null, 2));
+
     const result = await api.placeOrder(orderData);
 
     if (result.ok) {
@@ -546,17 +590,17 @@ export async function processCheckout(event) {
         closeCheckoutModal();
         
         if (paymentMethod === 'balance') {
-            alert('Đơn hàng đã tạo! Đang gửi OTP thanh toán...');
+            alert('Order created! Sending payment OTP...');
             
             const otpResult = await api.sendPaymentOTP(state.currentUser.id, orderId, total);
             
             if (otpResult.ok) {
                 showPaymentOTPModal(orderId, total);
             } else {
-                alert(otpResult.data.detail || 'Không thể gửi OTP');
+                alert(otpResult.data.detail || 'Failed to send OTP');
             }
         } else {
-            alert(`Đặt hàng thành công! Mã đơn: ${orderId}`);
+            alert(`Order placed successfully! Order ID: ${orderId}`);
             state.cart = [];
             state.promoApplied = null;
             state.discountPercent = 0;
@@ -576,7 +620,7 @@ async function loadDistricts() {
         
         if (result.ok && result.data.districts) {
             const select = document.getElementById('deliveryDistrict');
-            select.innerHTML = '<option value="">Chọn quận...</option>';
+            select.innerHTML = '<option value="">Choose district...</option>';
             
             result.data.districts.forEach(district => {
                 const option = document.createElement('option');
@@ -595,9 +639,13 @@ window.loadWards = async function() {
     const wardSelect = document.getElementById('deliveryWard');
     const district = districtSelect.value;
     
-    wardSelect.innerHTML = '<option value="">Chọn phường...</option>';
+    wardSelect.innerHTML = '<option value="">Choose ward...</option>';
+    wardSelect.disabled = false;
     
-    if (!district) return;
+    if (!district) {
+        wardSelect.disabled = true;
+        return;
+    }
     
     try {
         const result = await api.getWards(district);
@@ -622,26 +670,26 @@ function showPaymentOTPModal(orderId, amount) {
     modal.id = 'paymentOTPModal';
     modal.innerHTML = `
         <div class="modal-content" style="max-width: 450px;">
-            <div class="modal-header">🔐 Xác nhận thanh toán</div>
+            <div class="modal-header">🔐 Payment Confirmation</div>
             <div style="padding: 20px;">
                 <p style="color: #666; margin-bottom: 15px;">
-                    Nhập mã OTP 6 số đã gửi đến email để xác nhận thanh toán <strong style="color: #c41e3a;">${ui.formatCurrency(amount)}</strong>
+                    Enter the 6-digit OTP sent to your email to confirm payment of <strong style="color: #c41e3a;">${ui.formatCurrency(amount)}</strong>
                 </p>
                 <div class="form-group">
-                    <label>Mã OTP *</label>
-                    <input type="text" id="paymentOTPInput" maxlength="6" placeholder="Nhập 6 số" 
+                    <label>OTP Code *</label>
+                    <input type="text" id="paymentOTPInput" maxlength="6" placeholder="Enter 6 digits" 
                         style="width:100%; padding:12px; font-size:24px; text-align:center; letter-spacing:5px; border:2px solid #ddd; border-radius:8px;">
                 </div>
                 <p style="color: #999; font-size: 12px; margin-top: 10px;">
-                    OTP hết hạn sau 10 phút. Kiểm tra spam nếu không thấy email.
+                    OTP expires in 10 minutes. Check spam folder if you don't see the email.
                 </p>
             </div>
             <div class="modal-buttons">
                 <button type="button" class="btn-submit" onclick="window.verifyPaymentOTP('${orderId}', ${amount})">
-                    Xác nhận & Thanh toán
+                    Confirm & Pay
                 </button>
                 <button type="button" class="btn-cancel" onclick="window.closePaymentOTPModal()">
-                    Hủy
+                    Cancel
                 </button>
             </div>
         </div>
@@ -665,7 +713,7 @@ window.verifyPaymentOTP = async function(orderId, amount) {
     const result = await api.verifyPaymentOTP(state.currentUser.id, orderId, otpCode);
     
     if (result.ok) {
-        alert(`Thanh toán thành công! Mã đơn: ${orderId}`);
+        alert(`Payment successful! Order ID: ${orderId}`);
         
         if (result.data.new_balance !== undefined) {
             state.currentUser.balance = result.data.new_balance;

@@ -217,21 +217,21 @@ function formatOrderItems(items) {
         if (item.size) details += ` (${item.size})`;
         
         if (item.milks && Array.isArray(item.milks) && item.milks.length > 0) {
-            const milkNames = { 'nut': 'Sữa hạt', 'condensed': 'Sữa đặc' };
+            const milkNames = { 'nut': 'Nut Milk', 'condensed': 'Condensed Milk' };
             const milkLabels = item.milks.map(m => milkNames[m] || m).join(', ');
             details += `, ${milkLabels}`;
         }
         
         if (item.toppings && Array.isArray(item.toppings) && item.toppings.length > 0) {
             const toppingNames = { 
-                'butter': 'Bơ', 
-                'jam': 'Mứt', 
+                'butter': 'Butter', 
+                'jam': 'Jam', 
                 'cream': 'Cream cheese', 
                 'nutella': 'Nutella',
-                'sauce': 'Sốt', 
-                'almond': 'Hạnh nhân', 
-                'whipped': 'Kem tươi', 
-                'fruit': 'Trái cây tươi'
+                'sauce': 'Sauce', 
+                'almond': 'Almond', 
+                'whipped': 'Whipped Cream', 
+                'fruit': 'Fresh Fruit'
             };
             const toppingLabels = item.toppings.map(t => toppingNames[t] || t).join(', ');
             details += `, ${toppingLabels}`;
