@@ -15,11 +15,11 @@ body {
 /* ========== CONTAINER ========== */
 .container {
     display: flex;
-    max-width: 1200px;
+    max-inline-size: 1200px;
     margin: 0 auto;
     gap: 20px;
     padding: 20px;
-    min-height: calc(100vh - 60px);
+    min-block-size: calc(100vh - 60px);
 }
 
 /* ========== VIEW MANAGEMENT ========== */
@@ -39,6 +39,9 @@ body {
 /* ========== MAIN CONTENT ========== */
 .main-content {
     flex: 1;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
 }
 
 /* ========== COMMON BUTTONS ========== */
@@ -69,7 +72,7 @@ body {
 }
 
 .btn-logout {
-    width: 100%;
+    inline-size: 100%;
     padding: 15px;
     background: #d32f2f;
     color: white;
@@ -95,7 +98,7 @@ body {
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s;
-    margin-left: 10px;
+    margin-inline-start: 10px;
 }
 
 .btn-edit:hover {
@@ -107,13 +110,13 @@ body {
 /* ========== SPINNER ========== */
 .spinner {
     border: 3px solid #f3f3f3;
-    border-top: 3px solid #006241;
+    border-block-start: 3px solid #006241;
     border-radius: 50%;
-    width: 20px;
-    height: 20px;
+    inline-size: 20px;
+    block-size: 20px;
     animation: spin 1s linear infinite;
     display: inline-block;
-    margin-left: 8px;
+    margin-inline-start: 8px;
 }
 
 @keyframes spin {

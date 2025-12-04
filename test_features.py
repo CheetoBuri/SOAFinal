@@ -265,7 +265,7 @@ Database:
         
     except requests.exceptions.ConnectionError:
         print("❌ Error: Could not connect to server on http://localhost:3000")
-        print("   Make sure the server is running: python3 app_v2.py")
+        print("   Make sure the server is running: uvicorn app:app --host 0.0.0.0 --port 3000 --reload (hoặc docker-compose up)")
     except Exception as e:
         print(f"❌ Unexpected error: {e}")
 

@@ -1,3 +1,5 @@
+NOTE (Dec 2025): References to the monolithic legacy are historical. Current runtime uses `app.py` + `index.html`, served at `/` with health at `/health`.
+
 ╔════════════════════════════════════════════════════════════════════════════╗
 ║                 ☕ CAFE ORDERING SYSTEM v2 - IMPLEMENTATION SUMMARY        ║
 ║                          All Features Complete ✅                           ║
@@ -111,7 +113,7 @@ DATABASE:
    ✅ Session persistence in localStorage
    ✅ Logout functionality
    
-   Files: app_v2.py (lines 230-320)
+   Files: legacy monolithic backend (lines 230-320)
 
 2. ORDER MANAGEMENT
    ─────────────────────────────────
@@ -124,7 +126,7 @@ DATABASE:
    ✅ Store in SQLite database
    ✅ Email confirmation on order
    
-   Files: app_v2.py (lines 520-630), order_frontend.html (cart section)
+   Files: legacy monolithic backend (lines 520-630), legacy frontend (cart section)
 
 3. ORDER HISTORY
    ─────────────────────────────────
@@ -137,7 +139,7 @@ DATABASE:
    ✅ Display payment method used
    ✅ Color-coded status badges
    
-   Files: app_v2.py (lines 633-680), order_frontend.html (history view)
+   Files: legacy monolithic backend (lines 633-680), legacy frontend (history view)
 
 4. FAVORITES SYSTEM
    ─────────────────────────────────
@@ -149,7 +151,7 @@ DATABASE:
    ✅ Add from favorites to cart
    ✅ One-click toggle
    
-   Files: app_v2.py (lines 425-485), order_frontend.html (favorites)
+   Files: legacy monolithic backend (lines 425-485), legacy frontend (favorites)
 
 5. SEARCH FUNCTIONALITY
    ─────────────────────────────────
@@ -161,7 +163,7 @@ DATABASE:
    ✅ Quick click to select
    ✅ Search box in sidebar
    
-   Files: app_v2.py (lines 377-393), order_frontend.html (search)
+   Files: legacy monolithic backend (lines 377-393), legacy frontend (search)
 
 6. PROMO CODE SYSTEM
    ─────────────────────────────────
@@ -173,7 +175,7 @@ DATABASE:
    ✅ Display discount breakdown
    ✅ Error handling for invalid codes
    
-   Files: app_v2.py (lines 395-422), order_frontend.html (checkout)
+   Files: legacy monolithic backend (lines 395-422), legacy frontend (checkout)
 
 7. EMAIL NOTIFICATIONS
    ─────────────────────────────────
@@ -185,17 +187,17 @@ DATABASE:
    ✅ Configuration via .env file
    ✅ Error handling & logging
    
-   Files: app_v2.py (lines 177-206), .env.example
+   Files: legacy monolithic backend (lines 177-206), .env.example
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 📁 COMPLETE FILE LIST
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 CORE APPLICATION:
-├── app_v2.py (22 KB)
+├── [legacy monolithic backend]
 │   └── Main FastAPI backend with all business logic
 │
-├── order_frontend_v2.html (55 KB)
+├── [legacy monolithic frontend]
 │   └── Complete frontend UI with login, shopping, history
 │
 └── cafe_orders.db (52 KB)
@@ -250,7 +252,7 @@ LEGACY/BACKUP:
 STEP 1: START SERVER
 $ cd /Users/hnt_4/GitCloneDestination/SOAFinal
 $ source .venv/bin/activate
-$ python3 app_v2.py
+Run server with `uvicorn app:app --host 0.0.0.0 --port 3000 --reload`
 
 Output:
   INFO:     Started server process [79519]
@@ -375,7 +377,7 @@ COLORS & BRANDING:
   • Adjust color scheme in README_V2_COMPLETE.md
 
 MENU ITEMS:
-  • Edit MENU_PRODUCTS dict in app_v2.py
+   • Edit MENU_PRODUCTS in utils/menu_data.py
   • Add/remove categories
   • Adjust prices
   • Change icons
@@ -455,7 +457,7 @@ Three levels of documentation provided:
    → Troubleshooting
 
 3. CODE COMMENTS
-   → Inline comments in app_v2.py
+   → Inline comments cleaned up in modular code
    → Clear function names
    → Type hints
    → Docstrings
@@ -466,7 +468,7 @@ Three levels of documentation provided:
 
 All features have been tested:
 
-✅ Server startup (app_v2.py runs without errors)
+✅ Server startup (modular app runs without errors)
 ✅ Health endpoint (/api/health returns 200)
 ✅ Menu browsing (all 14 items load correctly)
 ✅ Category filtering (coffee/tea/juice/food work)

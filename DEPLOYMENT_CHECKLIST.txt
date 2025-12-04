@@ -6,7 +6,7 @@
 
 🔧 BACKEND (FastAPI)
   ✅ Server running on http://localhost:3000
-  ✅ Health endpoint: /api/health → 200 OK
+  ✅ Health endpoint: /health → 200 OK
   ✅ All 14 API endpoints working
   ✅ Database initialized with 5 tables
   ✅ Error handling in place
@@ -63,9 +63,9 @@
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 1. START SERVER
-   cd /Users/hnt_4/GitCloneDestination/SOAFinal
-   source .venv/bin/activate
-   python3 app_v2.py
+  cd /Users/hnt_4/GitCloneDestination/SOAFinal
+  source .venv/bin/activate
+  uvicorn app:app --host 0.0.0.0 --port 3000 --reload
 
 2. OPEN IN BROWSER
    http://localhost:3000
@@ -136,33 +136,28 @@ Email:
 
 SOAFinal/
 ├── 🔴 CORE APPLICATION
-│   ├── app_v2.py (22 KB) ........................ Main backend
-│   ├── order_frontend_v2.html (55 KB) ......... Frontend UI
-│   └── cafe_orders.db (52 KB) ................. SQLite database
+│   ├── app.py ............................... Main backend
+│   ├── index.html ........................... Frontend entry
+│   ├── frontend/ ............................ Frontend assets
+│   └── cafe_orders.db ....................... SQLite database
 │
 ├── 🟢 CONFIGURATION
-│   ├── requirements.txt ........................ Dependencies
-│   ├── .env.example ........................... Gmail config
-│   ├── docker-compose.yml ..................... Docker setup
-│   └── Dockerfile ............................ Image definition
+│   ├── requirements.txt ..................... Dependencies
+│   ├── .env.example ........................ Gmail config
+│   ├── docker-compose.yml .................. Docker setup
+│   └── Dockerfile .......................... Image definition
 │
 ├── 🟡 DOCUMENTATION
-│   ├── README_V2_COMPLETE.md (9.9 KB) ........ Full guide
-│   ├── QUICK_START_V2.txt (12 KB) ........... Quick reference
-│   ├── IMPLEMENTATION_SUMMARY.txt (19 KB) ... Overview
-│   └── DEPLOYMENT_CHECKLIST.txt (this file)..Status check
+│   ├── README_V2_COMPLETE.md ............... Full guide
+│   ├── QUICK_START_V2.txt .................. Quick reference
+│   ├── IMPLEMENTATION_SUMMARY.txt .......... Overview
+│   └── DEPLOYMENT_CHECKLIST.txt (this file). Status check
 │
 ├── 🔵 TESTING
-│   └── test_features.py (8.4 KB) ........... Test suite
+│   └── test_features.py .................... Test suite
 │
-├── 🟣 SCRIPTS
-│   ├── start.sh ............................. Mac/Linux start
-│   └── start.bat ............................ Windows start
-│
-└── 📦 LEGACY (for reference only)
-    ├── app.py, app_pos.py
-    ├── cafe_pos_system.py
-    └── old frontend files
+└── 🟣 SCRIPTS
+  └── start.sh ............................ Mac/Linux start
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 🎯 USAGE STATISTICS
@@ -174,8 +169,7 @@ Code Size:
   • Total: ~77 KB application code
 
 Lines of Code:
-  • app_v2.py: ~650 lines
-  • order_frontend_v2.html: ~1200 lines
+  • Monolithic version: ~1850 lines (legacy, removed)
   • Total: ~1850 lines
 
 API Endpoints:
@@ -278,7 +272,7 @@ For Issues:
   4. Review database: sqlite3 cafe_orders.db
 
 To Customize:
-  • Edit MENU_PRODUCTS in app_v2.py
+  • Edit MENU_PRODUCTS (now managed in `utils/menu_data.py`)
   • Adjust colors in order_frontend.html CSS
   • Add new API endpoints
   • Extend database schema

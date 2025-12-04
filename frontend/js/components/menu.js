@@ -11,8 +11,8 @@ export async function loadMenu() {
     }
 }
 
-export function displayProducts(items) {
-    const gridId = state.currentView === 'favorites' ? 'favoritesGrid' : 'productsGrid';
+export function displayProducts(items, targetGridId = null) {
+    const gridId = targetGridId || (state.currentView === 'favorites' ? 'favoritesGrid' : 'productsGrid');
     const grid = document.getElementById(gridId);
     if (!grid) return;
     
@@ -157,6 +157,26 @@ export async function loadFavorites() {
     }
 }
 
+// Helper function to update all heart icons for a product across both views
+function updateHeartIcons(productId, isFavorited) {
+    // Update all cards with this product ID in both grids
+    const cards = document.querySelectorAll(`[data-product-id="${productId}"]`);
+    cards.forEach(card => {
+        const heartBtn = card.querySelector('.btn-favorite');
+        if (heartBtn) {
+            if (isFavorited) {
+                heartBtn.classList.add('favorited');
+                heartBtn.innerHTML = '❤️';
+                heartBtn.title = 'Remove from favorites';
+            } else {
+                heartBtn.classList.remove('favorited');
+                heartBtn.innerHTML = '🤍';
+                heartBtn.title = 'Add to favorites';
+            }
+        }
+    });
+}
+
 export async function toggleFavorite(productId) {
     if (!state.currentUser) {
         ui.showError('Please login to add favorites');
@@ -173,13 +193,15 @@ export async function toggleFavorite(productId) {
     }
     
     if (result.ok) {
+        // Reload favorites state first
         await loadFavorites();
         
-        // Update UI
-        if (state.currentView === 'favorites') {
+        // Update heart icons in all views without reloading
+        updateHeartIcons(productId, !favorited);
+        
+        // If in favorites view and we just removed an item, reload favorites to remove the card
+        if (state.currentView === 'favorites' && favorited) {
             await loadFavoritesView();
-        } else {
-            await loadMenu();
         }
     } else {
         ui.showError(result.data.detail);
@@ -195,7 +217,7 @@ export async function loadFavoritesView() {
         const favoriteProducts = state.menuItems.filter(item => 
             result.data.some(f => f.product_id === item.id)
         );
-        displayProducts(favoriteProducts);
+        displayProducts(favoriteProducts, 'favoritesGrid');
     } else {
         const grid = document.getElementById('favoritesGrid');
         if (grid) {

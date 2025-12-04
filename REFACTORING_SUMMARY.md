@@ -1,8 +1,10 @@
+> Lưu ý (12/2025): Các tham chiếu tới phiên bản monolithic cũ trong tài liệu này mang tính lịch sử. Môi trường chạy hiện tại dùng `app.py` + `index.html` và health `/health`.
+
 # 🎯 Frontend Refactoring Summary
 
 ## Tổng Quan
 
-Đã refactor thành công file `order_frontend_v2.html` (3190 dòng) thành cấu trúc modular với **24 files** riêng biệt, cải thiện đáng kể về maintainability và scalability.
+Đã refactor thành công frontend monolithic cũ (3190 dòng) thành cấu trúc modular với **24 files** riêng biệt, cải thiện đáng kể về maintainability và scalability.
 
 ---
 
@@ -10,7 +12,7 @@
 
 ### Before (Monolithic)
 ```
-order_frontend_v2.html
+legacy monolithic frontend
 ├── Lines: 3,190
 ├── CSS: ~1,100 dòng (inline trong <style>)
 ├── JavaScript: ~2,000 dòng (inline trong <script>)
@@ -278,7 +280,7 @@ New: 1 ngày (structure rõ ràng)
 
 1. **FRONTEND_REFACTORING.md** - Chi tiết cấu trúc mới
 2. **TESTING_GUIDE.md** - Hướng dẫn test
-3. **Còn file cũ làm backup** - order_frontend_v2.html
+3. **Legacy** - Monolithic frontend đã bị loại bỏ
 
 ---
 

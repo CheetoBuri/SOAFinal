@@ -1,3 +1,5 @@
+> Note (12/2025): Các đề cập tới phiên bản monolithic cũ trong checklist là lịch sử. Runtime hiện tại sử dụng `app.py` + `index.html` và endpoint health `/health`.
+
 # ✅ REFACTORING COMPLETION CHECKLIST
 
 ## 📋 Refactoring Status: COMPLETE ✅
@@ -106,7 +108,7 @@
 - [✅] Remove specific item
 
 ### Total Endpoint Count
-**28 endpoints** (matching original app_v2.py)
+**28 endpoints** (matching original monolithic version)
 
 ### Key Features Verified
 - [✅] SHA256 password hashing
@@ -134,7 +136,7 @@
 ### Code Metrics
 
 #### Before (Monolithic)
-- Files: 1 (app_v2.py)
+- Files: 1 (monolithic)
 - Lines: ~1690
 - Endpoints: 28
 - Structure: Single file
@@ -153,7 +155,7 @@
 - ✅ Better code reusability
 
 ### Safety Measures
-- [✅] Original `app_v2.py` preserved as backup
+- [✅] Legacy monolithic removed to avoid confusion
 - [✅] All functionality tested and working
 - [✅] No breaking changes to API
 - [✅] Database schema unchanged
@@ -196,10 +198,7 @@
 uvicorn app:app --host 0.0.0.0 --port 3000
 ```
 
-**Switch Back to Legacy (if needed):**
-```bash
-uvicorn app_v2:app --host 0.0.0.0 --port 3000
-```
+
 
 **Docker:**
 ```bash

@@ -9,7 +9,10 @@
 
   cd /Users/hnt_4/GitCloneDestination/SOAFinal
   source .venv/bin/activate
-  python3 app_v2.py
+  uvicorn app:app --host 0.0.0.0 --port 3000 --reload
+
+  # hoặc dùng script
+  ./run.sh
 
   Server: http://localhost:3000
 
@@ -208,9 +211,9 @@
 🔍 FILE REFERENCE
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  app_v2.py                      Backend server (FastAPI + SQLite)
-  order_frontend_v2.html         Frontend UI (HTML5 + CSS3 + JS)
-  order_frontend.html            Symlink to v2
+  app.py                         Backend server (FastAPI + SQLite)
+  index.html                     Frontend entry (HTML)
+  frontend/                      Frontend assets (CSS/JS)
   cafe_orders.db                 SQLite database
   requirements.txt               Python dependencies
   .env.example                   Gmail configuration template
@@ -239,7 +242,7 @@
   Database issues?
   ────────────────
   rm cafe_orders.db
-  python3 app_v2.py  (recreates clean DB)
+  uvicorn app:app --host 0.0.0.0 --port 3000 --reload  # tái tạo DB sạch
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 📊 TECH STACK

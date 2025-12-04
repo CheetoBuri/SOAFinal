@@ -1,9 +1,11 @@
+> Note (Dec 2025): Đã loại bỏ mọi tham chiếu đến phiên bản monolithic cũ. Code hiện hành sử dụng `app.py` và `index.html` (serve tại `/`), health: `/health`.
+
 # ✅ REFACTORING HOÀN TẤT - FINAL REPORT
 
 ## 📊 Tổng Quan
 
 ### Trước Khi Refactor
-- ❌ **1 file monolithic**: `app_v2.py` (1693 dòng)
+- ❌ **1 file monolithic** (đã loại bỏ)
 - ❌ Khó tìm code, khó maintain
 - ❌ Không có cấu trúc rõ ràng
 
@@ -43,18 +45,15 @@ SOAFinal/
     ├── menu_data.py (48 lines) ............ Product catalog
     └── timezone.py (12 lines) ............. Vietnam timezone
 
-Legacy backup:
-└── app_v2_backup.py (1693 lines) .......... Original monolithic version
 ```
 
 ---
 
 ## 🎯 API Endpoints - Tất Cả Hoạt Động ✅
 
-### Health & Frontend (3)
-- ✅ `GET /` - Frontend (order_frontend_v2.html)
+### Health & Frontend (2)
+- ✅ `GET /` - Frontend
 - ✅ `GET /health` - Health check API
-- ✅ `GET /order_frontend_v2.html` - Frontend direct access
 
 ### 🔐 Authentication (6 endpoints)
 - ✅ `POST /api/auth/send-otp` - Gửi OTP đăng ký
@@ -125,7 +124,6 @@ Legacy backup:
 - ✅ Session management hoạt động
 
 ### 4. File Organization ✅
-- ✅ `app_v2.py` → `app_v2_backup.py` (backup)
 - ✅ `app.py` mới là entry point chính
 - ✅ Dockerfile đã update
 
@@ -154,8 +152,8 @@ Legacy backup:
 ## ✅ Testing Results
 
 ### Automated Tests
-File `test_endpoints.py` đã test tất cả 33 endpoints:
-- ✅ Health & Frontend: 3/3 pass
+File `test_endpoints.py` đã test đầy đủ các endpoints:
+- ✅ Health & Frontend: 2/2 pass
 - ✅ Authentication: 6/6 functional
 - ✅ Menu: 3/3 pass
 - ✅ Cart: 4/4 pass (after fix)
@@ -235,9 +233,6 @@ File `test_endpoints.py` đã test tất cả 33 endpoints:
 ### Modified:
 - `Dockerfile` - Updated to use new structure
 
-### Renamed:
-- `app_v2.py` → `app_v2_backup.py` (backup)
-
 ---
 
 ## 🎉 KẾT LUẬN
@@ -282,13 +277,7 @@ docker run -p 3000:3000 cafe-api
 python test_endpoints.py
 ```
 
-### If You Want to Switch Back:
-```bash
-# Rename files back
-mv app_v2_backup.py app_v2.py
-# Then run
-uvicorn app_v2:app --host 0.0.0.0 --port 3000
-```
+
 
 ---
 

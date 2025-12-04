@@ -5,7 +5,6 @@
 ```
 SOAFinal/
 ├── app.py                      # Main FastAPI application
-├── app_v2.py                   # Legacy monolithic version (backup)
 ├── database.py                 # Database connection & initialization
 ├── schema.sql                  # Database schema
 ├── requirements.txt            # Python dependencies
@@ -157,7 +156,7 @@ FROM_EMAIL=your-email@gmail.com
 
 ## 🎨 Code Organization Benefits
 
-### Before (Monolithic - app_v2.py)
+### Before (Monolithic)
 - ❌ 1690+ lines in single file
 - ❌ Hard to navigate
 - ❌ Difficult to maintain
@@ -189,7 +188,7 @@ curl http://localhost:3000/api/menu
 
 ## 📝 Migration Notes
 
-### Changes from app_v2.py
+### Refactoring Changes
 - All functionality preserved
 - Routes remain identical
 - Database schema unchanged
@@ -198,9 +197,7 @@ curl http://localhost:3000/api/menu
 - Improved code organization
 
 ### Legacy Support
-- `app_v2.py` kept as backup
-- Can switch back if needed: `uvicorn app_v2:app`
-- Dockerfile supports both versions
+Legacy monolithic files have been removed to avoid confusion. Please use `app.py` and `index.html`.
 
 ## 👨‍🏫 For Academic Review
 

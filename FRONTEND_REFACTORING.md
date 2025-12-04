@@ -1,3 +1,5 @@
+> Lưu ý (12/2025): Các đề cập tới frontend monolithic cũ đã bị loại bỏ. Frontend hiện tại là `index.html` + thư mục `frontend/`, được serve trực tiếp từ backend tại `/`.
+
 # Frontend Refactoring - Cafe Ordering System
 
 ## 📁 Cấu trúc mới (Refactored Structure)
@@ -34,7 +36,7 @@ SOAFinal/
 │           └── storage.js     # LocalStorage utilities
 │
 ├── index.html                 # Main HTML (Refactored)
-└── order_frontend_v2.html     # Old monolithic file (backup)
+└── [legacy monolithic frontend removed]
 ```
 
 ## 🎯 Lợi ích của refactoring
@@ -256,7 +258,7 @@ export async function getNewData(params) {
 
 ## ⚠️ Lưu ý
 
-1. **File cũ vẫn được giữ lại**: `order_frontend_v2.html` là backup
+1. **Legacy**: Monolithic frontend đã bị loại bỏ
 2. **ES6 Modules**: Cần chạy qua HTTP server, không chạy trực tiếp file://
 3. **Browser Support**: Cần browser hỗ trợ ES6 modules (Chrome, Firefox, Safari, Edge hiện đại)
 4. **API URL**: Có thể cần thay đổi `API_URL` trong `frontend/js/utils/state.js` nếu backend chạy ở port khác
@@ -275,7 +277,7 @@ Edit các file CSS tương ứng:
 
 ## 🔄 Migration từ file cũ
 
-File `index.html` mới đã được refactor hoàn toàn từ `order_frontend_v2.html`. Tất cả functionality được giữ nguyên, chỉ có cấu trúc code được tổ chức lại tốt hơn.
+File `index.html` mới đã được refactor hoàn toàn từ phiên bản monolithic cũ. Tất cả functionality được giữ nguyên, chỉ có cấu trúc code được tổ chức lại tốt hơn.
 
 ## ✅ Testing
 

@@ -31,7 +31,7 @@ Welcome to the enhanced **Cafe Ordering System v2** with user accounts, order hi
 ```bash
 cd /Users/hnt_4/GitCloneDestination/SOAFinal
 source .venv/bin/activate
-python3 app_v2.py
+uvicorn app:app --host 0.0.0.0 --port 3000 --reload
 ```
 
 #### Option B: Using npm
@@ -195,7 +195,7 @@ View all your orders:
 To start fresh:
 ```bash
 rm cafe_orders.db
-python3 app_v2.py
+uvicorn app:app --host 0.0.0.0 --port 3000 --reload
 ```
 
 ---
@@ -357,8 +357,8 @@ This will test:
 
 ```
 SOAFinal/
-├── app_v2.py                 # Main FastAPI backend
-├── order_frontend_v2.html    # Frontend UI
+├── app.py                    # Main FastAPI backend
+├── index.html                # Frontend entry
 ├── order_frontend.html       # Symlink to v2
 ├── cafe_orders.db            # SQLite database
 ├── requirements.txt          # Python dependencies
@@ -414,7 +414,7 @@ DATABASE=cafe_orders.db
 lsof -i :3000 | tail -n +2 | awk '{print $2}' | xargs -r kill -9
 
 # Then start again
-python3 app_v2.py
+uvicorn app:app --host 0.0.0.0 --port 3000 --reload
 ```
 
 ### Issue: Email not sending
@@ -433,14 +433,14 @@ python3 app_v2.py
 ```bash
 # Delete database and restart
 rm cafe_orders.db
-python3 app_v2.py
+uvicorn app:app --host 0.0.0.0 --port 3000 --reload
 ```
 
 ---
 
 ## 📈 Demo Checklist
 
-- [ ] Start server: `python3 app_v2.py`
+- [ ] Start server: `uvicorn app:app --host 0.0.0.0 --port 3000 --reload`
 - [ ] Open browser: http://localhost:3000
 - [ ] Register with email & OTP
 - [ ] Browse menu and search

@@ -114,9 +114,8 @@ class CheckoutRequest(BaseModel):
                 "delivery_ward": "Phường Bến Nghé",
                 "delivery_street": "123 Nguyễn Huệ",
                 "special_notes": "Less sugar",
-                "promo_code": "COFFEE20"
-                ,
-                "reuse_address": false
+                "promo_code": "COFFEE20",
+                "reuse_address": False
             }
         }
 

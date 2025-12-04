@@ -33,7 +33,6 @@ print("="*80)
 print("\n📍 Health & Frontend:")
 test_endpoint("GET", "/", description="Root - Frontend")
 test_endpoint("GET", "/health", description="Health check")
-test_endpoint("GET", "/order_frontend_v2.html", description="Frontend HTML")
 
 # Auth endpoints
 print("\n🔐 Authentication:")

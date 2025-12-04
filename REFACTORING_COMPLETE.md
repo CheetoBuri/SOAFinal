@@ -1,3 +1,5 @@
+> Lưu ý (12/2025): Mọi nội dung liên quan đến phiên bản monolithic cũ chỉ mang tính lịch sử. Sử dụng `app.py` + `index.html` cho runtime hiện tại.
+
 # 📊 Refactoring Complete - Final Report
 
 ## ✅ Status: COMPLETED
@@ -7,12 +9,6 @@
 ## 📈 Statistics
 
 ### Code Distribution
-
-#### Original File
-```
-order_frontend_v2.html: 3,190 lines
-└── Monolithic (CSS + JS + HTML in one file)
-```
 
 #### Refactored Structure
 ```
@@ -101,7 +97,7 @@ SOAFinal/
 │   ├── TESTING_GUIDE.md         (271 lines)
 │   └── REFACTORING_SUMMARY.md   (362 lines)
 │
-└── order_frontend_v2.html        [BACKUP - 3,190 lines]
+└── Legacy monolithic frontend     [BACKUP - removed]
 ```
 
 ---

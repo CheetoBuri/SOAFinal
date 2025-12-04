@@ -105,12 +105,12 @@ docker images
 
 **Check health:**
 ```bash
-curl http://localhost:3000/api/health
+curl http://localhost:3000/health
 ```
 
 Should see:
 ```json
-{"status":"ok","message":"Server running v2"}
+{"status":"online","message":"Cafe API is running"}
 ```
 
 **Check if port 3000 is listening:**
@@ -126,8 +126,9 @@ lsof -i :3000
 .
 ├── Dockerfile              ← Container image definition
 ├── docker-compose.yml      ← Docker Compose config
-├── app_v2.py              ← Backend
-├── order_frontend_v2.html ← Frontend
+├── app.py                 ← Backend
+├── index.html             ← Frontend entry
+├── frontend/              ← Frontend assets (CSS/JS)
 ├── schema.sql             ← Database schema
 ├── .env                   ← Environment variables
 ├── requirements.txt       ← Python dependencies

@@ -41,7 +41,9 @@ cp .env.example .env
 
 4. **Start the server:**
 ```bash
-python3 app_v2.py
+uvicorn app:app --host 0.0.0.0 --port 3000 --reload
+# hoặc dùng script có sẵn
+./run.sh
 ```
 
 5. **Open in browser:**
@@ -53,19 +55,17 @@ http://localhost:3000
 
 ```
 SOAFinal/
-├── app_v2.py                      # FastAPI backend (650+ lines)
-├── order_frontend_v2.html         # Web UI (1200+ lines)
-├── schema.sql                     # Database schema definition
-├── db_manager.sh                  # Database management tool
-├── cafe_orders.db                 # SQLite database (auto-created)
-├── requirements.txt               # Python dependencies
-├── .env.example                   # Environment variables template
-└── Documentation/
-    ├── README_V2_COMPLETE.md      # Detailed feature documentation
-    ├── DATABASE_GUIDE.md          # Database management guide
-    ├── QUICK_START_V2.txt         # Quick reference guide
-    ├── IMPLEMENTATION_SUMMARY.txt # Technical implementation details
-    └── DEPLOYMENT_CHECKLIST.txt   # Deployment steps
+├── app.py                 # Main FastAPI application
+├── index.html             # Refactored frontend served at '/'
+├── frontend/              # CSS/JS assets (modular)
+├── models/                # Pydantic models
+├── routers/               # API routers (auth, menu, orders, ...)
+├── utils/                 # Helpers (email, timezone, menu data)
+├── database.py            # DB init helpers
+├── schema.sql             # Database schema
+├── requirements.txt       # Python dependencies
+├── docker-compose.yml     # Docker compose config
+└── Dockerfile             # Container image definition
 ```
 
 ## 🛠️ Database Management
@@ -124,7 +124,7 @@ The project includes a professional database management tool:
 - `POST /api/promo/validate` - Validate promo code
 
 ### Health
-- `GET /api/health` - Check server status
+- `GET /health` - Check server status
 
 ## 🗄️ Database Schema
 

@@ -10,8 +10,8 @@ cd /Users/hnt_4/GitCloneDestination/SOAFinal
 # Activate virtual environment
 source .venv/bin/activate
 
-# Start backend (port 8000)
-uvicorn app:app --reload --port 8000
+# Start backend (port 3000)
+uvicorn app:app --host 0.0.0.0 --port 3000 --reload
 ```
 
 hoặc sử dụng script:
@@ -20,32 +20,15 @@ hoặc sử dụng script:
 ./start.sh
 ```
 
-### 2️⃣ Start Frontend Server
+### 2️⃣ Frontend
 
-Mở terminal mới và chạy HTTP server:
-
-**Option 1: Python**
-```bash
-cd /Users/hnt_4/GitCloneDestination/SOAFinal
-python3 -m http.server 8080
-```
-
-**Option 2: PHP**
-```bash
-cd /Users/hnt_4/GitCloneDestination/SOAFinal
-php -S localhost:8080
-```
-
-**Option 3: VS Code Live Server**
-- Cài extension "Live Server"
-- Right-click vào `index.html`
-- Chọn "Open with Live Server"
+Frontend được serve trực tiếp từ backend tại `/`.
 
 ### 3️⃣ Truy cập ứng dụng
 
 Mở browser và truy cập:
 ```
-http://localhost:8080/index.html
+http://localhost:3000/
 ```
 
 ### 4️⃣ Test Checklist
@@ -121,7 +104,7 @@ Cafe Ordering System - Refactored Version
 #### Network Requests
 - ✅ CSS files load thành công
 - ✅ JS modules load thành công
-- ✅ API calls đến backend (port 8000)
+- ✅ API calls đến backend (port 3000)
 
 #### Application Storage
 - ✅ LocalStorage có user data sau khi login:
@@ -131,21 +114,9 @@ Cafe Ordering System - Refactored Version
   - userPhone
   - userUsername
 
-### 6️⃣ Compare với Version Cũ
+### 6️⃣ Lưu ý
 
-Test song song:
-
-**Version mới** (Refactored):
-```
-http://localhost:8080/index.html
-```
-
-**Version cũ** (Monolithic):
-```
-http://localhost:8080/order_frontend_v2.html
-```
-
-Verify rằng tất cả functionality giống nhau.
+Phiên bản monolithic cũ đã được loại bỏ. Vui lòng dùng giao diện mới tại `/`.
 
 ### 7️⃣ Performance Check
 
@@ -177,14 +148,14 @@ Verify rằng tất cả functionality giống nhau.
 ```python
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:8080"],
+    allow_origins=["http://localhost:3000"],
     ...
 )
 ```
 
 #### ❌ "API_URL connection refused"
 **Cause**: Backend chưa chạy
-**Solution**: Start backend server ở port 8000
+**Solution**: Start backend server ở port 3000
 
 #### ❌ Styles không load
 **Cause**: Sai đường dẫn CSS
@@ -198,7 +169,7 @@ app.add_middleware(
 #### Sources Tab
 Check file structure:
 ```
-localhost:8080/
+localhost:3000/
 ├── index.html
 ├── frontend/
 │   ├── css/

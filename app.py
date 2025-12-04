@@ -2,7 +2,7 @@
 Main FastAPI application - Modular structure
 Cafe Ordering System with OTP Authentication
 """
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
@@ -90,28 +90,44 @@ if locations is not None:
 if transactions is not None:
     app.include_router(transactions.router)
 
-# Serve static files (CSS, JS)
+# Serve legacy static files (CSS, JS) if needed
 app.mount("/frontend", StaticFiles(directory="frontend"), name="frontend")
 
-# Root - redirect to new refactored frontend
-@app.get("/", tags=["Frontend"])
-def root():
-    """Serve new refactored frontend at root"""
-    return FileResponse("index.html")
+# Serve React build assets if present (Vite output)
+REACT_DIST_DIR = os.path.join("frontend", "react", "dist")
+REACT_ASSETS_DIR = os.path.join(REACT_DIST_DIR, "assets")
+HAS_REACT_BUILD = os.path.exists(os.path.join(REACT_DIST_DIR, "index.html"))
 
-# Health check
+if HAS_REACT_BUILD and os.path.isdir(REACT_ASSETS_DIR):
+    # Mount Vite hashed assets at /assets
+    app.mount("/assets", StaticFiles(directory=REACT_ASSETS_DIR), name="assets")
+
+# Health check - MUST be defined before catch-all routes
 @app.get("/health", tags=["Health"])
 def health_check():
     """API health check"""
     return {"status": "online", "message": "Cafe API is running"}
 
-# Serve old frontend (for backward compatibility)
-@app.get("/order_frontend_v2.html", tags=["Frontend"])
-def serve_old_frontend():
-    """Serve the old ordering frontend"""
-    return FileResponse("order_frontend_v2.html")
+# Root - serve React index.html if built, else fallback to vanilla index.html
+@app.get("/", tags=["Frontend"], include_in_schema=False)
+def root():
+    """Serve frontend at root: React build if available, else fallback HTML"""
+    react_index = os.path.join(REACT_DIST_DIR, "index.html")
+    if os.path.exists(react_index):
+        return FileResponse(react_index)
+    return FileResponse("index.html")
 
-@app.get("/old", tags=["Frontend"])
-def serve_old_frontend_alias():
-    """Serve the old ordering frontend (alias)"""
-    return FileResponse("order_frontend_v2.html")
+# SPA fallback for client-side routing (exclude API and known prefixes)
+@app.get("/{full_path:path}", include_in_schema=False)
+def spa_fallback(full_path: str):
+    # Let API and docs routes pass through
+    blocked_prefixes = ("api", "docs", "redoc", "openapi.json", "assets", "frontend")
+    if full_path.startswith(blocked_prefixes):
+        raise HTTPException(status_code=404, detail="Not Found")
+    react_index = os.path.join(REACT_DIST_DIR, "index.html")
+    if os.path.exists(react_index):
+        return FileResponse(react_index)
+    # If no React build, fall back to legacy index only for root; others 404
+    raise HTTPException(status_code=404, detail="Not Found")
+
+# Note: Old monolithic frontend endpoints removed to avoid confusion

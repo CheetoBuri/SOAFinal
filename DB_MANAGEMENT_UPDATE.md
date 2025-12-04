@@ -1,3 +1,5 @@
+> Note (Dec 2025): Legacy monolithic references have been removed. Use `app.py` and `index.html`. Backend serves frontend at `/` on port 3000; health endpoint is `/health`.
+
 ## ✨ Database Management Update
 
 Anh yêu cầu dùng file `.sql` thay vì tạo table trong code, mình đã hoàn thành:
@@ -25,7 +27,7 @@ Anh yêu cầu dùng file `.sql` thay vì tạo table trong code, mình đã ho�
 
 ### ✅ Integration
 
-**app_v2.py now:**
+**Backend app now:**
 - Loads `schema.sql` on startup
 - Automatically creates all tables
 - Falls back to manual creation if .sql not found

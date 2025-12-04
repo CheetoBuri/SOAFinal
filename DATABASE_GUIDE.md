@@ -1,3 +1,5 @@
+> Note (Dec 2025): Một số tham chiếu đến phiên bản monolithic cũ đã bị loại bỏ. Vui lòng dùng `app.py` + `index.html` (serve tại `/`), health: `/health`.
+
 # 📊 Database Management Guide
 
 This guide explains how to manage the Cafe Ordering System database using the provided tools.
@@ -270,7 +272,7 @@ The app automatically:
 
 When starting the app:
 ```bash
-python3 app_v2.py
+uvicorn app:app --host 0.0.0.0 --port 3000 --reload
 ```
 
 It will:
@@ -284,7 +286,7 @@ It will:
 **Day 1: Setup**
 ```bash
 ./db_manager.sh init          # Create fresh database
-python3 app_v2.py             # Start server
+uvicorn app:app --host 0.0.0.0 --port 3000 --reload   # Start server
 ```
 
 **Day 5: Backup**
