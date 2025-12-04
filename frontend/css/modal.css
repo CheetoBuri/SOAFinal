@@ -31,8 +31,8 @@
 
 .modal-close {
     position: absolute;
-    top: 20px;
-    right: 20px;
+    inset-block-start: 20px;
+    inset-inline-end: 20px;
     background: transparent;
     border: none;
     font-size: 32px;

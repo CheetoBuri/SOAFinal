@@ -6,19 +6,19 @@
     }
 
     .sidebar {
-        width: 100%;
+        inline-size: 100%;
         display: grid;
         grid-template-columns: repeat(2, 1fr);
         gap: 15px;
     }
 
     .sidebar-section {
-        margin-bottom: 0;
+        margin-block-end: 0;
     }
 
     .cart-sidebar {
         position: relative;
-        top: auto;
+        inset-block-start: auto;
         grid-column: 1 / -1;
     }
 
@@ -29,7 +29,7 @@
     
     .product-icon {
         font-size: 70px;
-        height: 160px;
+        block-size: 160px;
         padding: 30px;
     }
 }
@@ -70,13 +70,13 @@
     .product-icon {
         font-size: 60px;
         padding: 25px;
-        height: 150px;
+        block-size: 150px;
     }
     
     .product-name {
         font-size: 15px;
         margin: 12px 15px 8px;
-        min-height: 44px;
+        min-block-size: 44px;
     }
     
     .product-price {
@@ -115,7 +115,7 @@
     }
 
     .header-buttons {
-        width: 100%;
+        inline-size: 100%;
         gap: 5px;
     }
 
