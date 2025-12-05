@@ -1,0 +1,257 @@
+<!-- ========== NEW SETTINGS SYSTEM ========== -->
+
+<!-- Settings Modal (Full Screen) -->
+<div id="settingsModal" class="settings-modal">
+    <div class="settings-header">
+        <button class="settings-back" onclick="closeSettingsModal()">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="19" y1="12" x2="5" y2="12"></line>
+                <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+        </button>
+        <h2>Settings</h2>
+    </div>
+    <div class="settings-content">
+        <div class="settings-section">
+            <h3>ACCOUNT DETAILS</h3>
+            <button class="settings-item" onclick="openPersonalInfoModal()">
+                <div class="settings-item-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                </div>
+                <span>Personal Information</span>
+                <svg class="settings-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+            </button>
+            <button class="settings-item" onclick="openTransactionHistoryModal()">
+                <div class="settings-item-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="1" x2="12" y2="23"></line>
+                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                    </svg>
+                </div>
+                <span>Transaction History</span>
+                <svg class="settings-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Personal Information Modal (Popup) -->
+<div id="personalInfoModal" class="modal-overlay" onclick="closePersonalInfoModal(event)">
+    <div class="modal-popup" onclick="event.stopPropagation()">
+        <div class="modal-popup-header">
+            <h3>Personal Information</h3>
+            <button class="modal-close-btn" onclick="closePersonalInfoModal()">×</button>
+        </div>
+        <div class="modal-popup-content">
+            <div class="info-display">
+                <div class="info-item">
+                    <span class="info-label">Email</span>
+                    <span class="info-value" id="displayEmail">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Username</span>
+                    <span class="info-value" id="displayUsername">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Full Name</span>
+                    <span class="info-value" id="displayFullName">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Phone</span>
+                    <span class="info-value" id="displayPhone">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Balance</span>
+                    <span class="info-value" id="displayBalance" style="color: var(--primary); font-weight: 700;">₫0</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Member Since</span>
+                    <span class="info-value" id="displayMemberSince">-</span>
+                </div>
+            </div>
+            <div class="settings-options">
+                <button class="option-btn" onclick="openChangeEmailModal()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                        <polyline points="22,6 12,13 2,6"></polyline>
+                    </svg>
+                    <span>Change Email</span>
+                    <svg class="arrow-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                </button>
+                <button class="option-btn" onclick="openChangePhoneModal()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                    </svg>
+                    <span>Change Phone</span>
+                    <svg class="arrow-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                </button>
+                <button class="option-btn" onclick="openChangeUsernameModal()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                    <span>Change Username</span>
+                    <svg class="arrow-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                </button>
+                <button class="option-btn" onclick="openChangePasswordModal()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                    </svg>
+                    <span>Change Password</span>
+                    <svg class="arrow-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Transaction History Modal (Popup) -->
+<div id="transactionHistoryModal" class="modal-overlay" onclick="closeTransactionHistoryModal(event)">
+    <div class="modal-popup" onclick="event.stopPropagation()">
+        <div class="modal-popup-header">
+            <h3>Transaction History</h3>
+            <button class="modal-close-btn" onclick="closeTransactionHistoryModal()">×</button>
+        </div>
+        <div class="modal-popup-content">
+            <div id="transactionsList" class="transactions-list">
+                <p style="color:#999; text-align:center; padding:20px;">Loading transactions...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Change Email Modal -->
+<div id="changeEmailModal" class="modal-overlay" onclick="closeChangeEmailModalNew(event)">
+    <div class="modal-popup-small" onclick="event.stopPropagation()">
+        <div class="modal-popup-header">
+            <h3>Change Email</h3>
+            <button class="modal-close-btn" onclick="closeChangeEmailModalNew()">×</button>
+        </div>
+        <div class="modal-popup-content">
+            <form onsubmit="submitChangeEmailNew(event)">
+                <div class="form-group">
+                    <label>Current Email</label>
+                    <input type="email" id="currentEmailDisplay" readonly>
+                </div>
+                <div class="form-group">
+                    <label>New Email</label>
+                    <input type="email" id="newEmailInput" required placeholder="new@email.com">
+                </div>
+                <div class="form-group">
+                    <label>Password (to confirm)</label>
+                    <input type="password" id="emailChangePassword" required placeholder="Enter password">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel" onclick="closeChangeEmailModalNew()">Cancel</button>
+                    <button type="submit" class="btn-save">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Change Phone Modal -->
+<div id="changePhoneModal" class="modal-overlay" onclick="closeChangePhoneModalNew(event)">
+    <div class="modal-popup-small" onclick="event.stopPropagation()">
+        <div class="modal-popup-header">
+            <h3>Change Phone</h3>
+            <button class="modal-close-btn" onclick="closeChangePhoneModalNew()">×</button>
+        </div>
+        <div class="modal-popup-content">
+            <form onsubmit="submitChangePhoneNew(event)">
+                <div class="form-group">
+                    <label>Current Phone</label>
+                    <input type="tel" id="currentPhoneDisplay" readonly>
+                </div>
+                <div class="form-group">
+                    <label>New Phone</label>
+                    <input type="tel" id="newPhoneInput" required placeholder="0123456789">
+                </div>
+                <div class="form-group">
+                    <label>Password (to confirm)</label>
+                    <input type="password" id="phoneChangePassword" required placeholder="Enter password">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel" onclick="closeChangePhoneModalNew()">Cancel</button>
+                    <button type="submit" class="btn-save">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Change Username Modal -->
+<div id="changeUsernameModal" class="modal-overlay" onclick="closeChangeUsernameModalNew(event)">
+    <div class="modal-popup-small" onclick="event.stopPropagation()">
+        <div class="modal-popup-header">
+            <h3>Change Username</h3>
+            <button class="modal-close-btn" onclick="closeChangeUsernameModalNew()">×</button>
+        </div>
+        <div class="modal-popup-content">
+            <form onsubmit="submitChangeUsernameNew(event)">
+                <div class="form-group">
+                    <label>Current Username</label>
+                    <input type="text" id="currentUsernameDisplay" readonly>
+                </div>
+                <div class="form-group">
+                    <label>New Username</label>
+                    <input type="text" id="newUsernameInput" required placeholder="newusername">
+                </div>
+                <div class="form-group">
+                    <label>Password (to confirm)</label>
+                    <input type="password" id="usernameChangePassword" required placeholder="Enter password">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel" onclick="closeChangeUsernameModalNew()">Cancel</button>
+                    <button type="submit" class="btn-save">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Change Password Modal -->
+<div id="changePasswordModal" class="modal-overlay" onclick="closeChangePasswordModalNew(event)">
+    <div class="modal-popup-small" onclick="event.stopPropagation()">
+        <div class="modal-popup-header">
+            <h3>Change Password</h3>
+            <button class="modal-close-btn" onclick="closeChangePasswordModalNew()">×</button>
+        </div>
+        <div class="modal-popup-content">
+            <form onsubmit="submitChangePasswordNew(event)">
+                <div class="form-group">
+                    <label>Current Password</label>
+                    <input type="password" id="currentPasswordInput" required placeholder="Enter current password">
+                </div>
+                <div class="form-group">
+                    <label>New Password</label>
+                    <input type="password" id="newPasswordInput" required placeholder="Enter new password">
+                </div>
+                <div class="form-group">
+                    <label>Confirm New Password</label>
+                    <input type="password" id="confirmPasswordInput" required placeholder="Confirm new password">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel" onclick="closeChangePasswordModalNew()">Cancel</button>
+                    <button type="submit" class="btn-save">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

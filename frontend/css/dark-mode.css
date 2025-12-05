@@ -758,3 +758,34 @@ body.dark-mode .modal-summary .summary-line b {
 body.dark-mode .modal-summary .summary-line:not(.total) {
     color: #d0d0d0 !important;
 }
+
+/* Checkout modal: improve contrast for order items and totals */
+body.dark-mode #checkoutOrderItems {
+    background: #1f1f1f !important;
+    border-color: #3a3a3a !important;
+}
+body.dark-mode #checkoutOrderItems h4 {
+    color: #e6f4ea !important; /* lightened greenish for header */
+}
+body.dark-mode #checkoutItemsList,
+body.dark-mode #checkoutItemsList * {
+    color: #e0e0e0 !important;
+}
+
+body.dark-mode #checkoutSummary {
+    background: #262626 !important;
+}
+body.dark-mode #checkoutSummary span {
+    color: #e0e0e0 !important;
+}
+body.dark-mode #checkoutSummary [id="checkoutSubtotal"],
+body.dark-mode #checkoutSummary [id="checkoutDiscount"] {
+    color: #f0f0f0 !important;
+}
+body.dark-mode #checkoutSummary .total,
+body.dark-mode #checkoutSummary [id="checkoutTotal"] {
+    color: #ffccd5 !important; /* keep emphasis but readable */
+}
+body.dark-mode #checkoutSummary [style*="border-block-start"] {
+    border-block-start-color: #444 !important;
+}
