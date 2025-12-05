@@ -17,13 +17,26 @@ document.addEventListener('click', (e) => {
 
 // Settings Modal
 window.openSettingsModal = function() {
-    document.getElementById('settingsModal').classList.add('active');
-    document.getElementById('userDropdown').classList.remove('active');
+    const settings = document.getElementById('settingsModal');
+    if (settings) {
+        settings.classList.add('active');
+        settings.classList.remove('dimmed');
+    }
+    const userDropdown = document.getElementById('userDropdown');
+    if (userDropdown) {
+        userDropdown.classList.remove('active');
+    }
 };
 
 window.closeSettingsModal = function(event) {
-    if (!event || (event.target && (event.target.id === 'settingsModal' || event.target.classList.contains('modal-overlay')))) {
-        document.getElementById('settingsModal').classList.remove('active');
+    // Only close if clicking directly on the settings modal overlay, not other modals
+    if (!event || (event.target && event.target.id === 'settingsModal')) {
+        const settings = document.getElementById('settingsModal');
+        if (settings) {
+            // Remove both active and dimmed classes when closing
+            settings.classList.remove('active');
+            settings.classList.remove('dimmed');
+        }
     }
 };
 
@@ -74,6 +87,7 @@ window.openPersonalInfoModal = async function() {
 window.closePersonalInfoModal = function(event) {
     if (!event || event.target.classList.contains('modal-overlay')) {
         document.getElementById('personalInfoModal').classList.remove('active');
+        openSettingsModal();
     }
 };
 
@@ -86,6 +100,7 @@ window.openTransactionHistoryModal = function() {
 window.closeTransactionHistoryModal = function(event) {
     if (!event || event.target.classList.contains('modal-overlay')) {
         document.getElementById('transactionHistoryModal').classList.remove('active');
+        openSettingsModal();
     }
 };
 
@@ -146,19 +161,32 @@ window.openChangeEmailModal = function(event) {
 // Dedicated handlers for Settings screen to avoid conflicts with main.js rebindings
 window.settingsOpenChangeEmailModal = function(event) {
     if (event) event.stopPropagation();
-    const settings = document.getElementById('settingsModal');
-    if (settings) settings.classList.remove('active');
+    // Don't close settings modal - keep it open like Personal Info (it will be dimmed behind)
     const user = JSON.parse(localStorage.getItem('currentUser') || '{}');
     document.getElementById('currentEmailDisplay').value = user.email || '';
     document.getElementById('newEmailInput').value = '';
     document.getElementById('emailChangePassword').value = '';
-    setTimeout(() => document.getElementById('changeEmailModal').classList.add('active'), 0);
+    // Add a class to dim the settings modal
+    const settings = document.getElementById('settingsModal');
+    if (settings) settings.classList.add('dimmed');
+    document.getElementById('changeEmailModal').classList.add('active');
 };
 
 window.closeChangeEmailModalNew = function(event) {
-    if (!event || event.target.classList.contains('modal-overlay')) {
-        document.getElementById('changeEmailModal').classList.remove('active');
-        openSettingsModal();
+    if (event) {
+        event.stopPropagation();
+        event.preventDefault();
+    }
+    // Close the modal
+    document.getElementById('changeEmailModal').classList.remove('active');
+    // Restore Settings interactivity and ensure it's active
+    const settings = document.getElementById('settingsModal');
+    if (settings) {
+        settings.classList.remove('dimmed');
+        // Ensure settings modal stays active (don't close it)
+        if (!settings.classList.contains('active')) {
+            settings.classList.add('active');
+        }
     }
 };
 
@@ -186,7 +214,15 @@ window.submitChangeEmailNew = async function(event) {
             localStorage.setItem('currentUser', JSON.stringify(user));
             localStorage.setItem('userEmail', newEmail);
             document.getElementById('changeEmailModal').classList.remove('active');
-            openSettingsModal();
+            // Restore Settings interactivity and ensure it's active
+            const settings = document.getElementById('settingsModal');
+            if (settings) {
+                settings.classList.remove('dimmed');
+                // Ensure settings modal stays active (don't close it)
+                if (!settings.classList.contains('active')) {
+                    settings.classList.add('active');
+                }
+            }
         } else {
             alert(data.detail || 'Failed to update email');
         }
@@ -211,19 +247,30 @@ window.openChangePhoneModal = function(event) {
 
 window.settingsOpenChangePhoneModal = function(event) {
     if (event) event.stopPropagation();
-    const settings = document.getElementById('settingsModal');
-    if (settings) settings.classList.remove('active');
+    // Don't close settings modal - keep it open like Personal Info (it will be dimmed behind)
     const user = JSON.parse(localStorage.getItem('currentUser') || '{}');
     document.getElementById('currentPhoneDisplay').value = user.phone || '';
     document.getElementById('newPhoneInput').value = '';
     document.getElementById('phoneChangePassword').value = '';
-    setTimeout(() => document.getElementById('changePhoneModal').classList.add('active'), 0);
+    // Add a class to dim the settings modal
+    const settings = document.getElementById('settingsModal');
+    if (settings) settings.classList.add('dimmed');
+    document.getElementById('changePhoneModal').classList.add('active');
 };
 
 window.closeChangePhoneModalNew = function(event) {
-    if (!event || event.target.classList.contains('modal-overlay')) {
-        document.getElementById('changePhoneModal').classList.remove('active');
-        openSettingsModal();
+    if (event) {
+        event.stopPropagation();
+        event.preventDefault();
+    }
+    document.getElementById('changePhoneModal').classList.remove('active');
+    const settings = document.getElementById('settingsModal');
+    if (settings) {
+        settings.classList.remove('dimmed');
+        // Ensure settings modal stays active (don't close it)
+        if (!settings.classList.contains('active')) {
+            settings.classList.add('active');
+        }
     }
 };
 
@@ -251,7 +298,15 @@ window.submitChangePhoneNew = async function(event) {
             localStorage.setItem('currentUser', JSON.stringify(user));
             localStorage.setItem('userPhone', newPhone);
             document.getElementById('changePhoneModal').classList.remove('active');
-            openSettingsModal();
+            // Restore Settings interactivity and ensure it's active
+            const settings = document.getElementById('settingsModal');
+            if (settings) {
+                settings.classList.remove('dimmed');
+                // Ensure settings modal stays active (don't close it)
+                if (!settings.classList.contains('active')) {
+                    settings.classList.add('active');
+                }
+            }
         } else {
             alert(data.detail || 'Failed to update phone');
         }
@@ -276,19 +331,30 @@ window.openChangeUsernameModal = function(event) {
 
 window.settingsOpenChangeUsernameModal = function(event) {
     if (event) event.stopPropagation();
-    const settings = document.getElementById('settingsModal');
-    if (settings) settings.classList.remove('active');
+    // Don't close settings modal - keep it open like Personal Info (it will be dimmed behind)
     const user = JSON.parse(localStorage.getItem('currentUser') || '{}');
     document.getElementById('currentUsernameDisplay').value = user.username || '';
     document.getElementById('newUsernameInput').value = '';
     document.getElementById('usernameChangePassword').value = '';
-    setTimeout(() => document.getElementById('changeUsernameModal').classList.add('active'), 0);
+    // Add a class to dim the settings modal
+    const settings = document.getElementById('settingsModal');
+    if (settings) settings.classList.add('dimmed');
+    document.getElementById('changeUsernameModal').classList.add('active');
 };
 
 window.closeChangeUsernameModalNew = function(event) {
-    if (!event || event.target.classList.contains('modal-overlay')) {
-        document.getElementById('changeUsernameModal').classList.remove('active');
-        openSettingsModal();
+    if (event) {
+        event.stopPropagation();
+        event.preventDefault();
+    }
+    document.getElementById('changeUsernameModal').classList.remove('active');
+    const settings = document.getElementById('settingsModal');
+    if (settings) {
+        settings.classList.remove('dimmed');
+        // Ensure settings modal stays active (don't close it)
+        if (!settings.classList.contains('active')) {
+            settings.classList.add('active');
+        }
     }
 };
 
@@ -316,7 +382,15 @@ window.submitChangeUsernameNew = async function(event) {
             localStorage.setItem('currentUser', JSON.stringify(user));
             localStorage.setItem('userUsername', newUsername);
             document.getElementById('changeUsernameModal').classList.remove('active');
-            openSettingsModal();
+            // Restore Settings interactivity and ensure it's active
+            const settings = document.getElementById('settingsModal');
+            if (settings) {
+                settings.classList.remove('dimmed');
+                // Ensure settings modal stays active (don't close it)
+                if (!settings.classList.contains('active')) {
+                    settings.classList.add('active');
+                }
+            }
         } else {
             alert(data.detail || 'Failed to update username');
         }
@@ -340,18 +414,29 @@ window.openChangePasswordModal = function(event) {
 
 window.settingsOpenChangePasswordModal = function(event) {
     if (event) event.stopPropagation();
-    const settings = document.getElementById('settingsModal');
-    if (settings) settings.classList.remove('active');
+    // Don't close settings modal - keep it open like Personal Info (it will be dimmed behind)
     document.getElementById('currentPasswordInput').value = '';
     document.getElementById('newPasswordInput').value = '';
     document.getElementById('confirmPasswordInput').value = '';
-    setTimeout(() => document.getElementById('changePasswordModal').classList.add('active'), 0);
+    // Add a class to dim the settings modal
+    const settings = document.getElementById('settingsModal');
+    if (settings) settings.classList.add('dimmed');
+    document.getElementById('changePasswordModal').classList.add('active');
 };
 
 window.closeChangePasswordModalNew = function(event) {
-    if (!event || event.target.classList.contains('modal-overlay')) {
-        document.getElementById('changePasswordModal').classList.remove('active');
-        openSettingsModal();
+    if (event) {
+        event.stopPropagation();
+        event.preventDefault();
+    }
+    document.getElementById('changePasswordModal').classList.remove('active');
+    const settings = document.getElementById('settingsModal');
+    if (settings) {
+        settings.classList.remove('dimmed');
+        // Ensure settings modal stays active (don't close it)
+        if (!settings.classList.contains('active')) {
+            settings.classList.add('active');
+        }
     }
 };
 
@@ -382,7 +467,15 @@ window.submitChangePasswordNew = async function(event) {
         if (response.ok) {
             alert('Password updated successfully!');
             document.getElementById('changePasswordModal').classList.remove('active');
-            openSettingsModal();
+            // Restore Settings interactivity and ensure it's active
+            const settings = document.getElementById('settingsModal');
+            if (settings) {
+                settings.classList.remove('dimmed');
+                // Ensure settings modal stays active (don't close it)
+                if (!settings.classList.contains('active')) {
+                    settings.classList.add('active');
+                }
+            }
         } else {
             alert(data.detail || 'Failed to update password');
         }

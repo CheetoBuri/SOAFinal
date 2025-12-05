@@ -225,12 +225,31 @@
     right: 0;
     bottom: 0;
     background: rgba(0, 0, 0, 0.5);
-    z-index: 10000;
+    z-index: 9998;
     display: none;
     align-items: center;
     justify-content: center;
     padding: 20px;
     animation: fadeIn 0.3s ease;
+}
+
+/* Settings modal at base z-index */
+#settingsModal {
+    z-index: 9998;
+}
+
+/* Personal info and transaction history above settings */
+#personalInfoModal,
+#transactionHistoryModal {
+    z-index: 9999;
+}
+
+/* Change modals appear above settings modal */
+#changeEmailModal,
+#changePhoneModal,
+#changeUsernameModal,
+#changePasswordModal {
+    z-index: 9999;
 }
 
 .modal-overlay.active {
