@@ -31,7 +31,7 @@ CREATE INDEX IF NOT EXISTS idx_users_phone ON users(phone);
 -- OTP CODES TABLE
 -- ============================================
 CREATE TABLE IF NOT EXISTS otp_codes (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id INTEGER PRIMARY KEY,
     email TEXT NOT NULL,
     code TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -89,7 +89,7 @@ CREATE INDEX IF NOT EXISTS idx_orders_created_at ON orders(created_at);
 -- FAVORITES TABLE
 -- ============================================
 CREATE TABLE IF NOT EXISTS favorites (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id INTEGER PRIMARY KEY,
     user_id TEXT NOT NULL,
     product_id TEXT NOT NULL,
     added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -104,7 +104,7 @@ CREATE INDEX IF NOT EXISTS idx_favorites_product_id ON favorites(product_id);
 -- CART TABLE (for API testing)
 -- ============================================
 CREATE TABLE IF NOT EXISTS cart (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id INTEGER PRIMARY KEY,
     user_id TEXT NOT NULL UNIQUE,
     items TEXT NOT NULL DEFAULT '[]',
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -117,7 +117,7 @@ CREATE INDEX IF NOT EXISTS idx_cart_user_id ON cart(user_id);
 -- PAYMENT OTP TABLE
 -- ============================================
 CREATE TABLE IF NOT EXISTS payment_otp (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id INTEGER PRIMARY KEY,
     user_id TEXT NOT NULL,
     order_id TEXT NOT NULL,
     code TEXT NOT NULL,
@@ -135,7 +135,7 @@ CREATE INDEX IF NOT EXISTS idx_payment_otp_order ON payment_otp(order_id);
 -- REVIEWS TABLE
 -- ============================================
 CREATE TABLE IF NOT EXISTS reviews (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id INTEGER PRIMARY KEY,
     user_id TEXT NOT NULL,
     product_id TEXT NOT NULL,
     order_id TEXT,
