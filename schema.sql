@@ -131,6 +131,27 @@ CREATE INDEX IF NOT EXISTS idx_payment_otp_user ON payment_otp(user_id);
 CREATE INDEX IF NOT EXISTS idx_payment_otp_order ON payment_otp(order_id);
 
 -- ============================================
+-- REVIEWS TABLE
+-- ============================================
+CREATE TABLE IF NOT EXISTS reviews (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id TEXT NOT NULL,
+    product_id TEXT NOT NULL,
+    order_id TEXT,
+    rating INTEGER NOT NULL CHECK(rating >= 1 AND rating <= 5),
+    review_text TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(user_id, product_id),
+    FOREIGN KEY(user_id) REFERENCES users(id),
+    FOREIGN KEY(order_id) REFERENCES orders(id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_reviews_product ON reviews(product_id);
+CREATE INDEX IF NOT EXISTS idx_reviews_user ON reviews(user_id);
+CREATE INDEX IF NOT EXISTS idx_reviews_created ON reviews(created_at);
+
+-- ============================================
 -- SAMPLE DATA (Optional - uncomment to use)
 -- ============================================
 
