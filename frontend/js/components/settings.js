@@ -28,16 +28,46 @@ window.closeSettingsModal = function(event) {
 };
 
 // Personal Information Modal
-window.openPersonalInfoModal = function() {
-    // Load user data
-    const user = JSON.parse(localStorage.getItem('currentUser') || '{}');
-    document.getElementById('displayEmail').textContent = user.email || '-';
-    document.getElementById('displayUsername').textContent = user.username || '-';
-    document.getElementById('displayFullName').textContent = user.full_name || '-';
-    document.getElementById('displayPhone').textContent = user.phone || '-';
-    document.getElementById('displayBalance').textContent = formatCurrency(user.balance || 0);
-    document.getElementById('displayMemberSince').textContent = user.joined_at ? formatDate(user.joined_at) : '-';
-    
+window.openPersonalInfoModal = async function() {
+    // Prefer saved storage keys (used by auth.js), fallback to legacy currentUser JSON
+    const user = {
+        id: localStorage.getItem('userId'),
+        email: localStorage.getItem('userEmail'),
+        username: localStorage.getItem('userUsername'),
+        full_name: localStorage.getItem('userName'),
+        phone: localStorage.getItem('userPhone')
+    };
+    const legacy = JSON.parse(localStorage.getItem('currentUser') || '{}');
+    const email = user.email || legacy.email || '-';
+    const username = user.username || legacy.username || '-';
+    const fullName = user.full_name || legacy.full_name || legacy.name || '-';
+    const phone = user.phone || legacy.phone || '-';
+
+    document.getElementById('displayEmail').textContent = email;
+    document.getElementById('displayUsername').textContent = username;
+    document.getElementById('displayFullName').textContent = fullName;
+    document.getElementById('displayPhone').textContent = phone;
+
+    // Try to load live balance when user id exists
+    const userId = user.id || legacy.id;
+    if (userId) {
+        try {
+            const res = await fetch(`/api/user/balance?user_id=${userId}`);
+            const data = await res.json();
+            if (res.ok && typeof data.balance !== 'undefined') {
+                document.getElementById('displayBalance').textContent = formatCurrency(data.balance);
+            } else {
+                document.getElementById('displayBalance').textContent = formatCurrency(0);
+            }
+        } catch (e) {
+            document.getElementById('displayBalance').textContent = formatCurrency(0);
+        }
+    } else {
+        document.getElementById('displayBalance').textContent = formatCurrency(0);
+    }
+
+    document.getElementById('displayMemberSince').textContent = '-';
+
     document.getElementById('personalInfoModal').classList.add('active');
 };
 
@@ -60,26 +90,37 @@ window.closeTransactionHistoryModal = function(event) {
 };
 
 async function loadTransactions() {
-    const user = JSON.parse(localStorage.getItem('currentUser') || '{}');
+    const userId = localStorage.getItem('userId') || (JSON.parse(localStorage.getItem('currentUser') || '{}').id);
     const list = document.getElementById('transactionsList');
     
     try {
-        const response = await fetch(`/api/user/transactions?user_id=${user.id}`);
+        const response = await fetch(`/api/transactions?user_id=${encodeURIComponent(userId || '')}`);
         const data = await response.json();
         
         if (data.transactions && data.transactions.length > 0) {
-            list.innerHTML = data.transactions.map(t => `
-                <div class="transaction-item">
-                    <strong>${t.description}</strong>
-                    <small>${formatDate(t.created_at)}</small>
-                    <div style="margin-top:8px; display:flex; justify-content:space-between;">
-                        <span style="color:#666;">${t.order_id || ''}</span>
-                        <span style="color:${t.type === 'credit' ? '#28a745' : '#dc3545'}; font-weight:700;">
-                            ${t.type === 'credit' ? '+' : '-'}${formatCurrency(t.amount)}
-                        </span>
+            list.innerHTML = data.transactions.map(t => {
+                const isPositive = (t.amount || 0) >= 0 || t.type === 'refund';
+                const amountAbs = Math.abs(t.amount || 0);
+                const sign = isPositive ? '+' : '-';
+                const amountClass = isPositive ? 'positive' : 'negative';
+                const icon = t.type === 'payment' ? '💳' : (t.type === 'refund' ? '↩️' : '💰');
+                const orderRef = t.order_id ? `#${t.order_id}` : '';
+                return `
+                <div class="txn-item">
+                    <div class="txn-icon">${icon}</div>
+                    <div class="txn-main">
+                        <div class="txn-title">
+                            <div>${t.description || (t.type === 'refund' ? 'Refund' : 'Payment')}</div>
+                            <div class="txn-amount ${amountClass}">${sign}${formatCurrency(amountAbs)}</div>
+                        </div>
+                        <div class="txn-meta">
+                            <span>${orderRef}</span>
+                            <span>${formatDate(t.created_at)}</span>
+                        </div>
+                        ${typeof t.balance_after !== 'undefined' ? `<div class="txn-balance">Balance: ${formatCurrency(t.balance_after)}</div>` : ''}
                     </div>
-                </div>
-            `).join('');
+                </div>`;
+            }).join('');
         } else {
             list.innerHTML = '<p style="color:#999; text-align:center; padding:20px;">No transactions yet</p>';
         }
@@ -143,6 +184,7 @@ window.submitChangeEmailNew = async function(event) {
             alert('Email updated successfully!');
             user.email = newEmail;
             localStorage.setItem('currentUser', JSON.stringify(user));
+            localStorage.setItem('userEmail', newEmail);
             document.getElementById('changeEmailModal').classList.remove('active');
             openSettingsModal();
         } else {
@@ -207,6 +249,7 @@ window.submitChangePhoneNew = async function(event) {
             alert('Phone updated successfully!');
             user.phone = newPhone;
             localStorage.setItem('currentUser', JSON.stringify(user));
+            localStorage.setItem('userPhone', newPhone);
             document.getElementById('changePhoneModal').classList.remove('active');
             openSettingsModal();
         } else {
@@ -271,6 +314,7 @@ window.submitChangeUsernameNew = async function(event) {
             alert('Username updated successfully!');
             user.username = newUsername;
             localStorage.setItem('currentUser', JSON.stringify(user));
+            localStorage.setItem('userUsername', newUsername);
             document.getElementById('changeUsernameModal').classList.remove('active');
             openSettingsModal();
         } else {
