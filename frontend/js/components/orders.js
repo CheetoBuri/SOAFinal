@@ -126,6 +126,7 @@ function formatOrderCard(order) {
     const itemsList = formatOrderItems(order.items);
     const createdDate = ui.formatDate(order.created_at);
     const paymentDate = order.payment_time ? ui.formatDate(order.payment_time) : null;
+    const deliveredDate = order.delivered_at ? ui.formatDate(order.delivered_at) : null;
     const address = formatAddress(order);
     
     return `
@@ -135,6 +136,7 @@ function formatOrderCard(order) {
                     <div class="order-id">Order #${order.id}</div>
                     <div class="order-date">Created: ${createdDate}</div>
                     ${paymentDate ? `<div class="order-date" style="color:#28a745;">💳 Paid: ${paymentDate}</div>` : ''}
+                    ${deliveredDate ? `<div class="order-date" style="color:#1e90ff;">📦 Delivered: ${deliveredDate}</div>` : ''}
                 </div>
                 <div class="order-status status-${order.status}">${order.status.toUpperCase()}</div>
             </div>

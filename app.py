@@ -11,7 +11,7 @@ from utils.timezone import get_vietnam_time
 import os
 
 # Import database initialization
-from database import init_db
+from database import init_db, migrate_add_delivered_at
 
 # Import all routers
 from routers import auth, menu, profile, orders, payment, favorites, cart, reviews
@@ -70,6 +70,9 @@ def startup_event():
             init_db()
         else:
             print("✅ Database already initialized")
+        
+        # Run migrations
+        migrate_add_delivered_at()
     except Exception as e:
         print(f"⚠️ Error checking database: {e}")
     finally:
@@ -132,3 +135,4 @@ def spa_fallback(full_path: str):
     raise HTTPException(status_code=404, detail="Not Found")
 
 # Note: Old monolithic frontend endpoints removed to avoid confusion
+

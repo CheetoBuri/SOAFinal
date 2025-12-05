@@ -204,7 +204,7 @@ def get_orders(user_id: str):
     c.execute("""
         SELECT id, items, total, status, special_notes, promo_code, discount, 
                payment_method, customer_name, customer_phone, delivery_district, 
-               delivery_ward, delivery_street, payment_time, created_at
+               delivery_ward, delivery_street, payment_time, created_at, delivered_at
         FROM orders
         WHERE user_id = ?
         ORDER BY created_at DESC
@@ -227,7 +227,8 @@ def get_orders(user_id: str):
             "delivery_ward": row[11],
             "delivery_street": row[12],
             "payment_time": row[13],
-            "created_at": row[14]
+            "created_at": row[14],
+            "delivered_at": row[15]
         })
     
     conn.close()
@@ -380,12 +381,21 @@ def mark_order_received(order_id: str, request: OrderActionRequest):
         raise HTTPException(status_code=400, detail="Cancelled order cannot be marked as received")
     
     # Update order status to delivered (completed)
-    # For COD: this marks payment as successful
-    payment_time = get_vietnam_time().isoformat()
-    c.execute(
-        "UPDATE orders SET status = 'delivered', payment_time = ? WHERE id = ?", 
-        (payment_time, order_id)
-    )
+    # Set delivered_at timestamp when user confirms received
+    current_time = get_vietnam_time().isoformat()
+    
+    # For COD orders that haven't been paid yet, also set payment_time
+    if order[2] == 'cash_on_delivery' and order[1] == 'pending_payment':
+        c.execute(
+            "UPDATE orders SET status = 'delivered', payment_time = ?, delivered_at = ? WHERE id = ?", 
+            (current_time, current_time, order_id)
+        )
+    else:
+        # For all other orders (balance/already paid), just set delivered_at
+        c.execute(
+            "UPDATE orders SET status = 'delivered', delivered_at = ? WHERE id = ?", 
+            (current_time, order_id)
+        )
     
     conn.commit()
     conn.close()

@@ -26,7 +26,12 @@ export async function apiCall(endpoint, method = 'GET', body = null) {
 
 // Auth APIs
 export async function loginUser(email, password) {
-    return await apiCall('/auth/login', 'POST', { email, password });
+    // Send both 'identifier' (new) and 'email' (backward compatibility)
+    return await apiCall('/auth/login', 'POST', { 
+        identifier: email,
+        email: email,
+        password 
+    });
 }
 
 export async function registerUser(email, password, name, phone, username) {

@@ -248,6 +248,8 @@
     color: white;
     box-shadow: var(--shadow-md);
     border: none;
+    border-radius: var(--radius-md);
+    padding: 12px 20px;
     font-weight: 600;
     transition: var(--trans-fast);
 }
@@ -262,21 +264,24 @@
 }
 
 .btn-favorite {
-    background: white;
+    background: transparent;
     color: var(--error);
-    border: 2px solid var(--error);
+    border: none;
     font-weight: 600;
+    font-size: 24px;
+    padding: 8px;
     transition: var(--trans-fast);
 }
 
 .btn-favorite:hover {
-    background: rgba(239, 68, 68, 0.1);
-    transform: scale(1.05);
+    background: transparent;
+    transform: scale(1.2);
+    filter: brightness(1.2);
 }
 
 .btn-favorite.favorited {
-    background: var(--error);
-    color: white;
-    border-color: var(--error);
-    box-shadow: var(--shadow-md);
+    background: transparent;
+    color: var(--error);
+    border: none;
+    filter: drop-shadow(0 2px 4px rgba(239, 68, 68, 0.3));
 }

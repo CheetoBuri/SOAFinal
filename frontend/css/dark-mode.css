@@ -381,16 +381,16 @@ body.dark-mode .btn-cancel:hover {
 }
 
 body.dark-mode .modal-summary {
-    background: #252525;
-    border: 1px solid #3a3a3a;
+    background: #1a1a1a;
+    border: none;
 }
 
 body.dark-mode .summary-line {
-    color: #b5b5b5;
+    color: #d0d0d0;
 }
 
 body.dark-mode .summary-line.total {
-    color: #ffffff;
+    color: #ff0000;
     border-top: 2px solid #3a3a3a;
     font-weight: 700;
 }
@@ -738,4 +738,23 @@ body.dark-mode .addon-option.selected {
     color: #1a1a1a;
     border-color: #ffffff;
     font-weight: 600;
+}
+
+/* Improve readability of checkout order items in dark mode */
+body.dark-mode .modal-summary .summary-line small,
+body.dark-mode .modal-summary [style*="color: #999"],
+body.dark-mode .modal-summary [style*="color:#999"] {
+    color: #c0c0c0 !important;
+}
+
+/* Product name and details in order summary */
+body.dark-mode .modal-summary .summary-line strong,
+body.dark-mode .modal-summary .summary-line b {
+    color: #ffffff !important;
+    font-weight: 600;
+}
+
+/* Subtotal, Discount, Total labels */
+body.dark-mode .modal-summary .summary-line:not(.total) {
+    color: #d0d0d0 !important;
 }

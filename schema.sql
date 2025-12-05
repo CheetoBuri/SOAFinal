@@ -77,6 +77,7 @@ CREATE TABLE IF NOT EXISTS orders (
     delivery_street TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     payment_time TIMESTAMP,
+    delivered_at TIMESTAMP,
     FOREIGN KEY(user_id) REFERENCES users(id)
 );
 

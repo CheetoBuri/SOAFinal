@@ -40,8 +40,9 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 14px 0;
+    padding: 16px 0;
     border-block-end: 1px solid #f0f0f0;
+    gap: 20px;
 }
 
 .profile-info-row:last-child {
@@ -52,6 +53,8 @@
     font-weight: 500;
     color: #666;
     font-size: 14px;
+    min-width: 100px;
+    flex-shrink: 0;
 }
 
 .profile-value {
@@ -60,6 +63,8 @@
     flex: 1;
     font-weight: 500;
     font-size: 14px;
+    margin-right: 12px;
+    word-break: break-word;
 }
 
 .transaction-list {

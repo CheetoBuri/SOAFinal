@@ -37,23 +37,31 @@ export function showApp() {
 }
 
 export function switchAuthTab(tab) {
-    ui.setActive('.auth-form', null);
-    ui.setActive('.auth-tab', null);
+    // Remove active class from all forms and tabs
+    document.querySelectorAll('.auth-form').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.auth-tab').forEach(el => el.classList.remove('active'));
     
     // Clear all error messages
     ui.clearError('loginError');
     ui.clearError('registerError');
     ui.clearError('forgotError');
     
+    // Activate the selected tab and form
     if (tab === 'login') {
-        document.getElementById('loginForm')?.classList.add('active');
-        document.querySelectorAll('.auth-tab')[0]?.classList.add('active');
+        const loginForm = document.getElementById('loginForm');
+        const tabs = document.querySelectorAll('.auth-tab');
+        if (loginForm) loginForm.classList.add('active');
+        if (tabs[0]) tabs[0].classList.add('active');
     } else if (tab === 'register') {
-        document.getElementById('registerForm')?.classList.add('active');
-        document.querySelectorAll('.auth-tab')[1]?.classList.add('active');
+        const registerForm = document.getElementById('registerForm');
+        const tabs = document.querySelectorAll('.auth-tab');
+        if (registerForm) registerForm.classList.add('active');
+        if (tabs[1]) tabs[1].classList.add('active');
     } else if (tab === 'forgot') {
-        document.getElementById('forgotForm')?.classList.add('active');
-        document.querySelectorAll('.auth-tab')[2]?.classList.add('active');
+        const forgotForm = document.getElementById('forgotForm');
+        const tabs = document.querySelectorAll('.auth-tab');
+        if (forgotForm) forgotForm.classList.add('active');
+        if (tabs[2]) tabs[2].classList.add('active');
     }
 }
 

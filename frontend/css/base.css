@@ -68,17 +68,17 @@ body {
     background: linear-gradient(135deg, var(--light) 0%, #f0f0f5 100%);
     color: var(--dark);
     line-height: 1.6;
-    min-height: 100vh;
+    min-block-size: 100vh;
 }
 
 /* ========== CONTAINER ========== */
 .container {
     display: flex;
-    max-width: 1400px;
+    max-inline-size: 1400px;
     margin: 0 auto;
     gap: var(--sp-2xl);
     padding: var(--sp-2xl);
-    min-height: calc(100vh - 60px);
+    min-block-size: calc(100vh - 60px);
 }
 
 /* ========== VIEW MANAGEMENT ========== */
@@ -98,8 +98,8 @@ body {
 /* ========== MAIN CONTENT ========== */
 .main-content {
     flex: 1;
-    width: 100%;
-    min-width: 0;
+    inline-size: 100%;
+    min-inline-size: 0;
     box-sizing: border-box;
 }
 
@@ -107,7 +107,7 @@ body {
     font-size: 32px;
     font-weight: 700;
     color: var(--dark);
-    margin-bottom: var(--sp-2xl);
+    margin-block-end: var(--sp-2xl);
     display: flex;
     align-items: center;
     gap: var(--sp-lg);
@@ -161,7 +161,7 @@ button, .btn {
 }
 
 .btn-logout {
-    width: 100%;
+    inline-size: 100%;
     padding: 15px;
     background: linear-gradient(135deg, var(--error) 0%, #dc2626 100%);
     color: white;

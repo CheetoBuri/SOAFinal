@@ -102,3 +102,25 @@ def init_db():
         conn.commit()
     finally:
         conn.close()
+
+
+def migrate_add_delivered_at():
+    """Add delivered_at column to orders table if it doesn't exist"""
+    conn = get_db()
+    c = conn.cursor()
+    
+    try:
+        # Check if column exists
+        c.execute("PRAGMA table_info(orders)")
+        columns = [col[1] for col in c.fetchall()]
+        
+        if 'delivered_at' not in columns:
+            c.execute("ALTER TABLE orders ADD COLUMN delivered_at TIMESTAMP")
+            conn.commit()
+            print("✅ Added 'delivered_at' column to orders table")
+        else:
+            print("ℹ️  Column 'delivered_at' already exists")
+    except Exception as e:
+        print(f"⚠️  Migration error: {e}")
+    finally:
+        conn.close()
