@@ -14,7 +14,7 @@ import os
 from database import init_db
 
 # Import all routers
-from routers import auth, menu, profile, orders, payment, favorites, cart, reviews
+from routers import auth, menu, profile, orders, payment, favorites, cart, reviews, wishlist
 # Optional routers: import if present
 try:
     from routers import locations  # type: ignore
@@ -86,6 +86,7 @@ app.include_router(payment.router)
 app.include_router(favorites.router)
 app.include_router(cart.router)
 app.include_router(reviews.router)
+app.include_router(wishlist.router)
 if locations is not None:
     app.include_router(locations.router)
 if transactions is not None:

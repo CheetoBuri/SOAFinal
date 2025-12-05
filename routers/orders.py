@@ -189,26 +189,73 @@ def checkout(request: CheckoutRequest):
     }
 
 
-@router.get("/orders", summary="Get User's Order History")
-def get_orders(user_id: str):
+@router.get("/orders", summary="Get User's Order History with Filtering")
+def get_orders(
+    user_id: str,
+    status: str = None,
+    start_date: str = None,
+    end_date: str = None,
+    sort_by: str = "created_at",
+    order: str = "desc",
+    limit: int = 50
+):
     """
-    Get all orders for a user.
+    Get user's order history with optional filtering and sorting.
     
     - **user_id**: User ID (query parameter, required)
+    - **status**: Filter by order status (query parameter, optional)
+      - Options: `pending`, `confirmed`, `preparing`, `ready`, `delivered`, `cancelled`
+    - **start_date**: Filter orders from this date (ISO format: YYYY-MM-DD, optional)
+    - **end_date**: Filter orders until this date (ISO format: YYYY-MM-DD, optional)
+    - **sort_by**: Sort field (query parameter, optional)
+      - Options: `created_at`, `total`, `status` (default: `created_at`)
+    - **order**: Sort direction (query parameter, optional)
+      - Options: `asc`, `desc` (default: `desc`)
+    - **limit**: Maximum orders to return (query parameter, default: 50)
     
-    Returns array of user's orders sorted by creation date (newest first).
+    Returns array of user's orders with applied filters.
     """
     conn = get_db()
     c = conn.cursor()
     
-    c.execute("""
+    # Build base query
+    query = """
         SELECT id, items, total, status, special_notes, promo_code, discount, 
                payment_method, customer_name, customer_phone, delivery_district, 
                delivery_ward, delivery_street, payment_time, created_at
         FROM orders
         WHERE user_id = ?
-        ORDER BY created_at DESC
-    """, (user_id,))
+    """
+    params = [user_id]
+    
+    # Add status filter
+    if status:
+        query += " AND status = ?"
+        params.append(status)
+    
+    # Add date range filters
+    if start_date:
+        query += " AND DATE(created_at) >= DATE(?)"
+        params.append(start_date)
+    
+    if end_date:
+        query += " AND DATE(created_at) <= DATE(?)"
+        params.append(end_date)
+    
+    # Validate sort_by to prevent SQL injection
+    valid_sort_fields = {"created_at", "total", "status"}
+    if sort_by not in valid_sort_fields:
+        sort_by = "created_at"
+    
+    # Validate order direction
+    if order.lower() not in {"asc", "desc"}:
+        order = "desc"
+    
+    # Add sorting
+    query += f" ORDER BY {sort_by} {order.upper()}"
+    query += f" LIMIT {limit}"
+    
+    c.execute(query, params)
     
     orders = []
     for row in c.fetchall():

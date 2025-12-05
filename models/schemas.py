@@ -341,3 +341,56 @@ class ProductReviewsResponse(BaseModel):
                 "reviews": []
             }
         }
+
+
+# ========== WISHLIST MODELS ==========
+
+class WishlistItemRequest(BaseModel):
+    """Add item to wishlist"""
+    user_id: str
+    product_id: str
+    notes: Optional[str] = None
+    
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "user_id": "user_123",
+                "product_id": "cf_1",
+                "notes": "Try when in stock"
+            }
+        }
+
+
+class WishlistItemResponse(BaseModel):
+    """Wishlist item details"""
+    id: int
+    user_id: str
+    product_id: str
+    notes: Optional[str]
+    added_at: str
+
+
+# ========== STATISTICS MODELS ==========
+
+class OrderStatsResponse(BaseModel):
+    """User order statistics"""
+    total_orders: int
+    total_spent: float
+    average_order_value: float
+    highest_order: float
+    lowest_order: float
+    favorite_product: Optional[str] = None
+    favorite_product_count: int = 0
+    
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "total_orders": 25,
+                "total_spent": 500000.0,
+                "average_order_value": 20000.0,
+                "highest_order": 150000.0,
+                "lowest_order": 25000.0,
+                "favorite_product": "cf_1",
+                "favorite_product_count": 5
+            }
+        }

@@ -3,7 +3,7 @@ import { initAuth, handleLogin, sendOTP, handleRegister, sendForgotOTP, handleFo
 import { loadMenu, filterByCategory, handleSearch, selectSearchResult, toggleFavorite } from './components/menu.js';
 import { showAddToCart, closeSizeModal, addToCartFromModal, updateModalPrice, updateCartUI, changeQty, removeFromCart, openCheckoutModal, closeCheckoutModal, processCheckout } from './components/cart.js';
 import { switchView } from './components/navigation.js';
-import { cancelOrder, confirmReceived } from './components/orders.js';
+import { cancelOrder, confirmReceived, initOrderFilters } from './components/orders.js';
 import * as profileComponent from './components/profile.js';
 import * as ui from './utils/ui.js';
 import { initDarkMode, toggleDarkMode } from './utils/darkmode.js';
@@ -58,4 +58,5 @@ document.addEventListener('DOMContentLoaded', () => {
     setupAuthListeners();
     initAuth();
     initDarkMode();
+    initOrderFilters();
 });

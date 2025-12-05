@@ -1,0 +1,180 @@
+/* ========== WISHLIST STYLES ========== */
+
+.wishlist-item {
+    background: white;
+    border-radius: var(--radius-md);
+    padding: 16px;
+    border-left: 4px solid var(--primary);
+    margin-bottom: 12px;
+    transition: var(--trans-fast);
+}
+
+.wishlist-item:hover {
+    box-shadow: 0 4px 12px rgba(0, 98, 65, 0.1);
+    transform: translateX(4px);
+}
+
+.wishlist-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.wishlist-product-id {
+    font-weight: 600;
+    color: var(--dark);
+}
+
+.wishlist-date {
+    font-size: 12px;
+    color: var(--gray-400);
+}
+
+.wishlist-notes {
+    color: #666;
+    font-size: 13px;
+    margin-bottom: 12px;
+    padding: 8px;
+    background: #f9f9f9;
+    border-radius: var(--radius-sm);
+}
+
+.wishlist-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-add-to-cart {
+    flex: 1;
+    background: linear-gradient(135deg, #006241 0%, #004d33 100%);
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--trans-fast);
+}
+
+.btn-add-to-cart:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 98, 65, 0.2);
+}
+
+.btn-remove-wishlist {
+    background: #f0f0f0;
+    color: var(--dark);
+    border: none;
+    padding: 8px 12px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    cursor: pointer;
+    transition: var(--trans-fast);
+}
+
+.btn-remove-wishlist:hover {
+    background: #e0e0e0;
+}
+
+/* ========== STATISTICS STYLES ========== */
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 16px;
+    margin: 24px 0;
+}
+
+.stat-card {
+    background: white;
+    border-radius: var(--radius-md);
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    border: 1px solid #f0f0f0;
+    transition: var(--trans-fast);
+}
+
+.stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px rgba(0, 98, 65, 0.1);
+    border-color: var(--primary);
+}
+
+.stat-icon {
+    font-size: 32px;
+    margin-bottom: 12px;
+}
+
+.stat-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 8px;
+}
+
+.stat-label {
+    font-size: 12px;
+    color: var(--gray-400);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* ========== FREQUENT ITEMS STYLES ========== */
+
+.frequent-items-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin: 20px 0;
+}
+
+.frequent-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: linear-gradient(135deg, #f5f5f5 0%, white 100%);
+    padding: 12px 16px;
+    border-radius: var(--radius-md);
+    border-left: 3px solid var(--primary);
+    transition: var(--trans-fast);
+}
+
+.frequent-item:hover {
+    background: linear-gradient(135deg, white 0%, #f5f5f5 100%);
+    transform: translateX(4px);
+}
+
+.rank {
+    font-weight: 700;
+    color: var(--primary);
+    min-width: 30px;
+    text-align: center;
+}
+
+.product-id {
+    flex: 1;
+    font-weight: 600;
+    color: var(--dark);
+}
+
+.count {
+    font-size: 12px;
+    color: var(--gray-400);
+    font-weight: 600;
+}
+
+@media (max-width: 768px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+}

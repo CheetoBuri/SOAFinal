@@ -3,8 +3,17 @@ import * as api from '../utils/api.js';
 import * as ui from '../utils/ui.js';
 import { state } from '../utils/state.js';
 
+// Filter state
+let currentFilters = {
+    status: '',
+    start_date: '',
+    end_date: '',
+    sort_by: 'created_at',
+    order: 'desc'
+};
+
 export async function loadOrderHistory() {
-    const result = await api.getOrderHistory(state.currentUser.id);
+    const result = await api.getOrderHistory(state.currentUser.id, currentFilters);
     const ordersList = document.getElementById('ordersList');
     
     if (!ordersList) return;
@@ -12,7 +21,7 @@ export async function loadOrderHistory() {
     if (result.ok && result.data.orders && result.data.orders.length > 0) {
         ordersList.innerHTML = result.data.orders.map(formatOrderCard).join('');
     } else {
-        ordersList.innerHTML = '<p style="color:#999;">No orders yet. Start shopping!</p>';
+        ordersList.innerHTML = '<p style="color:#999;">No orders found. Start shopping!</p>';
     }
 }
 
@@ -252,3 +261,97 @@ function formatAddress(order) {
     }
     return null;
 }
+
+// ========== ORDER FILTERING FUNCTIONS ==========
+
+export function initOrderFilters() {
+    const filterBtn = document.getElementById('filterOrdersBtn');
+    if (filterBtn) {
+        filterBtn.addEventListener('click', openOrderFilterModal);
+    }
+    
+    // Set event listeners for filter inputs
+    const statusSelect = document.getElementById('filterStatus');
+    const sortSelect = document.getElementById('filterSort');
+    const orderSelect = document.getElementById('filterOrder');
+    const startDateInput = document.getElementById('filterStartDate');
+    const endDateInput = document.getElementById('filterEndDate');
+    const applyBtn = document.getElementById('applyFiltersBtn');
+    const resetBtn = document.getElementById('resetFiltersBtn');
+    
+    if (applyBtn) {
+        applyBtn.addEventListener('click', applyOrderFilters);
+    }
+    
+    if (resetBtn) {
+        resetBtn.addEventListener('click', resetOrderFilters);
+    }
+}
+
+export function openOrderFilterModal() {
+    const modal = document.getElementById('orderFilterModal');
+    if (modal) {
+        modal.classList.add('active');
+        // Pre-populate with current filters
+        document.getElementById('filterStatus').value = currentFilters.status || '';
+        document.getElementById('filterSort').value = currentFilters.sort_by || 'created_at';
+        document.getElementById('filterOrder').value = currentFilters.order || 'desc';
+        document.getElementById('filterStartDate').value = currentFilters.start_date || '';
+        document.getElementById('filterEndDate').value = currentFilters.end_date || '';
+    }
+}
+
+export function closeOrderFilterModal() {
+    const modal = document.getElementById('orderFilterModal');
+    if (modal) {
+        modal.classList.remove('active');
+    }
+}
+
+export async function applyOrderFilters() {
+    currentFilters = {
+        status: document.getElementById('filterStatus').value || '',
+        start_date: document.getElementById('filterStartDate').value || '',
+        end_date: document.getElementById('filterEndDate').value || '',
+        sort_by: document.getElementById('filterSort').value || 'created_at',
+        order: document.getElementById('filterOrder').value || 'desc'
+    };
+    
+    // Validate date range
+    if (currentFilters.start_date && currentFilters.end_date) {
+        if (new Date(currentFilters.start_date) > new Date(currentFilters.end_date)) {
+            ui.showError('Start date cannot be after end date');
+            return;
+        }
+    }
+    
+    closeOrderFilterModal();
+    await loadOrderHistory();
+    ui.showSuccess('Filters applied');
+}
+
+export function resetOrderFilters() {
+    currentFilters = {
+        status: '',
+        start_date: '',
+        end_date: '',
+        sort_by: 'created_at',
+        order: 'desc'
+    };
+    
+    document.getElementById('filterStatus').value = '';
+    document.getElementById('filterSort').value = 'created_at';
+    document.getElementById('filterOrder').value = 'desc';
+    document.getElementById('filterStartDate').value = '';
+    document.getElementById('filterEndDate').value = '';
+    
+    closeOrderFilterModal();
+    loadOrderHistory();
+    ui.showSuccess('Filters reset');
+}
+
+// Expose to window for onclick handlers
+window.openOrderFilterModal = openOrderFilterModal;
+window.closeOrderFilterModal = closeOrderFilterModal;
+window.applyOrderFilters = applyOrderFilters;
+window.resetOrderFilters = resetOrderFilters;

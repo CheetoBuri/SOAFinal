@@ -232,3 +232,77 @@ button:disabled {
     cursor: not-allowed !important;
     opacity: 0.6 !important;
 }
+
+/* ========== FILTER STYLES ========== */
+
+.btn-filter {
+    background: linear-gradient(135deg, #006241 0%, #004d33 100%);
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--trans-fast);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-filter:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 98, 65, 0.3);
+}
+
+.btn-secondary {
+    background: #f0f0f0;
+    color: #1a1a1a;
+    border: none;
+    padding: 10px 16px;
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--trans-fast);
+}
+
+.btn-secondary:hover {
+    background: #e0e0e0;
+}
+
+.filter-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin: 24px 0;
+}
+
+.filter-form .form-group {
+    grid-column: 1 / -1;
+}
+
+.filter-form select,
+.filter-form input[type="date"] {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #e0e0e0;
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    font-family: inherit;
+    transition: var(--trans-fast);
+}
+
+.filter-form select:focus,
+.filter-form input[type="date"]:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(0, 98, 65, 0.1);
+}
+
+@media (max-width: 640px) {
+    .filter-form {
+        grid-template-columns: 1fr;
+    }
+}
+

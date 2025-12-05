@@ -203,3 +203,107 @@ def get_balance(user_id: str):
         raise HTTPException(status_code=404, detail="User not found")
     
     return {"balance": result[0]}
+
+
+@router.get("/stats", summary="Get User Order Statistics", tags=["6️⃣ User Profile"])
+def get_order_stats(user_id: str):
+    """
+    Get user's order statistics including spending, order count, and favorite product.
+    
+    - **user_id**: User ID (query parameter, required)
+    
+    Returns stats with total orders, spending, averages, and favorite product.
+    """
+    conn = get_db()
+    c = conn.cursor()
+    
+    # Get basic order stats
+    c.execute("""
+        SELECT 
+            COUNT(*) as total_orders,
+            SUM(total) as total_spent,
+            AVG(total) as avg_order,
+            MAX(total) as highest,
+            MIN(total) as lowest
+        FROM orders
+        WHERE user_id = ? AND status != 'cancelled'
+    """, (user_id,))
+    
+    stats = c.fetchone()
+    
+    total_orders = stats[0] or 0
+    total_spent = stats[1] or 0.0
+    avg_order = stats[2] or 0.0
+    highest = stats[3] or 0.0
+    lowest = stats[4] or 0.0
+    
+    # Get favorite product (most ordered)
+    c.execute("""
+        SELECT 
+            json_extract(items, '$[0].product_id') as product_id,
+            COUNT(*) as count
+        FROM (
+            SELECT json_each.value as item
+            FROM orders, json_each(orders.items)
+            WHERE user_id = ? AND status != 'cancelled'
+        ) as items_table,
+        json_each
+        GROUP BY json_extract(items, '$[0].product_id')
+        ORDER BY count DESC
+        LIMIT 1
+    """, (user_id,))
+    
+    fav_result = c.fetchone()
+    favorite_product = fav_result[0] if fav_result else None
+    favorite_count = fav_result[1] if fav_result else 0
+    
+    conn.close()
+    
+    return {
+        "total_orders": total_orders,
+        "total_spent": round(total_spent, 2),
+        "average_order_value": round(avg_order, 2),
+        "highest_order": round(highest, 2),
+        "lowest_order": round(lowest, 2),
+        "favorite_product": favorite_product,
+        "favorite_product_count": favorite_count
+    }
+
+
+@router.get("/frequent-items", summary="Get Frequent Items", tags=["6️⃣ User Profile"])
+def get_frequent_items(user_id: str, limit: int = 5):
+    """
+    Get user's most frequently ordered items.
+    
+    - **user_id**: User ID (query parameter, required)
+    - **limit**: Maximum items to return (query parameter, default 5)
+    
+    Returns top N most ordered products.
+    """
+    conn = get_db()
+    c = conn.cursor()
+    
+    # Extract product IDs from JSON items and count occurrences
+    c.execute("""
+        SELECT 
+            json_extract(value, '$.product_id') as product_id,
+            COUNT(*) as order_count
+        FROM orders, json_each(orders.items)
+        WHERE user_id = ? AND status != 'cancelled'
+        GROUP BY json_extract(value, '$.product_id')
+        ORDER BY order_count DESC
+        LIMIT ?
+    """, (user_id, limit))
+    
+    results = c.fetchall()
+    conn.close()
+    
+    return {
+        "frequent_items": [
+            {
+                "product_id": row[0],
+                "order_count": row[1]
+            }
+            for row in results
+        ]
+    }

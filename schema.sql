@@ -152,6 +152,22 @@ CREATE INDEX IF NOT EXISTS idx_reviews_user ON reviews(user_id);
 CREATE INDEX IF NOT EXISTS idx_reviews_created ON reviews(created_at);
 
 -- ============================================
+-- WISHLIST TABLE
+-- ============================================
+CREATE TABLE IF NOT EXISTS wishlist (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id TEXT NOT NULL,
+    product_id TEXT NOT NULL,
+    notes TEXT,
+    added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(user_id, product_id),
+    FOREIGN KEY(user_id) REFERENCES users(id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_wishlist_user_id ON wishlist(user_id);
+CREATE INDEX IF NOT EXISTS idx_wishlist_product_id ON wishlist(product_id);
+
+-- ============================================
 -- SAMPLE DATA (Optional - uncomment to use)
 -- ============================================
 

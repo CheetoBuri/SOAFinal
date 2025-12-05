@@ -4,6 +4,8 @@ import { state, setCurrentView } from '../utils/state.js';
 import { loadOrderHistory, loadOrderStatus } from './orders.js';
 import { loadFavoritesView } from './menu.js';
 import { loadProfileData, loadTransactionHistory } from './profile.js';
+import { loadWishlist } from './wishlist.js';
+import { loadOrderStats, loadFrequentItems } from './statistics.js';
 
 export function switchView(view) {
     const shopControls = document.getElementById('shopControls');
@@ -40,5 +42,16 @@ export function switchView(view) {
         if (shopControls) shopControls.style.display = 'block';
         if (cartSidebar) cartSidebar.style.display = 'block';
         loadFavoritesView();
+    } else if (view === 'wishlist') {
+        document.getElementById('wishlistView')?.classList.add('active');
+        if (shopControls) shopControls.style.display = 'none';
+        if (cartSidebar) cartSidebar.style.display = 'none';
+        loadWishlist();
+    } else if (view === 'statistics') {
+        document.getElementById('statisticsView')?.classList.add('active');
+        if (shopControls) shopControls.style.display = 'none';
+        if (cartSidebar) cartSidebar.style.display = 'none';
+        loadOrderStats();
+        loadFrequentItems();
     }
 }

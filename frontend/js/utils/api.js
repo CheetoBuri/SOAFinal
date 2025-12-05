@@ -66,8 +66,26 @@ export async function placeOrder(orderData) {
     return await apiCall('/checkout', 'POST', orderData);
 }
 
-export async function getOrderHistory(user_id) {
-    return await apiCall(`/orders?user_id=${user_id}`);
+export async function getOrderHistory(user_id, filters = {}) {
+    let endpoint = `/orders?user_id=${user_id}`;
+    
+    if (filters.status) {
+        endpoint += `&status=${encodeURIComponent(filters.status)}`;
+    }
+    if (filters.start_date) {
+        endpoint += `&start_date=${encodeURIComponent(filters.start_date)}`;
+    }
+    if (filters.end_date) {
+        endpoint += `&end_date=${encodeURIComponent(filters.end_date)}`;
+    }
+    if (filters.sort_by) {
+        endpoint += `&sort_by=${encodeURIComponent(filters.sort_by)}`;
+    }
+    if (filters.order) {
+        endpoint += `&order=${encodeURIComponent(filters.order)}`;
+    }
+    
+    return await apiCall(endpoint);
 }
 
 export async function getOrderStatus(user_id, status = null) {
@@ -154,6 +172,37 @@ export async function sendPaymentOTP(user_id, order_id, amount) {
         amount
     });
 }
+
+// Wishlist APIs
+export async function addToWishlist(user_id, product_id, notes = '') {
+    return await apiCall('/wishlist/add', 'POST', {
+        user_id,
+        product_id,
+        notes
+    });
+}
+
+export async function getWishlist(user_id) {
+    return await apiCall(`/wishlist/${user_id}`);
+}
+
+export async function removeFromWishlist(product_id, user_id) {
+    return await apiCall(`/wishlist/${product_id}?user_id=${user_id}`, 'DELETE');
+}
+
+export async function clearWishlist(user_id) {
+    return await apiCall(`/wishlist/clear?user_id=${user_id}`, 'POST');
+}
+
+// User Statistics APIs
+export async function getOrderStats(user_id) {
+    return await apiCall(`/user/stats?user_id=${user_id}`);
+}
+
+export async function getFrequentItems(user_id, limit = 5) {
+    return await apiCall(`/user/frequent-items?user_id=${user_id}&limit=${limit}`);
+}
+
 
 export async function verifyPaymentOTP(user_id, order_id, otp_code) {
     return await apiCall('/payment/verify-otp', 'POST', {

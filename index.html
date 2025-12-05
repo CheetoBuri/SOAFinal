@@ -24,6 +24,7 @@
     <link rel="stylesheet" href="frontend/css/dark-mode.css?v=20251205">
     <link rel="stylesheet" href="frontend/css/responsive.css?v=20251205">
     <link rel="stylesheet" href="frontend/css/reviews.css?v=20251205">
+    <link rel="stylesheet" href="frontend/css/wishlist-stats.css?v=20251205">
 </head>
 <body>
     <!-- ========== AUTH SCREEN ========== -->
@@ -174,6 +175,19 @@
                         <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
                     </svg>
                 </button>
+                <button class="icon-btn" onclick="switchView('wishlist')" title="Wishlist">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2-2 2 2 0 0 0 2 2 2 2 0 0 0 2-2 2 2 0 0 0-2-2"></path>
+                        <line x1="8" y1="11" x2="16" y2="11"></line>
+                        <line x1="8" y1="15" x2="16" y2="15"></line>
+                    </svg>
+                </button>
+                <button class="icon-btn" onclick="switchView('statistics')" title="Statistics">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="2" x2="12" y2="22"></line>
+                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                    </svg>
+                </button>
                 <button class="icon-btn" onclick="switchView('profile')" title="Profile">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
@@ -233,7 +247,10 @@
 
                 <!-- ORDER HISTORY VIEW -->
                 <div id="historyView" class="view">
-                    <h2 style="color:#006241; margin-block-end:20px;">📜 Your Orders</h2>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-block-end:20px;">
+                        <h2 style="color:#006241; margin:0;">📜 Your Orders</h2>
+                        <button id="filterOrdersBtn" class="btn-filter" onclick="openOrderFilterModal()">🔍 Filter</button>
+                    </div>
                     <div class="order-list" id="ordersList">
                         <p style="color:#999;">Loading orders...</p>
                     </div>
@@ -244,6 +261,36 @@
                     <h2>❤️ Your Favorites</h2>
                     <div id="favoritesGrid">
                         <p style="color:#999;">No favorites yet. Add some from the shop!</p>
+                    </div>
+                </div>
+
+                <!-- WISHLIST VIEW -->
+                <div id="wishlistView" class="view">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-block-end:20px;">
+                        <h2 style="color:#006241; margin:0;">💭 Wishlist</h2>
+                        <button class="btn-filter" onclick="clearAllWishlist()">Clear All</button>
+                    </div>
+                    <div id="wishlistContainer">
+                        <p style="color:#999; text-align:center; padding:40px;">Your wishlist is empty</p>
+                    </div>
+                </div>
+
+                <!-- STATISTICS VIEW -->
+                <div id="statisticsView" class="view">
+                    <h2 style="color:#006241; margin-block-end:20px;">📊 Your Statistics</h2>
+                    
+                    <div style="margin-block-end:40px;">
+                        <h3 style="color:#333; margin-block-end:16px;">Order Overview</h3>
+                        <div id="statsContainer">
+                            <p style="color:#999;">Loading statistics...</p>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h3 style="color:#333; margin-block-end:16px;">Your Top Items</h3>
+                        <div id="frequentItemsContainer">
+                            <p style="color:#999;">Loading frequent items...</p>
+                        </div>
                     </div>
                 </div>
 
@@ -514,6 +561,85 @@
         </div>
     </div>
 
+    <!-- ORDER FILTER MODAL -->
+    <div id="orderFilterModal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeOrderFilterModal()">×</button>
+            <h3 class="modal-header">🔍 Filter Orders</h3>
+            
+            <div class="filter-form">
+                <div class="form-group">
+                    <label>Order Status</label>
+                    <select id="filterStatus">
+                        <option value="">All Statuses</option>
+                        <option value="pending_payment">Pending Payment</option>
+                        <option value="paid">Paid</option>
+                        <option value="confirmed">Confirmed</option>
+                        <option value="preparing">Preparing</option>
+                        <option value="delivering">Delivering</option>
+                        <option value="delivered">Delivered</option>
+                        <option value="cancelled">Cancelled</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Sort By</label>
+                    <select id="filterSort">
+                        <option value="created_at">Date (Default)</option>
+                        <option value="total">Amount</option>
+                        <option value="status">Status</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Sort Order</label>
+                    <select id="filterOrder">
+                        <option value="desc">Newest First</option>
+                        <option value="asc">Oldest First</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Start Date</label>
+                    <input type="date" id="filterStartDate">
+                </div>
+
+                <div class="form-group">
+                    <label>End Date</label>
+                    <input type="date" id="filterEndDate">
+                </div>
+            </div>
+
+            <div class="modal-buttons">
+                <button class="btn-submit" id="applyFiltersBtn">Apply Filters</button>
+                <button class="btn-secondary" id="resetFiltersBtn">Reset</button>
+                <button class="btn-cancel" onclick="closeOrderFilterModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- WISHLIST MODAL -->
+    <div id="wishlistModal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeWishlistModal()">×</button>
+            <h3 class="modal-header">💭 Add to Wishlist</h3>
+            
+            <form onsubmit="submitWishlistItem(); return false;">
+                <div class="form-group">
+                    <label>Add Notes (Optional)</label>
+                    <textarea id="wishlistNotes" placeholder="e.g., Try when back in stock..." maxlength="200" style="min-height: 80px;"></textarea>
+                </div>
+                
+                <div class="modal-buttons">
+                    <button type="submit" class="btn-submit">Add to Wishlist</button>
+                    <button type="button" class="btn-cancel" onclick="closeWishlistModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <input type="hidden" id="wishlistProductId">
+
     <!-- REVIEW MODAL -->
     <div id="reviewModal" class="modal">
         <div class="modal-content">
@@ -556,6 +682,8 @@
 
     <!-- JavaScript Imports (ES6 Modules) -->
     <script src="frontend/js/components/reviews.js"></script>
+    <script src="frontend/js/components/wishlist.js"></script>
+    <script src="frontend/js/components/statistics.js"></script>
     <script type="module" src="frontend/js/main.js?v=2.2"></script>
 </body>
 </html>
