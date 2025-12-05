@@ -7,10 +7,10 @@ header {
     justify-content: space-between;
     align-items: center;
     position: sticky;
-    top: 0;
+    inset-block-start: 0;
     z-index: 100;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    border-block-end: 1px solid rgba(0, 0, 0, 0.05);
     backdrop-filter: blur(10px);
 }
 
@@ -58,8 +58,8 @@ header {
     align-items: center;
     justify-content: center;
     transition: var(--trans-fast);
-    width: 44px;
-    height: 44px;
+    inline-size: 44px;
+    block-size: 44px;
     position: relative;
 }
 
@@ -75,6 +75,6 @@ header {
 }
 
 .icon-btn svg {
-    width: 24px;
-    height: 24px;
+    inline-size: 24px;
+    block-size: 24px;
 }

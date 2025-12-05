@@ -236,3 +236,26 @@ def send_order_confirmation_email(recipient_email: str, recipient_name: str, ord
     """
     # Can implement later if needed
     pass
+
+
+def send_simple_email(recipient_email: str, subject: str, body: str) -> bool:
+    """Send a simple text email. Returns True on success, False otherwise."""
+    if not SENDER_EMAIL or not SENDER_PASSWORD:
+        print("⚠️ Email credentials not configured. Skipping email.")
+        return False
+    try:
+        msg = MIMEMultipart('alternative')
+        msg['Subject'] = subject
+        msg['From'] = f"{SENDER_NAME} <{SENDER_EMAIL}>"
+        msg['To'] = recipient_email
+        text_part = MIMEText(body, 'plain')
+        msg.attach(text_part)
+        with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
+            server.starttls()
+            server.login(SENDER_EMAIL, SENDER_PASSWORD)
+            server.send_message(msg)
+        print(f"✅ Email sent to {recipient_email}: {subject}")
+        return True
+    except Exception as e:
+        print(f"❌ Failed to send email: {str(e)}")
+        return False

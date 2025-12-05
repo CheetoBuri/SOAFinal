@@ -75,7 +75,7 @@ function showCustomizationModal(product, customization) {
     if (isCoffee && Object.keys(customization.milkOptions).length > 0) {
         modalContent += `
             <div class="form-group">
-                <label><strong>🥛 Milk Options (Optional - Max 2):</strong></label>
+                <label><strong>🥛 Milk Options:</strong> <span style="font-size: 12px; color: #666;">(Choose 1 milk type + optional condensed milk)</span></label>
                 <div class="milk-options" style="display: flex; flex-direction: column; gap: 8px; margin-top: 8px;">
                     ${Object.entries(customization.milkOptions).map(([key, data]) => `
                         <label class="checkbox-option ${data.default ? 'selected' : ''}" style="cursor: pointer; display: flex; align-items: center; gap: 10px; padding: 10px; border: 2px solid #ddd; border-radius: 8px; transition: all 0.3s;" data-milk-key="${key}">
@@ -190,18 +190,31 @@ function addOptionCardListeners() {
         });
     });
     
-    // Milk option cards - Allow selecting up to 2 milk options
+    // Milk option cards - Allow only 1 regular milk + optional condensed milk
     document.querySelectorAll('.milk-options .milk-checkbox').forEach(checkbox => {
         checkbox.addEventListener('change', function() {
-            const checkedMilks = document.querySelectorAll('.milk-options .milk-checkbox:checked');
+            const milkValue = this.value;
+            const isCondensed = milkValue === 'condensed' || milkValue === 'condensed_milk';
             
             if (this.checked) {
-                // If trying to select more than 2, uncheck this one and show warning
-                if (checkedMilks.length > 2) {
+                // Get all checked milks (EXCLUDING the one just clicked to check the state BEFORE this change)
+                const otherCheckedMilks = Array.from(document.querySelectorAll('.milk-options .milk-checkbox:checked')).filter(cb => cb !== this);
+                const otherRegularMilks = otherCheckedMilks.filter(cb => cb.value !== 'condensed' && cb.value !== 'condensed_milk');
+                
+                // If this is a regular milk and there's already another regular milk selected
+                if (!isCondensed && otherRegularMilks.length >= 1) {
                     this.checked = false;
-                    alert('You can select up to 2 milk options only.');
+                    alert('Bạn chỉ có thể chọn 1 loại sữa chính. Có thể thêm sữa đặc nếu muốn.');
                     return;
                 }
+                
+                // If trying to select condensed milk when no regular milk is selected
+                if (isCondensed && otherRegularMilks.length === 0) {
+                    this.checked = false;
+                    alert('Vui lòng chọn 1 loại sữa chính trước khi thêm sữa đặc.');
+                    return;
+                }
+                
                 this.closest('.checkbox-option').classList.add('selected');
             } else {
                 this.closest('.checkbox-option').classList.remove('selected');
@@ -343,13 +356,65 @@ export function updateCartUI() {
     cartItemsDiv.innerHTML = cartItems.map((item, index) => {
         total += item.price * item.quantity;
         
-        // Build customization summary
+        // Build detailed customization display
         let customizations = [];
-        if (item.size && item.size !== 'M') customizations.push(`Size: ${item.size}`);
+        
+        // Size
+        if (item.size) customizations.push(`Size: ${item.size}`);
+        
+        // Sugar level
         if (item.sugar) customizations.push(`Sugar: ${item.sugar}%`);
-        if (item.milk) customizations.push(`Milk: ${item.milk}`);
-        if (item.upsells && item.upsells.length > 0) customizations.push(`+${item.upsells.length} topping`);
-        if (item.toppings && item.toppings.length > 0) customizations.push(`+${item.toppings.length} topping`);
+        
+        // Milk options (show all selected milk types)
+        if (item.milks && Array.isArray(item.milks) && item.milks.length > 0) {
+            const milkNames = {
+                'fresh': 'Fresh Milk',
+                'fresh_milk': 'Fresh Milk',
+                'condensed': 'Condensed Milk',
+                'condensed_milk': 'Condensed Milk',
+                'coconut': 'Coconut Milk',
+                'coconut_milk': 'Coconut Milk',
+                'almond': 'Almond Milk',
+                'almond_milk': 'Almond Milk',
+                'oat': 'Oat Milk',
+                'oat_milk': 'Oat Milk',
+                'soy': 'Soy Milk',
+                'soy_milk': 'Soy Milk'
+            };
+            const milkLabels = item.milks.map(m => milkNames[m] || m.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())).join(', ');
+            customizations.push(`Milk: ${milkLabels}`);
+        }
+        
+        // Upsells/extras
+        if (item.upsells && Array.isArray(item.upsells) && item.upsells.length > 0) {
+            const upsellNames = {
+                'extra_shot': 'Extra Shot',
+                'whipped_cream': 'Whipped Cream',
+                'chocolate_sauce': 'Chocolate Sauce',
+                'caramel_sauce': 'Caramel Sauce',
+                'vanilla_syrup': 'Vanilla Syrup',
+                'caramel_drizzle': 'Caramel Drizzle',
+                'chocolate_drizzle': 'Chocolate Drizzle'
+            };
+            const upsellLabels = item.upsells.map(u => upsellNames[u] || u.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())).join(', ');
+            customizations.push(`Extras: ${upsellLabels}`);
+        }
+        
+        // Toppings
+        if (item.toppings && Array.isArray(item.toppings) && item.toppings.length > 0) {
+            const toppingNames = {
+                'pearl': 'Pearl',
+                'jelly': 'Jelly',
+                'pudding': 'Pudding',
+                'aloe': 'Aloe Vera',
+                'grass_jelly': 'Grass Jelly',
+                'coconut_jelly': 'Coconut Jelly',
+                'tapioca': 'Tapioca',
+                'red_bean': 'Red Bean'
+            };
+            const toppingLabels = item.toppings.map(t => toppingNames[t] || t.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())).join(', ');
+            customizations.push(`Toppings: ${toppingLabels}`);
+        }
         
         const customText = customizations.length > 0 ? `<div style="font-size: 11px; color: #999; margin-top: 2px;">${customizations.join(' • ')}</div>` : '';
         
@@ -505,11 +570,63 @@ function displayCheckoutItems() {
 
     itemsList.innerHTML = state.cart.map(item => {
         const details = [];
+        
+        // Size
         if (item.size) details.push(`Size: ${item.size}`);
+        
+        // Sugar level
         if (item.sugar) details.push(`Sugar: ${item.sugar}%`);
-        if (item.milk) details.push(`Milk: ${item.milk}`);
-        if (item.upsells && item.upsells.length > 0) details.push(`+${item.upsells.length} topping`);
-        if (item.toppings && item.toppings.length > 0) details.push(`+${item.toppings.length} topping`);
+        
+        // Milk options (show all selected milk types)
+        if (item.milks && Array.isArray(item.milks) && item.milks.length > 0) {
+            const milkNames = {
+                'fresh': 'Fresh Milk',
+                'fresh_milk': 'Fresh Milk',
+                'condensed': 'Condensed Milk',
+                'condensed_milk': 'Condensed Milk',
+                'coconut': 'Coconut Milk',
+                'coconut_milk': 'Coconut Milk',
+                'almond': 'Almond Milk',
+                'almond_milk': 'Almond Milk',
+                'oat': 'Oat Milk',
+                'oat_milk': 'Oat Milk',
+                'soy': 'Soy Milk',
+                'soy_milk': 'Soy Milk'
+            };
+            const milkLabels = item.milks.map(m => milkNames[m] || m.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())).join(', ');
+            details.push(`Milk: ${milkLabels}`);
+        }
+        
+        // Upsells/extras
+        if (item.upsells && Array.isArray(item.upsells) && item.upsells.length > 0) {
+            const upsellNames = {
+                'extra_shot': 'Extra Shot',
+                'whipped_cream': 'Whipped Cream',
+                'chocolate_sauce': 'Chocolate Sauce',
+                'caramel_sauce': 'Caramel Sauce',
+                'vanilla_syrup': 'Vanilla Syrup',
+                'caramel_drizzle': 'Caramel Drizzle',
+                'chocolate_drizzle': 'Chocolate Drizzle'
+            };
+            const upsellLabels = item.upsells.map(u => upsellNames[u] || u.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())).join(', ');
+            details.push(`Extras: ${upsellLabels}`);
+        }
+        
+        // Toppings
+        if (item.toppings && Array.isArray(item.toppings) && item.toppings.length > 0) {
+            const toppingNames = {
+                'pearl': 'Pearl',
+                'jelly': 'Jelly',
+                'pudding': 'Pudding',
+                'aloe': 'Aloe Vera',
+                'grass_jelly': 'Grass Jelly',
+                'coconut_jelly': 'Coconut Jelly',
+                'tapioca': 'Tapioca',
+                'red_bean': 'Red Bean'
+            };
+            const toppingLabels = item.toppings.map(t => toppingNames[t] || t.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())).join(', ');
+            details.push(`Toppings: ${toppingLabels}`);
+        }
         
         const detailsText = details.length > 0 ? `<br><span style="font-size:12px; color:#666;">${details.join(' | ')}</span>` : '';
         
@@ -727,7 +844,11 @@ window.verifyPaymentOTP = async function(orderId, amount) {
         return;
     }
     
+    console.log('Verifying payment OTP:', { user_id: state.currentUser.id, order_id: orderId, otp_code: otpCode });
+    
     const result = await api.verifyPaymentOTP(state.currentUser.id, orderId, otpCode);
+    
+    console.log('Verify payment OTP result:', result);
     
     if (result.ok) {
         alert(`Payment successful! Order ID: ${orderId}`);
@@ -746,7 +867,9 @@ window.verifyPaymentOTP = async function(orderId, amount) {
         const { switchView } = await import('./navigation.js');
         switchView('orderStatus');
     } else {
-        alert(result.data.detail || 'Xác thực OTP thất bại');
+        const errorMsg = result.data?.detail || result.data?.message || 'Xác thực OTP thất bại';
+        console.error('Payment OTP verification failed:', errorMsg, result);
+        alert(`Lỗi: ${errorMsg}`);
     }
 }
 

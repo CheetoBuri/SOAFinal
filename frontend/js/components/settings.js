@@ -50,19 +50,14 @@ window.openPersonalInfoModal = async function() {
         full_name: localStorage.getItem('userName'),
         phone: localStorage.getItem('userPhone')
     };
-    const legacy = JSON.parse(localStorage.getItem('currentUser') || '{}');
-    const email = user.email || legacy.email || '-';
-    const username = user.username || legacy.username || '-';
-    const fullName = user.full_name || legacy.full_name || legacy.name || '-';
-    const phone = user.phone || legacy.phone || '-';
-
-    document.getElementById('displayEmail').textContent = email;
-    document.getElementById('displayUsername').textContent = username;
-    document.getElementById('displayFullName').textContent = fullName;
-    document.getElementById('displayPhone').textContent = phone;
+    
+    document.getElementById('displayEmail').textContent = user.email || '-';
+    document.getElementById('displayUsername').textContent = user.username || '-';
+    document.getElementById('displayFullName').textContent = user.full_name || '-';
+    document.getElementById('displayPhone').textContent = user.phone || '-';
 
     // Try to load live balance when user id exists
-    const userId = user.id || legacy.id;
+    const userId = user.id;
     if (userId) {
         try {
             const res = await fetch(`/api/user/balance?user_id=${userId}`);
@@ -105,7 +100,7 @@ window.closeTransactionHistoryModal = function(event) {
 };
 
 async function loadTransactions() {
-    const userId = localStorage.getItem('userId') || (JSON.parse(localStorage.getItem('currentUser') || '{}').id);
+    const userId = localStorage.getItem('userId');
     const list = document.getElementById('transactionsList');
     
     try {
@@ -151,8 +146,8 @@ window.openChangeEmailModal = function(event) {
     if (settings) settings.classList.remove('active');
     const personal = document.getElementById('personalInfoModal');
     if (personal) personal.classList.remove('active');
-    const user = JSON.parse(localStorage.getItem('currentUser') || '{}');
-    document.getElementById('currentEmailDisplay').value = user.email || '';
+    const currentEmail = localStorage.getItem('userEmail');
+    document.getElementById('currentEmailDisplay').value = currentEmail || '';
     document.getElementById('newEmailInput').value = '';
     document.getElementById('emailChangePassword').value = '';
     setTimeout(() => document.getElementById('changeEmailModal').classList.add('active'), 0);
@@ -162,8 +157,8 @@ window.openChangeEmailModal = function(event) {
 window.settingsOpenChangeEmailModal = function(event) {
     if (event) event.stopPropagation();
     // Don't close settings modal - keep it open like Personal Info (it will be dimmed behind)
-    const user = JSON.parse(localStorage.getItem('currentUser') || '{}');
-    document.getElementById('currentEmailDisplay').value = user.email || '';
+    const currentEmail = localStorage.getItem('userEmail');
+    document.getElementById('currentEmailDisplay').value = currentEmail || '';
     document.getElementById('newEmailInput').value = '';
     document.getElementById('emailChangePassword').value = '';
     // Add a class to dim the settings modal
@@ -177,6 +172,13 @@ window.closeChangeEmailModalNew = function(event) {
         event.stopPropagation();
         event.preventDefault();
     }
+    
+    // Clear input fields
+    const newEmailInput = document.getElementById('newEmailInput');
+    const emailPasswordInput = document.getElementById('emailChangePassword');
+    if (newEmailInput) newEmailInput.value = '';
+    if (emailPasswordInput) emailPasswordInput.value = '';
+    
     // Close the modal
     document.getElementById('changeEmailModal').classList.remove('active');
     // Restore Settings interactivity and ensure it's active
@@ -192,42 +194,102 @@ window.closeChangeEmailModalNew = function(event) {
 
 window.submitChangeEmailNew = async function(event) {
     event.preventDefault();
-    const user = JSON.parse(localStorage.getItem('currentUser') || '{}');
-    const newEmail = document.getElementById('newEmailInput').value;
+    const user = {
+        id: localStorage.getItem('userId'),
+        email: localStorage.getItem('userEmail'),
+        name: localStorage.getItem('userName'),
+        phone: localStorage.getItem('userPhone'),
+        username: localStorage.getItem('userUsername')
+    };
+    const newEmail = document.getElementById('newEmailInput').value.trim();
     const password = document.getElementById('emailChangePassword').value;
-    
+
+    if (!newEmail) {
+        alert('Please enter a new email');
+        return;
+    }
+
     try {
-        const response = await fetch('/api/user/change-email', {
+        // Verify current password first (reuse existing endpoint)
+        const verifyResp = await fetch(`/api/user/verify-password?user_id=${user.id}&current_password=${encodeURIComponent(password)}`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                user_id: user.id,
-                new_email: newEmail,
-                password: password
-            })
+            headers: { 'Content-Type': 'application/json' }
         });
-        
-        const data = await response.json();
-        if (response.ok) {
-            alert('Email updated successfully!');
-            user.email = newEmail;
-            localStorage.setItem('currentUser', JSON.stringify(user));
-            localStorage.setItem('userEmail', newEmail);
-            document.getElementById('changeEmailModal').classList.remove('active');
-            // Restore Settings interactivity and ensure it's active
-            const settings = document.getElementById('settingsModal');
-            if (settings) {
-                settings.classList.remove('dimmed');
-                // Ensure settings modal stays active (don't close it)
-                if (!settings.classList.contains('active')) {
-                    settings.classList.add('active');
-                }
-            }
-        } else {
-            alert(data.detail || 'Failed to update email');
+        const verifyData = await verifyResp.json();
+        if (!verifyResp.ok) {
+            const errorMsg = typeof verifyData.detail === 'string' ? verifyData.detail : JSON.stringify(verifyData.detail) || 'Current password is incorrect';
+            alert(errorMsg);
+            return;
         }
+
+        const { sendChangeEmailOTP, verifyChangeEmailOTP } = await import('../utils/api.js');
+
+        // Dim settings and close change email modal
+        const changeEmailModal = document.getElementById('changeEmailModal');
+        if (changeEmailModal) changeEmailModal.classList.remove('active');
+        const settingsModal = document.getElementById('settingsModal');
+        if (settingsModal) settingsModal.classList.remove('active');
+
+        // Build OTP modal
+        const otpModal = document.createElement('div');
+        otpModal.className = 'modal-overlay active';
+        otpModal.id = 'emailChangeOTPModal';
+        otpModal.innerHTML = `
+            <div class="modal-popup-small" onclick="event.stopPropagation()">
+                <div class="modal-popup-header">
+                    <h3>Verify Email Change</h3>
+                    <button class="modal-close-btn" onclick="document.getElementById('emailChangeOTPModal')?.remove()">×</button>
+                </div>
+                <div class="modal-popup-content">
+                    <p style="margin-bottom:8px;">Enter the 6-digit OTP sent to <strong>${newEmail}</strong> to confirm email change.</p>
+                    <p id="emailOtpSendStatus" class="help-text" style="font-size:12px;color:#888; margin-bottom:12px;">Sending OTP…</p>
+                    <div class="form-group">
+                        <label>Enter OTP</label>
+                        <input type="text" id="emailChangeOTPInput" maxlength="6" placeholder="123456" class="form-input"/>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn-cancel" id="btnCancelEmailOTP">Cancel</button>
+                        <button type="button" class="btn-save" id="btnConfirmEmailOTP">Confirm</button>
+                    </div>
+                </div>
+            </div>`;
+        document.body.appendChild(otpModal);
+
+        document.getElementById('btnCancelEmailOTP').onclick = () => {
+            otpModal.remove();
+            // Restore settings modal
+            const settings = document.getElementById('settingsModal');
+            if (settings) settings.classList.add('active');
+        };
+
+        // Send OTP to new email
+        const sent = await sendChangeEmailOTP(user.id, newEmail);
+        const statusEl = document.getElementById('emailOtpSendStatus');
+        if (statusEl) {
+            statusEl.textContent = sent.ok ? `OTP sent to ${newEmail}.` : (typeof sent.data?.detail === 'string' ? sent.data.detail : 'Failed to send OTP');
+        }
+
+        document.getElementById('btnConfirmEmailOTP').onclick = async () => {
+            const code = document.getElementById('emailChangeOTPInput').value.trim();
+            if (!code || code.length !== 6) {
+                alert('Please enter a valid 6-digit OTP');
+                return;
+            }
+            const verify = await verifyChangeEmailOTP(user.id, newEmail, code);
+            if (verify.ok) {
+                alert('Email changed successfully!');
+                localStorage.setItem('userEmail', newEmail);
+                otpModal.remove();
+                const settings = document.getElementById('settingsModal');
+                if (settings) settings.classList.add('active');
+            } else {
+                const errorMsg = verify.data?.detail;
+                const displayMsg = typeof errorMsg === 'string' ? errorMsg : (errorMsg ? JSON.stringify(errorMsg) : 'OTP verification failed');
+                alert(displayMsg);
+            }
+        };
     } catch (err) {
-        alert('Error updating email');
+        alert('Error processing email change: ' + (err.message || err));
     }
 };
 
@@ -238,8 +300,8 @@ window.openChangePhoneModal = function(event) {
     if (settings) settings.classList.remove('active');
     const personal = document.getElementById('personalInfoModal');
     if (personal) personal.classList.remove('active');
-    const user = JSON.parse(localStorage.getItem('currentUser') || '{}');
-    document.getElementById('currentPhoneDisplay').value = user.phone || '';
+    const currentPhone = localStorage.getItem('userPhone');
+    document.getElementById('currentPhoneDisplay').value = currentPhone || '';
     document.getElementById('newPhoneInput').value = '';
     document.getElementById('phoneChangePassword').value = '';
     setTimeout(() => document.getElementById('changePhoneModal').classList.add('active'), 0);
@@ -248,8 +310,8 @@ window.openChangePhoneModal = function(event) {
 window.settingsOpenChangePhoneModal = function(event) {
     if (event) event.stopPropagation();
     // Don't close settings modal - keep it open like Personal Info (it will be dimmed behind)
-    const user = JSON.parse(localStorage.getItem('currentUser') || '{}');
-    document.getElementById('currentPhoneDisplay').value = user.phone || '';
+    const currentPhone = localStorage.getItem('userPhone');
+    document.getElementById('currentPhoneDisplay').value = currentPhone || '';
     document.getElementById('newPhoneInput').value = '';
     document.getElementById('phoneChangePassword').value = '';
     // Add a class to dim the settings modal
@@ -263,6 +325,11 @@ window.closeChangePhoneModalNew = function(event) {
         event.stopPropagation();
         event.preventDefault();
     }
+    
+    // Clear input field
+    const newPhoneInput = document.getElementById('newPhoneInput');
+    if (newPhoneInput) newPhoneInput.value = '';
+    
     document.getElementById('changePhoneModal').classList.remove('active');
     const settings = document.getElementById('settingsModal');
     if (settings) {
@@ -276,7 +343,13 @@ window.closeChangePhoneModalNew = function(event) {
 
 window.submitChangePhoneNew = async function(event) {
     event.preventDefault();
-    const user = JSON.parse(localStorage.getItem('currentUser') || '{}');
+    const user = {
+        id: localStorage.getItem('userId'),
+        email: localStorage.getItem('userEmail'),
+        name: localStorage.getItem('userName'),
+        phone: localStorage.getItem('userPhone'),
+        username: localStorage.getItem('userUsername')
+    };
     const newPhone = document.getElementById('newPhoneInput').value;
     const password = document.getElementById('phoneChangePassword').value;
     
@@ -294,24 +367,17 @@ window.submitChangePhoneNew = async function(event) {
         const data = await response.json();
         if (response.ok) {
             alert('Phone updated successfully!');
-            user.phone = newPhone;
-            localStorage.setItem('currentUser', JSON.stringify(user));
             localStorage.setItem('userPhone', newPhone);
+            // Close both modals
             document.getElementById('changePhoneModal').classList.remove('active');
-            // Restore Settings interactivity and ensure it's active
-            const settings = document.getElementById('settingsModal');
-            if (settings) {
-                settings.classList.remove('dimmed');
-                // Ensure settings modal stays active (don't close it)
-                if (!settings.classList.contains('active')) {
-                    settings.classList.add('active');
-                }
-            }
+            document.getElementById('settingsModal')?.classList.remove('active');
+            document.getElementById('settingsModal')?.classList.remove('dimmed');
         } else {
-            alert(data.detail || 'Failed to update phone');
+            const errorMsg = typeof data.detail === 'string' ? data.detail : JSON.stringify(data.detail) || 'Failed to update phone';
+            alert(errorMsg);
         }
     } catch (err) {
-        alert('Error updating phone');
+        alert('Error updating phone: ' + (err.message || err));
     }
 };
 
@@ -322,8 +388,8 @@ window.openChangeUsernameModal = function(event) {
     if (settings) settings.classList.remove('active');
     const personal = document.getElementById('personalInfoModal');
     if (personal) personal.classList.remove('active');
-    const user = JSON.parse(localStorage.getItem('currentUser') || '{}');
-    document.getElementById('currentUsernameDisplay').value = user.username || '';
+    const currentUsername = localStorage.getItem('userUsername');
+    document.getElementById('currentUsernameDisplay').value = currentUsername || '';
     document.getElementById('newUsernameInput').value = '';
     document.getElementById('usernameChangePassword').value = '';
     setTimeout(() => document.getElementById('changeUsernameModal').classList.add('active'), 0);
@@ -332,8 +398,8 @@ window.openChangeUsernameModal = function(event) {
 window.settingsOpenChangeUsernameModal = function(event) {
     if (event) event.stopPropagation();
     // Don't close settings modal - keep it open like Personal Info (it will be dimmed behind)
-    const user = JSON.parse(localStorage.getItem('currentUser') || '{}');
-    document.getElementById('currentUsernameDisplay').value = user.username || '';
+    const currentUsername = localStorage.getItem('userUsername');
+    document.getElementById('currentUsernameDisplay').value = currentUsername || '';
     document.getElementById('newUsernameInput').value = '';
     document.getElementById('usernameChangePassword').value = '';
     // Add a class to dim the settings modal
@@ -347,6 +413,13 @@ window.closeChangeUsernameModalNew = function(event) {
         event.stopPropagation();
         event.preventDefault();
     }
+    
+    // Clear input fields
+    const newUsernameInput = document.getElementById('newUsernameInput');
+    const usernamePasswordInput = document.getElementById('usernameChangePassword');
+    if (newUsernameInput) newUsernameInput.value = '';
+    if (usernamePasswordInput) usernamePasswordInput.value = '';
+    
     document.getElementById('changeUsernameModal').classList.remove('active');
     const settings = document.getElementById('settingsModal');
     if (settings) {
@@ -360,7 +433,13 @@ window.closeChangeUsernameModalNew = function(event) {
 
 window.submitChangeUsernameNew = async function(event) {
     event.preventDefault();
-    const user = JSON.parse(localStorage.getItem('currentUser') || '{}');
+    const user = {
+        id: localStorage.getItem('userId'),
+        email: localStorage.getItem('userEmail'),
+        name: localStorage.getItem('userName'),
+        phone: localStorage.getItem('userPhone'),
+        username: localStorage.getItem('userUsername')
+    };
     const newUsername = document.getElementById('newUsernameInput').value;
     const password = document.getElementById('usernameChangePassword').value;
     
@@ -378,24 +457,17 @@ window.submitChangeUsernameNew = async function(event) {
         const data = await response.json();
         if (response.ok) {
             alert('Username updated successfully!');
-            user.username = newUsername;
-            localStorage.setItem('currentUser', JSON.stringify(user));
             localStorage.setItem('userUsername', newUsername);
+            // Close both modals
             document.getElementById('changeUsernameModal').classList.remove('active');
-            // Restore Settings interactivity and ensure it's active
-            const settings = document.getElementById('settingsModal');
-            if (settings) {
-                settings.classList.remove('dimmed');
-                // Ensure settings modal stays active (don't close it)
-                if (!settings.classList.contains('active')) {
-                    settings.classList.add('active');
-                }
-            }
+            document.getElementById('settingsModal')?.classList.remove('active');
+            document.getElementById('settingsModal')?.classList.remove('dimmed');
         } else {
-            alert(data.detail || 'Failed to update username');
+            const errorMsg = typeof data.detail === 'string' ? data.detail : JSON.stringify(data.detail) || 'Failed to update username';
+            alert(errorMsg);
         }
     } catch (err) {
-        alert('Error updating username');
+        alert('Error updating username: ' + (err.message || err));
     }
 };
 
@@ -424,11 +496,26 @@ window.settingsOpenChangePasswordModal = function(event) {
     document.getElementById('changePasswordModal').classList.add('active');
 };
 
+// Clear password fields helper function
+function clearPasswordFields() {
+    const currentPasswordInput = document.getElementById('currentPasswordInput');
+    const newPasswordInput = document.getElementById('newPasswordInput');
+    const confirmPasswordInput = document.getElementById('confirmPasswordInput');
+    
+    if (currentPasswordInput) currentPasswordInput.value = '';
+    if (newPasswordInput) newPasswordInput.value = '';
+    if (confirmPasswordInput) confirmPasswordInput.value = '';
+}
+
 window.closeChangePasswordModalNew = function(event) {
     if (event) {
         event.stopPropagation();
         event.preventDefault();
     }
+    
+    // Clear password fields when closing modal
+    clearPasswordFields();
+    
     document.getElementById('changePasswordModal').classList.remove('active');
     const settings = document.getElementById('settingsModal');
     if (settings) {
@@ -442,7 +529,13 @@ window.closeChangePasswordModalNew = function(event) {
 
 window.submitChangePasswordNew = async function(event) {
     event.preventDefault();
-    const user = JSON.parse(localStorage.getItem('currentUser') || '{}');
+    const user = {
+        id: localStorage.getItem('userId'),
+        email: localStorage.getItem('userEmail'),
+        name: localStorage.getItem('userName'),
+        phone: localStorage.getItem('userPhone'),
+        username: localStorage.getItem('userUsername')
+    };
     const currentPassword = document.getElementById('currentPasswordInput').value;
     const newPassword = document.getElementById('newPasswordInput').value;
     const confirmPassword = document.getElementById('confirmPasswordInput').value;
@@ -453,34 +546,86 @@ window.submitChangePasswordNew = async function(event) {
     }
     
     try {
-        const response = await fetch('/api/user/change-password', {
+        // Verify current password first
+        const verifyResp = await fetch(`/api/user/verify-password?user_id=${user.id}&current_password=${encodeURIComponent(currentPassword)}`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                user_id: user.id,
-                current_password: currentPassword,
-                new_password: newPassword
-            })
+            headers: { 'Content-Type': 'application/json' }
         });
-        
-        const data = await response.json();
-        if (response.ok) {
-            alert('Password updated successfully!');
-            document.getElementById('changePasswordModal').classList.remove('active');
-            // Restore Settings interactivity and ensure it's active
-            const settings = document.getElementById('settingsModal');
-            if (settings) {
-                settings.classList.remove('dimmed');
-                // Ensure settings modal stays active (don't close it)
-                if (!settings.classList.contains('active')) {
-                    settings.classList.add('active');
-                }
-            }
-        } else {
-            alert(data.detail || 'Failed to update password');
+        const verifyData = await verifyResp.json();
+        if (!verifyResp.ok) {
+            const errorMsg = typeof verifyData.detail === 'string' ? verifyData.detail : JSON.stringify(verifyData.detail) || 'Current password is incorrect';
+            alert(errorMsg);
+            return;
         }
+
+        const { sendChangePasswordOTP, verifyChangePasswordOTP } = await import('../utils/api.js');
+
+        // Close the change password modal and the Settings modal immediately
+        const changePwdModal = document.getElementById('changePasswordModal');
+        if (changePwdModal) changePwdModal.classList.remove('active');
+        const settingsModal = document.getElementById('settingsModal');
+        if (settingsModal) settingsModal.classList.remove('active');
+
+        // Build OTP modal immediately (no waiting for email sending)
+        const otpModal = document.createElement('div');
+        otpModal.className = 'modal-overlay active';
+        otpModal.id = 'passwordChangeOTPModal';
+        otpModal.innerHTML = `
+            <div class="modal-popup-small" onclick="event.stopPropagation()">
+                <div class="modal-popup-header">
+                    <h3>Verify Password Change</h3>
+                    <button class="modal-close-btn" onclick="document.getElementById('passwordChangeOTPModal')?.remove()">×</button>
+                </div>
+                <div class="modal-popup-content">
+                    <p style="margin-bottom:8px;">Enter the 6-digit OTP sent to your email to confirm password change.</p>
+                    <p id="otpSendStatus" class="help-text" style="font-size:12px;color:#888; margin-bottom:12px;">Sending OTP…</p>
+                    <div class="form-group">
+                        <label>Enter OTP</label>
+                        <input type="text" id="passwordChangeOTPInput" maxlength="6" placeholder="123456" class="form-input"/>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn-cancel" id="btnCancelPasswordOTP">Cancel</button>
+                        <button type="button" class="btn-save" id="btnConfirmPasswordOTP">Confirm</button>
+                    </div>
+                </div>
+            </div>`;
+        document.body.appendChild(otpModal);
+
+        document.getElementById('btnCancelPasswordOTP').onclick = () => {
+            otpModal.remove();
+        };
+
+        // Fire OTP send in background and update status
+        const sent = await sendChangePasswordOTP(user.id);
+        const statusEl = document.getElementById('otpSendStatus');
+        if (statusEl) {
+            statusEl.textContent = sent.ok ? 'OTP sent to your email.' : (typeof sent.data?.detail === 'string' ? sent.data.detail : 'Failed to send OTP');
+        }
+        document.getElementById('btnConfirmPasswordOTP').onclick = async () => {
+            const code = document.getElementById('passwordChangeOTPInput').value.trim();
+            if (!code || code.length !== 6) {
+                alert('Please enter a valid 6-digit OTP');
+                return;
+            }
+            const verify = await verifyChangePasswordOTP(user.id, code, newPassword);
+            if (verify.ok) {
+                // Show success message first
+                alert('Password changed successfully! Please login again.');
+                
+                // Ensure OTP modal is removed before logout
+                try { otpModal.remove(); } catch (e) {}
+
+                // Logout will handle clearing storage and removing other modals
+                const { logout } = await import('./auth.js');
+                logout();
+            } else {
+                const errorMsg = verify.data?.detail;
+                const displayMsg = typeof errorMsg === 'string' ? errorMsg : (errorMsg ? JSON.stringify(errorMsg) : 'OTP verification failed');
+                alert(displayMsg);
+            }
+        };
     } catch (err) {
-        alert('Error updating password');
+        alert('Error processing password change: ' + (err.message || err));
     }
 };
 

@@ -16,11 +16,25 @@ export async function apiCall(endpoint, method = 'GET', body = null) {
 
     try {
         const response = await fetch(`${API_URL}${endpoint}`, options);
-        const data = await response.json();
+        
+        // Try to parse JSON; if it fails, fallback to text for better error surfacing
+        let data;
+        try {
+            data = await response.json();
+        } catch (parseError) {
+            try {
+                const text = await response.text();
+                data = { detail: text || 'Invalid server response' };
+            } catch (textError) {
+                console.error('Failed to parse response:', parseError, textError);
+                data = { detail: 'Invalid server response' };
+            }
+        }
+        
         return { ok: response.ok, data, status: response.status };
     } catch (error) {
         console.error('API call error:', error);
-        return { ok: false, data: { detail: 'Connection error' }, status: 0 };
+        return { ok: false, data: { detail: `Connection error: ${error.message}` }, status: 0 };
     }
 }
 
@@ -71,6 +85,27 @@ export async function placeOrder(orderData) {
     return await apiCall('/checkout', 'POST', orderData);
 }
 
+// Profile change via OTP
+export async function sendChangePasswordOTP(user_id) {
+    // Backend expects query params for these OTP endpoints
+    const qs = `?user_id=${encodeURIComponent(user_id)}`;
+    return await apiCall(`/user/send-change-password-otp${qs}`, 'POST');
+}
+
+export async function verifyChangePasswordOTP(user_id, otp_code, new_password) {
+    const qs = `?user_id=${encodeURIComponent(user_id)}&otp_code=${encodeURIComponent(otp_code)}&new_password=${encodeURIComponent(new_password)}`;
+    return await apiCall(`/user/verify-change-password-otp${qs}`, 'POST');
+}
+
+export async function sendChangeEmailOTP(user_id, new_email) {
+    const qs = `?user_id=${encodeURIComponent(user_id)}&new_email=${encodeURIComponent(new_email)}`;
+    return await apiCall(`/user/send-change-email-otp${qs}`, 'POST');
+}
+
+export async function verifyChangeEmailOTP(user_id, new_email, otp_code) {
+    const qs = `?user_id=${encodeURIComponent(user_id)}&new_email=${encodeURIComponent(new_email)}&otp_code=${encodeURIComponent(otp_code)}`;
+    return await apiCall(`/user/verify-change-email-otp${qs}`, 'POST');
+}
 export async function getOrderHistory(user_id) {
     return await apiCall(`/orders?user_id=${user_id}`);
 }

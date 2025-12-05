@@ -244,6 +244,15 @@ export function resetForgotForm() {
 export function logout() {
     storage.clearAllStorage();
     setCurrentUser(null);
+    
+    // Remove ALL modals except authModal FIRST
+    document.querySelectorAll('.modal').forEach(modal => {
+        if (modal.id !== 'authModal') {
+            modal.remove();
+        }
+    });
+    
+    // Then show auth screen
     showAuthScreen();
     switchAuthTab('login');
 }

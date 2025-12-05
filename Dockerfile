@@ -33,7 +33,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application files
 COPY app.py .
 COPY index.html .
-COPY home.html .
+# Optional legacy file; omit if not present
+# COPY home.html .
 COPY schema.sql .
 COPY .env .
 

@@ -111,7 +111,8 @@ def verify_otp(request: VerifyOTPRequest):
         raise HTTPException(status_code=400, detail="Invalid or expired OTP")
     
     expires_at = datetime.fromisoformat(result[1])
-    if datetime.now() > expires_at:
+    # Use timezone-aware comparison to avoid TypeError
+    if get_vietnam_time() > expires_at:
         conn.close()
         raise HTTPException(status_code=400, detail="OTP expired")
     
@@ -161,7 +162,8 @@ def verify_otp(request: VerifyOTPRequest):
         "user_id": user_id,
         "email": email,
         "name": request.full_name,
-        "username": request.username.lower().strip() if request.username else None
+        "username": request.username.lower().strip() if request.username else None,
+        "phone": request.phone
     }
 
 
