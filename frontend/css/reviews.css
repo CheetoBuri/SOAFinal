@@ -1,0 +1,117 @@
+/* ========== REVIEWS STYLES ========== */
+
+.product-rating {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.stars {
+    color: var(--primary);
+    font-size: 16px;
+    letter-spacing: -2px;
+}
+
+.rating-value {
+    font-weight: 700;
+}
+
+.review-count {
+    color: var(--gray-400);
+    font-size: 13px;
+}
+
+.review-item {
+    background: var(--gray-50);
+    padding: 12px;
+    border-radius: var(--radius-md);
+    margin-bottom: 12px;
+    border-left: 3px solid var(--primary);
+}
+
+.review-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.review-date {
+    font-size: 12px;
+    color: var(--gray-400);
+}
+
+.review-text {
+    color: var(--dark);
+    margin-bottom: 8px;
+    line-height: 1.5;
+}
+
+.btn-delete-review {
+    background: var(--error);
+    color: white;
+    border: none;
+    padding: 4px 12px;
+    border-radius: var(--radius-sm);
+    font-size: 12px;
+    cursor: pointer;
+    transition: var(--trans-fast);
+}
+
+.btn-delete-review:hover {
+    transform: scale(1.05);
+    opacity: 0.8;
+}
+
+.star-rating {
+    margin: 16px 0;
+}
+
+.stars-input {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+.stars-input button.star {
+    font-size: 32px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--gray-300);
+    transition: var(--trans-fast);
+    padding: 0;
+}
+
+.stars-input button.star:hover,
+.stars-input button.star.active {
+    color: var(--primary);
+    transform: scale(1.2);
+}
+
+.star-rating label {
+    display: block;
+    margin-bottom: 12px;
+    font-weight: 600;
+    color: var(--dark);
+}
+
+#reviewText {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-md);
+    font-family: inherit;
+    font-size: 14px;
+    resize: vertical;
+    transition: var(--trans-fast);
+}
+
+#reviewText:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(165, 102, 0, 0.1);
+}

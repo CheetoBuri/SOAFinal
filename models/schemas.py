@@ -273,3 +273,71 @@ class OrderActionRequest(BaseModel):
                 "user_id": "1"
             }
         }
+
+
+# ========== REVIEW MODELS ==========
+
+class ReviewSubmit(BaseModel):
+    """Submit a new review"""
+    user_id: str
+    product_id: str
+    rating: int  # 1-5
+    review_text: Optional[str] = None
+    order_id: Optional[str] = None
+    
+    @model_validator(mode='after')
+    def validate_rating(self):
+        if not 1 <= self.rating <= 5:
+            raise ValueError('Rating must be between 1 and 5')
+        return self
+    
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "user_id": "user_123",
+                "product_id": "cf_1",
+                "rating": 5,
+                "review_text": "Amazing espresso!",
+                "order_id": "ord_123"
+            }
+        }
+
+
+class ReviewResponse(BaseModel):
+    """Review details"""
+    id: int
+    user_id: str
+    product_id: str
+    rating: int
+    review_text: Optional[str]
+    created_at: str
+    
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "id": 1,
+                "user_id": "user_123",
+                "product_id": "cf_1",
+                "rating": 5,
+                "review_text": "Amazing espresso!",
+                "created_at": "2025-12-04T10:30:00"
+            }
+        }
+
+
+class ProductReviewsResponse(BaseModel):
+    """Product with reviews"""
+    product_id: str
+    average_rating: float
+    total_reviews: int
+    reviews: List[ReviewResponse]
+    
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "product_id": "cf_1",
+                "average_rating": 4.5,
+                "total_reviews": 8,
+                "reviews": []
+            }
+        }

@@ -23,6 +23,7 @@
     <link rel="stylesheet" href="frontend/css/profile.css?v=20251205d">
     <link rel="stylesheet" href="frontend/css/dark-mode.css?v=20251205">
     <link rel="stylesheet" href="frontend/css/responsive.css?v=20251205">
+    <link rel="stylesheet" href="frontend/css/reviews.css?v=20251205">
 </head>
 <body>
     <!-- ========== AUTH SCREEN ========== -->
@@ -513,7 +514,48 @@
         </div>
     </div>
 
+    <!-- REVIEW MODAL -->
+    <div id="reviewModal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeReviewModal()">×</button>
+            <h3 class="modal-header">🌟 Write a Review</h3>
+            
+            <form onsubmit="submitReview(document.getElementById('reviewProductId').value, document.getElementById('reviewRating').value, document.getElementById('reviewText').value); return false;">
+                <div class="form-group">
+                    <label>Rating</label>
+                    <div class="star-rating">
+                        <input type="hidden" id="reviewRating" value="5">
+                        <div class="stars-input">
+                            <button type="button" class="star active" onclick="document.getElementById('reviewRating').value = 1; updateStarDisplay(1);">★</button>
+                            <button type="button" class="star active" onclick="document.getElementById('reviewRating').value = 2; updateStarDisplay(2);">★</button>
+                            <button type="button" class="star active" onclick="document.getElementById('reviewRating').value = 3; updateStarDisplay(3);">★</button>
+                            <button type="button" class="star active" onclick="document.getElementById('reviewRating').value = 4; updateStarDisplay(4);">★</button>
+                            <button type="button" class="star active" onclick="document.getElementById('reviewRating').value = 5; updateStarDisplay(5);">★</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Your Review (Optional)</label>
+                    <textarea id="reviewText" placeholder="Share your experience..." maxlength="500" style="min-height: 100px;"></textarea>
+                </div>
+                
+                <div class="modal-buttons">
+                    <button type="submit" class="btn-submit">Submit Review</button>
+                    <button type="button" class="btn-cancel" onclick="closeReviewModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <input type="hidden" id="reviewProductId">
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- JavaScript Imports (ES6 Modules) -->
+    <script src="frontend/js/components/reviews.js"></script>
     <script type="module" src="frontend/js/main.js?v=2.2"></script>
 </body>
 </html>

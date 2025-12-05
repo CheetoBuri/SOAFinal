@@ -1,15 +1,74 @@
-/* ========== BASE STYLES v2.0 ========== */
+/* ========== BASE STYLES v3.0 - MODERN DESIGN SYSTEM ========== */
+:root {
+    /* Color palette */
+    --primary: #c41e3a;
+    --primary-light: #e74856;
+    --primary-dark: #8b1629;
+    --secondary: #006241;
+    --secondary-light: #00875d;
+    --accent: #f39200;
+    --success: #10b981;
+    --error: #ef4444;
+    --warning: #f59e0b;
+    
+    /* Neutrals */
+    --dark: #1a1a1a;
+    --light: #fafafa;
+    --gray-50: #f9fafb;
+    --gray-100: #f3f4f6;
+    --gray-200: #e5e7eb;
+    --gray-300: #d1d5db;
+    --gray-400: #9ca3af;
+    --gray-600: #4b5563;
+    
+    /* Typography */
+    --font-main: 'Inter', 'Segoe UI', -apple-system, sans-serif;
+    --font-mono: 'Monaco', 'Courier New', monospace;
+    
+    /* Spacing scale */
+    --sp-xs: 4px;
+    --sp-sm: 8px;
+    --sp-md: 12px;
+    --sp-lg: 16px;
+    --sp-xl: 24px;
+    --sp-2xl: 32px;
+    --sp-3xl: 48px;
+    
+    /* Shadows */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.08);
+    --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.1);
+    --shadow-xl: 0 12px 24px rgba(0, 0, 0, 0.15);
+    --shadow-2xl: 0 20px 40px rgba(0, 0, 0, 0.2);
+    
+    /* Border radius */
+    --radius-sm: 6px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 20px;
+    
+    /* Transitions */
+    --trans-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+    --trans-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+    --trans-slow: 350ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
+html {
+    scroll-behavior: smooth;
+}
+
 body {
-    font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
-    background-color: #fafafa;
-    color: #2d2d2d;
+    font-family: var(--font-main);
+    background: linear-gradient(135deg, var(--light) 0%, #f0f0f5 100%);
+    color: var(--dark);
     line-height: 1.6;
+    min-height: 100vh;
 }
 
 /* ========== CONTAINER ========== */
@@ -17,8 +76,8 @@ body {
     display: flex;
     max-width: 1400px;
     margin: 0 auto;
-    gap: 24px;
-    padding: 24px;
+    gap: var(--sp-2xl);
+    padding: var(--sp-2xl);
     min-height: calc(100vh - 60px);
 }
 
@@ -45,53 +104,83 @@ body {
 }
 
 .main-content h2 {
-    font-size: 28px;
-    font-weight: 600;
-    color: #1a1a1a;
-    margin-bottom: 24px;
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--dark);
+    margin-bottom: var(--sp-2xl);
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: var(--sp-lg);
+    background: linear-gradient(135deg, var(--dark) 0%, var(--gray-600) 100%);
+    -webkit-background-clip: text;
+/* ========== COMMON BUTTONS ========== */
+button, .btn {
+    font-family: var(--font-main);
+    transition: all var(--trans-base);
 }
 
-/* ========== COMMON BUTTONS ========== */
 .btn-small {
     flex: 1;
-    padding: 14px;
+    padding: var(--sp-lg);
     border: none;
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     cursor: pointer;
-    transition: all 0.3s ease;
     font-size: 14px;
     font-weight: 600;
+    background: var(--primary);
+    color: white;
+    box-shadow: var(--shadow-md);
+}
+
+.btn-small:hover {
+    background: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.btn-small:active {
+    transform: translateY(0);
 }
 
 .btn-back {
-    padding: 8px 16px;
-    background: #f5f5f5;
-    color: #333;
-    border: 1px solid #ddd;
-    border-radius: 6px;
+    padding: 10px 16px;
+    background: white;
+    color: var(--gray-600);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-sm);
     cursor: pointer;
     font-size: 14px;
-    transition: all 0.3s;
+    font-weight: 500;
+    transition: var(--trans-fast);
 }
 
 .btn-back:hover {
-    background: #e0e0e0;
+    background: var(--gray-50);
+    border-color: var(--gray-300);
+    box-shadow: var(--shadow-sm);
 }
 
 .btn-logout {
-    inline-size: 100%;
+    width: 100%;
     padding: 15px;
-    background: #d32f2f;
+    background: linear-gradient(135deg, var(--error) 0%, #dc2626 100%);
     color: white;
     border: none;
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     font-size: 16px;
-    font-weight: bold;
+    font-weight: 600;
     cursor: pointer;
-    transition: background 0.3s;
+    transition: var(--trans-base);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-logout:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.btn-logout:active {
+    transform: translateY(0);
 }
 
 .btn-logout:hover {

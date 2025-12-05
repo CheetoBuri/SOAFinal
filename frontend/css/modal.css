@@ -1,4 +1,15 @@
-/* ========== MODAL STYLES ========== */
+/* ========== MODAL STYLES v3.0 - MODERN DESIGN ========== */
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95) translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
 .modal {
     display: none;
     position: fixed;
@@ -6,11 +17,21 @@
     inset-inline-start: 0;
     inline-size: 100%;
     block-size: 100%;
-    background: rgba(0,0,0,0.6);
-    backdrop-filter: blur(4px);
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
     z-index: 1000;
     align-items: center;
     justify-content: center;
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
 }
 
 .modal.active {
@@ -18,60 +39,74 @@
 }
 
 .modal-content {
-    background: white;
-    border-radius: 24px;
+    background: linear-gradient(135deg, white 0%, #fafafa 100%);
+    border-radius: var(--radius-xl);
     padding: 32px;
     max-inline-size: 560px;
     inline-size: 90%;
     max-block-size: 85vh;
     overflow-y: auto;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
     position: relative;
+    animation: modalSlideIn 0.4s ease-out;
+    border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .modal-close {
     position: absolute;
     inset-block-start: 20px;
     inset-inline-end: 20px;
-    background: transparent;
-    border: none;
+    background: var(--gray-100);
+    border: 1px solid var(--gray-200);
     font-size: 32px;
     line-height: 1;
-    color: #999;
+    color: var(--gray-600);
     cursor: pointer;
-    padding: 4px 8px;
-    border-radius: 8px;
-    transition: all 0.2s ease;
+    padding: 6px 10px;
+    border-radius: var(--radius-md);
+    transition: var(--trans-fast);
     z-index: 10;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .modal-close:hover {
-    background: #f5f5f5;
-    color: #333;
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+    transform: rotate(90deg);
 }
 
 .modal-header {
-    font-size: 24px;
-    font-weight: 600;
-    color: #1a1a1a;
-    margin-block-end: 24px;
+    font-size: 26px;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-block-end: 28px;
     border-block-end: none;
     padding-block-end: 0;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 12px;
 }
 
 .form-group {
-    margin-block-end: 15px;
+    margin-block-end: 18px;
 }
 
 .form-group label {
     display: block;
     margin-block-end: 8px;
-    font-weight: 500;
+    font-weight: 600;
     font-size: 14px;
-    color: #666;
+    color: var(--dark);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .form-group input,
@@ -79,72 +114,77 @@
 .form-group textarea {
     inline-size: 100%;
     padding: 12px 16px;
-    border: 1px solid #e0e0e0;
-    border-radius: 12px;
+    border: 2px solid var(--gray-200);
+    border-radius: var(--radius-md);
     font-size: 15px;
-    background: #fafafa;
-    transition: all 0.2s ease;
-    font-family: inherit;
+    background: white;
+    transition: var(--trans-fast);
+    font-family: var(--font-main);
 }
 
 .form-group input:focus,
 .form-group select:focus,
 .form-group textarea:focus {
     outline: none;
-    border-color: #1a1a1a;
+    border-color: var(--primary);
     background: white;
-    box-shadow: 0 0 0 3px rgba(26,26,26,0.1);
+    box-shadow: 0 0 0 3px rgba(196, 30, 58, 0.1);
 }
 
 .form-group textarea {
     resize: vertical;
-    min-block-size: 80px;
+    min-block-size: 100px;
 }
 
 .promo-section {
     display: flex;
     gap: 10px;
-    margin-block-end: 15px;
+    margin-block-end: 18px;
 }
 
 .promo-section input {
     flex: 1;
+    border: 2px solid var(--gray-200);
 }
 
 .promo-section button {
-    background: linear-gradient(135deg, #c41e3a 0%, #a01729 100%);
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
     color: white;
     border: none;
     padding: 12px 24px;
-    border-radius: 10px;
+    border-radius: var(--radius-md);
     cursor: pointer;
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 600;
     white-space: nowrap;
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 8px rgba(196, 30, 58, 0.3);
+    transition: var(--trans-base);
+    box-shadow: var(--shadow-md);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .promo-section button:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(196, 30, 58, 0.4);
+    box-shadow: var(--shadow-lg);
 }
 
 .promo-discount {
-    background: #d1e7dd;
-    color: #0f5132;
-    padding: 10px;
-    border-radius: 5px;
-    font-size: 13px;
-    margin-block-end: 10px;
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.05) 100%);
+    color: var(--success);
+    padding: 12px 14px;
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    margin-block-end: 12px;
+    border-left: 4px solid var(--success);
+    font-weight: 600;
 }
 
 .modal-summary {
-    background: #fafafa;
+    background: linear-gradient(135deg, rgba(196, 30, 58, 0.05) 0%, rgba(0, 98, 65, 0.05) 100%);
     padding: 20px;
-    border-radius: 16px;
+    border-radius: var(--radius-lg);
     margin-block-end: 24px;
-    border: 1px solid #f0f0f0;
+    border: 1px solid rgba(196, 30, 58, 0.1);
 }
 
 .summary-line {
@@ -152,14 +192,14 @@
     justify-content: space-between;
     margin-block-end: 12px;
     font-size: 15px;
-    color: #666;
+    color: var(--gray-600);
 }
 
 .summary-line.total {
     font-size: 18px;
-    font-weight: 600;
-    color: #1a1a1a;
-    border-block-start: 1px solid #e0e0e0;
+    font-weight: 700;
+    color: var(--primary);
+    border-block-start: 2px solid var(--gray-200);
     padding-block-start: 12px;
     margin-block-start: 8px;
 }
@@ -174,52 +214,68 @@
     flex: 1;
     padding: 16px;
     border: none;
-    border-radius: 12px;
+    border-radius: var(--radius-md);
     font-size: 15px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: var(--trans-base);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .btn-submit {
-    background: #1a1a1a;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
     color: white;
+    box-shadow: var(--shadow-md);
 }
 
 .btn-submit:hover {
-    background: #333;
-    transform: translateY(-1px);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
 }
 
 .btn-cancel {
-    background: transparent;
-    color: #666;
-    border: 2px solid #e0e0e0;
+    background: white;
+    color: var(--gray-600);
+    border: 2px solid var(--gray-200);
 }
 
 .btn-cancel:hover {
-    background: #f5f5f5;
-    border-color: #ccc;
+    background: var(--gray-50);
+    border-color: var(--gray-300);
 }
 
 /* ========== CUSTOMIZATION MODAL STYLES ========== */
 .option-card {
-    transition: all 0.3s ease;
+    transition: var(--trans-base);
+    border: 2px solid var(--gray-200);
+    border-radius: var(--radius-md);
+    padding: 12px;
+    cursor: pointer;
 }
 
 .option-card.selected {
-    border-color: #c41e3a !important;
-    background: linear-gradient(135deg, #fff5f5 0%, #ffe8e8 100%);
+    border-color: var(--primary) !important;
+    background: linear-gradient(135deg, rgba(196, 30, 58, 0.05) 0%, rgba(196, 30, 58, 0.02) 100%);
     transform: scale(1.05);
+    box-shadow: 0 0 0 3px rgba(196, 30, 58, 0.1);
 }
 
 .checkbox-option {
-    transition: all 0.3s ease;
+    transition: var(--trans-base);
+    border: 2px solid var(--gray-200);
+    border-radius: var(--radius-md);
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
 }
 
 .checkbox-option.selected {
-    border-color: #c41e3a !important;
-    background: linear-gradient(135deg, #fff5f5 0%, #ffe8e8 100%);
+    border-color: var(--primary) !important;
+    background: linear-gradient(135deg, rgba(196, 30, 58, 0.05) 0%, rgba(196, 30, 58, 0.02) 100%);
+    box-shadow: 0 0 0 3px rgba(196, 30, 58, 0.1);
 }
 
 .checkbox-option input[type="checkbox"],
@@ -227,12 +283,12 @@
     inline-size: 20px;
     block-size: 20px;
     cursor: pointer;
-    accent-color: #c41e3a;
+    accent-color: var(--primary);
 }
 
 .form-select {
     appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23c41e3a' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 12px center;
     padding-inline-end: 40px;
@@ -240,7 +296,14 @@
 
 .size-options {
     display: flex;
-    gap: 10px;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.size-options .option-card {
+    flex: 1;
+    min-width: 80px;
+    text-align: center;
 }
 
 .milk-options,
@@ -248,6 +311,9 @@
 .toppings-options {
     max-block-size: 300px;
     overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
 /* Scrollbar styling */
@@ -260,19 +326,19 @@
 .milk-options::-webkit-scrollbar-track,
 .upsells-options::-webkit-scrollbar-track,
 .toppings-options::-webkit-scrollbar-track {
-    background: #f1f1f1;
+    background: var(--gray-100);
     border-radius: 10px;
 }
 
 .milk-options::-webkit-scrollbar-thumb,
 .upsells-options::-webkit-scrollbar-thumb,
 .toppings-options::-webkit-scrollbar-thumb {
-    background: #c41e3a;
+    background: var(--primary);
     border-radius: 10px;
 }
 
 .milk-options::-webkit-scrollbar-thumb:hover,
 .upsells-options::-webkit-scrollbar-thumb:hover,
 .toppings-options::-webkit-scrollbar-thumb:hover {
-    background: #a01729;
+    background: var(--primary-dark);
 }
