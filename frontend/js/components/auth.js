@@ -15,16 +15,28 @@ export function initAuth() {
         loadMenu();
         loadFavorites();
     } else {
-        showAuthScreen();
+        // Show landing page initially
+        const landingPage = document.getElementById('landingPage');
+        const authScreen = document.getElementById('authScreen');
+        if (landingPage) landingPage.classList.remove('hidden');
+        if (authScreen) authScreen.style.display = 'none';
     }
 }
 
 export function showAuthScreen() {
+    // Hide landing page
+    const landingPage = document.getElementById('landingPage');
+    if (landingPage) landingPage.classList.add('hidden');
+    
     ui.hideElement('appScreen');
     ui.showElement('authScreen');
 }
 
 export function showApp() {
+    // Hide landing page and auth screen
+    const landingPage = document.getElementById('landingPage');
+    if (landingPage) landingPage.classList.add('hidden');
+    
     ui.hideElement('authScreen');
     ui.showElement('appScreen');
     

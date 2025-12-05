@@ -52,6 +52,12 @@ window.openChangePasswordModal = profileComponent.openChangePasswordModal;
 window.closeChangePasswordModal = profileComponent.closeChangePasswordModal;
 window.submitChangePassword = profileComponent.submitChangePassword;
 
+// Landing page functions
+window.showAuthScreen = function() {
+    document.getElementById('landingPage').classList.add('hidden');
+    document.getElementById('authScreen').style.display = 'flex';
+};
+
 // Initialize app
 document.addEventListener('DOMContentLoaded', () => {
     console.log('Cafe Ordering System - Refactored Version');

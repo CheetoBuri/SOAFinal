@@ -2,23 +2,23 @@
 .dark-mode-toggle {
     position: relative;
     display: inline-block;
-    width: 52px;
-    height: 28px;
+    inline-size: 52px;
+    block-size: 28px;
 }
 
 .dark-mode-toggle input {
     opacity: 0;
-    width: 0;
-    height: 0;
+    inline-size: 0;
+    block-size: 0;
 }
 
 .toggle-slider {
     position: absolute;
     cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    inset-block-start: 0;
+    inset-inline-start: 0;
+    inset-inline-end: 0;
+    inset-block-end: 0;
     background-color: #e0e0e0;
     transition: all 0.3s ease;
     border-radius: 28px;
@@ -28,10 +28,10 @@
 .toggle-slider:before {
     position: absolute;
     content: "";
-    height: 20px;
-    width: 20px;
-    left: 4px;
-    bottom: 4px;
+    block-size: 20px;
+    inline-size: 20px;
+    inset-inline-start: 4px;
+    inset-block-end: 4px;
     background-color: white;
     transition: all 0.3s ease;
     border-radius: 50%;
@@ -60,7 +60,7 @@ body.dark-mode {
 /* Header */
 body.dark-mode header {
     background: #1f1f1f;
-    border-bottom: 1px solid #3a3a3a;
+    border-block-end: 1px solid #3a3a3a;
     box-shadow: 0 2px 8px rgba(0,0,0,0.3);
 }
 
@@ -86,7 +86,7 @@ body.dark-mode .cart-badge {
 /* Sidebar */
 body.dark-mode .sidebar {
     background: #1f1f1f;
-    border-right: 1px solid #3a3a3a;
+    border-inline-end: 1px solid #3a3a3a;
 }
 
 body.dark-mode .sidebar-section {
@@ -253,7 +253,7 @@ body.dark-mode .cart-sidebar {
 
 body.dark-mode .cart-title {
     color: #ffffff;
-    border-bottom: 2px solid #3a3a3a;
+    border-block-end: 2px solid #3a3a3a;
     font-weight: 600;
 }
 
@@ -281,7 +281,7 @@ body.dark-mode .cart-item-price {
 }
 
 body.dark-mode .cart-total {
-    border-top: 2px solid #3a3a3a;
+    border-block-start: 2px solid #3a3a3a;
     color: #ffffff;
     font-weight: 700;
 }
@@ -318,7 +318,7 @@ body.dark-mode .modal-content {
 
 body.dark-mode .modal-header {
     color: #ffffff;
-    border-bottom: 2px solid #3a3a3a;
+    border-block-end: 2px solid #3a3a3a;
     font-weight: 600;
 }
 
@@ -391,7 +391,7 @@ body.dark-mode .summary-line {
 
 body.dark-mode .summary-line.total {
     color: #ff0000;
-    border-top: 2px solid #3a3a3a;
+    border-block-start: 2px solid #3a3a3a;
     font-weight: 700;
 }
 
@@ -429,12 +429,12 @@ body.dark-mode .profile-section {
 
 body.dark-mode .profile-section h3 {
     color: #ffffff;
-    border-bottom: 1px solid #3a3a3a;
+    border-block-end: 1px solid #3a3a3a;
     font-weight: 600;
 }
 
 body.dark-mode .profile-info-row {
-    border-bottom: 1px solid #3a3a3a;
+    border-block-end: 1px solid #3a3a3a;
 }
 
 body.dark-mode .profile-label {
@@ -465,14 +465,14 @@ body.dark-mode .profile-edit-btn:hover {
 body.dark-mode .transaction-item {
     background: #252525;
     border: 1px solid #3a3a3a;
-    border-left: 3px solid #5a5a5a;
+    border-inline-start: 3px solid #5a5a5a;
     color: #e5e5e5 !important;
     border-radius: 12px;
 }
 
 body.dark-mode .transaction-item:hover {
     background: #2a2a2a;
-    border-left-color: #ffffff;
+    border-inline-start-color: #ffffff;
 }
 
 body.dark-mode .transaction-item * {
@@ -583,7 +583,7 @@ body.dark-mode .auth-box h2 {
 }
 
 body.dark-mode .auth-tabs {
-    border-bottom: 2px solid #3a3a3a;
+    border-block-end: 2px solid #3a3a3a;
 }
 
 body.dark-mode .auth-tab {
@@ -597,7 +597,7 @@ body.dark-mode .auth-tab:hover {
 
 body.dark-mode .auth-tab.active {
     color: #ffffff;
-    border-bottom: 3px solid #ffffff;
+    border-block-end: 3px solid #ffffff;
     font-weight: 600;
 }
 
@@ -645,8 +645,8 @@ body.dark-mode .favorite-item button:hover {
 
 /* Scrollbar Styling */
 body.dark-mode ::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
+    inline-size: 10px;
+    block-size: 10px;
 }
 
 body.dark-mode ::-webkit-scrollbar-track {
@@ -666,7 +666,7 @@ body.dark-mode ::-webkit-scrollbar-thumb:hover {
 body.dark-mode .loading,
 body.dark-mode .spinner {
     border-color: #3a3a3a;
-    border-top-color: #ffffff;
+    border-block-start-color: #ffffff;
 }
 
 /* Empty States */
