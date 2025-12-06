@@ -31,12 +31,12 @@ CREATE INDEX IF NOT EXISTS idx_users_phone ON users(phone);
 -- OTP CODES TABLE
 -- ============================================
 CREATE TABLE IF NOT EXISTS otp_codes (
-    id INTEGER PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
     email TEXT NOT NULL,
     code TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     expires_at TIMESTAMP NOT NULL,
-    verified BOOLEAN DEFAULT 0
+    verified BOOLEAN DEFAULT FALSE
 );
 
 CREATE INDEX IF NOT EXISTS idx_otp_email ON otp_codes(email);
@@ -118,14 +118,14 @@ CREATE INDEX IF NOT EXISTS idx_cart_user_id ON cart(user_id);
 -- PAYMENT OTP TABLE
 -- ============================================
 CREATE TABLE IF NOT EXISTS payment_otp (
-    id INTEGER PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
     user_id TEXT NOT NULL,
     order_id TEXT NOT NULL,
     code TEXT NOT NULL,
     amount REAL NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     expires_at TIMESTAMP NOT NULL,
-    verified BOOLEAN DEFAULT 0,
+    verified BOOLEAN DEFAULT FALSE,
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
@@ -154,14 +154,35 @@ CREATE INDEX IF NOT EXISTS idx_reviews_user ON reviews(user_id);
 CREATE INDEX IF NOT EXISTS idx_reviews_created ON reviews(created_at);
 
 -- ============================================
+-- TRANSACTIONS TABLE
+-- ============================================
+CREATE TABLE IF NOT EXISTS transactions (
+    id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL,
+    type TEXT NOT NULL,
+    amount REAL NOT NULL,
+    balance_before REAL NOT NULL,
+    balance_after REAL NOT NULL,
+    order_id TEXT,
+    description TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY(user_id) REFERENCES users(id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_transactions_user ON transactions(user_id);
+CREATE INDEX IF NOT EXISTS idx_transactions_order ON transactions(order_id);
+CREATE INDEX IF NOT EXISTS idx_transactions_created ON transactions(created_at);
+
+-- ============================================
 -- FREQUENT ITEMS TABLE
 -- ============================================
 CREATE TABLE IF NOT EXISTS frequent_items (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id SERIAL PRIMARY KEY,
     user_id TEXT NOT NULL,
     product_id TEXT NOT NULL,
     product_name TEXT NOT NULL,
     product_icon TEXT,
+    product_image TEXT,
     base_price REAL NOT NULL,
     order_count INTEGER DEFAULT 1,
     last_ordered_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

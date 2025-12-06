@@ -277,6 +277,11 @@ export function logout() {
         }
     });
     
+    // Clear all form inputs in auth screen
+    document.querySelectorAll('#authScreen input').forEach(input => {
+        input.value = '';
+    });
+    
     // Then show auth screen
     showAuthScreen();
     switchAuthTab('login');

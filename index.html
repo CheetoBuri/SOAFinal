@@ -65,7 +65,12 @@
                     <label>Password</label>
                     <div class="password-field">
                         <input type="password" id="loginPassword" required placeholder="Enter password">
-                        <button type="button" class="password-toggle" onclick="togglePasswordVisibility('loginPassword')">👁️</button>
+                        <button type="button" class="password-toggle" onclick="togglePasswordVisibility('loginPassword')">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                                <line x1="1" y1="1" x2="23" y2="23"></line>
+                            </svg>
+                        </button>
                     </div>
                 </div>
                 <div class="forgot-password-link">
@@ -109,14 +114,24 @@
                         <label>Password</label>
                         <div class="password-field">
                             <input type="password" id="registerPassword" placeholder="Create a strong password" required>
-                            <button type="button" class="password-toggle" onclick="togglePasswordVisibility('registerPassword')">👁️</button>
+                            <button type="button" class="password-toggle" onclick="togglePasswordVisibility('registerPassword')">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                                    <line x1="1" y1="1" x2="23" y2="23"></line>
+                                </svg>
+                            </button>
                         </div>
                     </div>
                     <div class="form-group">
                         <label>Confirm Password</label>
                         <div class="password-field">
                             <input type="password" id="registerPasswordConfirm" placeholder="Confirm password" required>
-                            <button type="button" class="password-toggle" onclick="togglePasswordVisibility('registerPasswordConfirm')">👁️</button>
+                            <button type="button" class="password-toggle" onclick="togglePasswordVisibility('registerPasswordConfirm')">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                                    <line x1="1" y1="1" x2="23" y2="23"></line>
+                                </svg>
+                            </button>
                         </div>
                     </div>
                     <button type="submit" class="auth-submit">Create Account</button>
@@ -147,14 +162,24 @@
                         <label>New Password</label>
                         <div class="password-field">
                             <input type="password" id="forgotNewPassword" placeholder="Create new password" required>
-                            <button type="button" class="password-toggle" onclick="togglePasswordVisibility('forgotNewPassword')">👁️</button>
+                            <button type="button" class="password-toggle" onclick="togglePasswordVisibility('forgotNewPassword')">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                                    <line x1="1" y1="1" x2="23" y2="23"></line>
+                                </svg>
+                            </button>
                         </div>
                     </div>
                     <div class="form-group">
                         <label>Confirm New Password</label>
                         <div class="password-field">
                             <input type="password" id="forgotConfirmPassword" placeholder="Confirm password" required>
-                            <button type="button" class="password-toggle" onclick="togglePasswordVisibility('forgotConfirmPassword')">👁️</button>
+                            <button type="button" class="password-toggle" onclick="togglePasswordVisibility('forgotConfirmPassword')">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                                    <line x1="1" y1="1" x2="23" y2="23"></line>
+                                </svg>
+                            </button>
                         </div>
                     </div>
                     <button type="submit" class="auth-submit">Reset Password</button>
@@ -169,7 +194,36 @@
         <!-- HEADER -->
         <header>
             <div class="header-logo">
-                <span class="logo-icon">☕</span>
+                <span class="logo-icon">
+                    <svg width="32" height="32" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Coffee cup -->
+                        <path d="M10 20 L38 20 L36 40 C36 42 34 44 32 44 L16 44 C14 44 12 42 12 40 Z" fill="#8B4513" stroke="#5d2f0a" stroke-width="1.5"/>
+                        <!-- Cup rim -->
+                        <ellipse cx="24" cy="20" rx="14" ry="3" fill="#A0522D"/>
+                        <!-- Coffee inside -->
+                        <ellipse cx="24" cy="22" rx="12" ry="2.5" fill="#3e2723"/>
+                        <!-- Handle -->
+                        <path d="M38 22 Q44 22 44 28 Q44 34 38 34" stroke="#8B4513" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+                        <!-- Steam 1 -->
+                        <path d="M18 12 Q16 8 18 4" stroke="#999" stroke-width="1.5" fill="none" stroke-linecap="round" opacity="0.7">
+                            <animate attributeName="d" 
+                                values="M18 12 Q16 8 18 4; M18 12 Q20 8 18 4; M18 12 Q16 8 18 4" 
+                                dur="2s" repeatCount="indefinite"/>
+                        </path>
+                        <!-- Steam 2 -->
+                        <path d="M24 14 Q22 10 24 6" stroke="#999" stroke-width="1.5" fill="none" stroke-linecap="round" opacity="0.7">
+                            <animate attributeName="d" 
+                                values="M24 14 Q22 10 24 6; M24 14 Q26 10 24 6; M24 14 Q22 10 24 6" 
+                                dur="2s" begin="0.3s" repeatCount="indefinite"/>
+                        </path>
+                        <!-- Steam 3 -->
+                        <path d="M30 12 Q28 8 30 4" stroke="#999" stroke-width="1.5" fill="none" stroke-linecap="round" opacity="0.7">
+                            <animate attributeName="d" 
+                                values="M30 12 Q28 8 30 4; M30 12 Q32 8 30 4; M30 12 Q28 8 30 4" 
+                                dur="2s" begin="0.6s" repeatCount="indefinite"/>
+                        </path>
+                    </svg>
+                </span>
                 <span class="logo-text">Cafe Ordering System</span>
             </div>
             
@@ -284,7 +338,65 @@
                             <button class="hero-btn" onclick="document.getElementById('productsGrid').scrollIntoView({behavior: 'smooth'})">Order Now →</button>
                         </div>
                         <div class="hero-image">
-                            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'%3E%3Ccircle cx='200' cy='200' r='180' fill='%23f5f5f5'/%3E%3Cellipse cx='200' cy='280' rx='120' ry='20' fill='%23e0e0e0'/%3E%3Cpath d='M120 180 Q120 120 180 120 L220 120 Q280 120 280 180 Q280 240 220 280 L180 280 Q120 240 120 180' fill='%23fff' stroke='%23333' stroke-width='3'/%3E%3Cpath d='M140 180 Q140 140 180 140 L220 140 Q260 140 260 180 Q260 220 220 250 L180 250 Q140 220 140 180' fill='%23654321'/%3E%3Cellipse cx='200' cy='170' rx='50' ry='20' fill='%238B6F47' opacity='0.5'/%3E%3Cpath d='M280 140 Q320 120 340 140 Q360 160 340 180 Q320 200 280 180 Z' fill='%23fff' stroke='%23333' stroke-width='3'/%3E%3C/svg%3E" alt="Coffee Cup">
+                            <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+                                <!-- Background circle -->
+                                <circle cx="200" cy="220" r="160" fill="#f8f4f0" opacity="0.5"/>
+                                
+                                <!-- Shadow -->
+                                <ellipse cx="200" cy="340" rx="100" ry="15" fill="#d0d0d0" opacity="0.3"/>
+                                
+                                <!-- Cup body -->
+                                <path d="M130 160 L140 300 C140 310 150 320 170 320 L230 320 C250 320 260 310 260 300 L270 160 Z" 
+                                      fill="#FFFFFF" stroke="#8B6F47" stroke-width="4" stroke-linejoin="round"/>
+                                
+                                <!-- Cup rim (ellipse top) -->
+                                <ellipse cx="200" cy="160" rx="70" ry="15" fill="#E8D4B8" stroke="#8B6F47" stroke-width="3"/>
+                                
+                                <!-- Coffee liquid -->
+                                <ellipse cx="200" cy="165" rx="65" ry="12" fill="#6F4E37"/>
+                                
+                                <!-- Coffee highlight/shine -->
+                                <ellipse cx="200" cy="163" rx="50" ry="8" fill="#8B6F47" opacity="0.6"/>
+                                
+                                <!-- Cup handle -->
+                                <path d="M270 180 Q300 180 310 200 Q320 220 310 240 Q300 260 270 260" 
+                                      stroke="#C4A574" stroke-width="6" fill="none" stroke-linecap="round"/>
+                                <path d="M270 185 Q295 185 303 200 Q310 215 303 230 Q295 245 270 245" 
+                                      stroke="#FFFFFF" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.5"/>
+                                
+                                <!-- Steam 1 -->
+                                <path d="M160 120 Q155 90 160 60" stroke="#999999" stroke-width="3" fill="none" 
+                                      stroke-linecap="round" opacity="0.6">
+                                    <animate attributeName="d" 
+                                        values="M160 120 Q155 90 160 60;M160 120 Q165 90 160 60;M160 120 Q155 90 160 60" 
+                                        dur="3s" repeatCount="indefinite"/>
+                                    <animate attributeName="opacity" 
+                                        values="0.6;0.3;0.6" 
+                                        dur="3s" repeatCount="indefinite"/>
+                                </path>
+                                
+                                <!-- Steam 2 -->
+                                <path d="M200 130 Q195 100 200 70" stroke="#999999" stroke-width="3" fill="none" 
+                                      stroke-linecap="round" opacity="0.6">
+                                    <animate attributeName="d" 
+                                        values="M200 130 Q195 100 200 70;M200 130 Q205 100 200 70;M200 130 Q195 100 200 70" 
+                                        dur="3s" begin="0.5s" repeatCount="indefinite"/>
+                                    <animate attributeName="opacity" 
+                                        values="0.6;0.3;0.6" 
+                                        dur="3s" begin="0.5s" repeatCount="indefinite"/>
+                                </path>
+                                
+                                <!-- Steam 3 -->
+                                <path d="M240 120 Q235 90 240 60" stroke="#999999" stroke-width="3" fill="none" 
+                                      stroke-linecap="round" opacity="0.6">
+                                    <animate attributeName="d" 
+                                        values="M240 120 Q235 90 240 60;M240 120 Q245 90 240 60;M240 120 Q235 90 240 60" 
+                                        dur="3s" begin="1s" repeatCount="indefinite"/>
+                                    <animate attributeName="opacity" 
+                                        values="0.6;0.3;0.6" 
+                                        dur="3s" begin="1s" repeatCount="indefinite"/>
+                                </path>
+                            </svg>
                         </div>
                     </div>
                     

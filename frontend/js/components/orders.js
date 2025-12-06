@@ -258,21 +258,20 @@ function formatActiveOrderCard(order) {
     let statusBadges = '';
     let paymentMethodText = '';
     
-    // Main status badge - all orders show "Out for Delivery Soon"
-    statusBadges = '<span style="background:#FFA500; color:white; padding:4px 12px; border-radius:12px; font-size:12px; font-weight:bold;">🚚 Out for Delivery Soon</span>';
-    
-    // Payment status badge
+    // Main status badge - depends on payment status
     if (order.status === 'pending_payment') {
         if (order.payment_method === 'cod' || order.payment_method === 'cash') {
-            // COD: Show pending payment + payment method
-            statusBadges += ' <span style="background:#FF6B6B; color:white; padding:4px 12px; border-radius:12px; font-size:12px; font-weight:bold; margin-left:8px;">⏳ Pending Payment</span>';
+            // COD: Order is ready for delivery, will be paid on arrival
+            statusBadges = '<span style="background:#FFA500; color:white; padding:4px 12px; border-radius:12px; font-size:12px; font-weight:bold;">🚚 Out for Delivery Soon</span>';
             paymentMethodText = '<div style="color:#666; font-size:13px; margin-top:6px;">💵 Payment Method: <strong>Cash on Delivery</strong></div>';
         } else {
-            // Balance: Need OTP verification
-            statusBadges += ' <span style="background:#FF6B6B; color:white; padding:4px 12px; border-radius:12px; font-size:12px; font-weight:bold; margin-left:8px;">⏳ Awaiting OTP Verification</span>';
+            // Balance: Need OTP verification before delivery
+            statusBadges = '<span style="background:#FF6B6B; color:white; padding:4px 12px; border-radius:12px; font-size:12px; font-weight:bold;">⏳ Awaiting OTP Verification</span>';
             paymentMethodText = '<div style="color:#666; font-size:13px; margin-top:6px;">💳 Payment Method: <strong>Wallet Balance</strong><br>Please check your email for OTP to complete payment</div>';
         }
     } else if (order.status === 'paid') {
+        // Payment confirmed - ready for delivery
+        statusBadges = '<span style="background:#FFA500; color:white; padding:4px 12px; border-radius:12px; font-size:12px; font-weight:bold;">🚚 Out for Delivery Soon</span>';
         statusBadges += ' <span style="background:#4CAF50; color:white; padding:4px 12px; border-radius:12px; font-size:12px; font-weight:bold; margin-left:8px;">✓ Paid</span>';
         paymentMethodText = (order.payment_method === 'cod' || order.payment_method === 'cash')
             ? '<div style="color:#666; font-size:13px; margin-top:6px;">💵 Payment Method: <strong>Cash on Delivery</strong></div>'

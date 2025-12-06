@@ -37,6 +37,7 @@ function showCustomizationModal(product, customization) {
     const isFood = product.category === 'food';
     const isCoffee = product.category === 'coffee';
     const isVNCoffee = isCoffee && product.type === 'vietnamese';
+    const hasMilkOption = isCoffee || product.onlyMilkOption; // Allow milk for coffee or products with onlyMilkOption (e.g., Matcha Latte)
     
     let modalContent = `
         <div class="modal-content" style="max-inline-size: 600px; max-block-size: 90vh; overflow-y: auto;">
@@ -94,8 +95,8 @@ function showCustomizationModal(product, customization) {
         `;
     }
     
-    // Milk options (for coffee)
-    if (isCoffee && Object.keys(customization.milkOptions).length > 0) {
+    // Milk options (for coffee or products with onlyMilkOption like Matcha Latte)
+    if (hasMilkOption && Object.keys(customization.milkOptions).length > 0) {
         modalContent += `
             <div class="form-group">
                 <label><strong>🥛 Milk Options:</strong> <span style="font-size: 12px; color: #666;">(Optional) Choose up to 1 milk. Condensed milk can be added anytime.</span></label>
@@ -882,6 +883,19 @@ export async function processCheckout(event) {
         
         closeCheckoutModal();
         
+        // Clear cart and reset state IMMEDIATELY after order is created
+        state.cart = [];
+        state.promoApplied = null;
+        state.discountPercent = 0;
+        updateCartUI();
+        
+        // CRITICAL: Force clear special notes after successful order
+        const notesField = document.getElementById('specialNotes');
+        if (notesField) {
+            notesField.value = '';
+            console.log('Special notes cleared after order placement');
+        }
+        
         if (paymentMethod === 'balance') {
             alert('Order created! Sending payment OTP...');
             
@@ -891,22 +905,12 @@ export async function processCheckout(event) {
                 showPaymentOTPModal(orderId, total);
             } else {
                 alert(otpResult.data.detail || 'Failed to send OTP');
+                // Even if OTP fails, order is already created and cart is cleared
+                const { switchView } = await import('./navigation.js');
+                switchView('orderStatus');
             }
         } else {
             alert(`Order placed successfully! Order ID: ${orderId}`);
-            // Clear cart and reset state
-            state.cart = [];
-            state.promoApplied = null;
-            state.discountPercent = 0;
-            updateCartUI();
-            
-            // CRITICAL: Force clear special notes after successful order
-            const notesField = document.getElementById('specialNotes');
-            if (notesField) {
-                notesField.value = '';
-                console.log('Special notes cleared after COD order');
-            }
-            
             const { switchView } = await import('./navigation.js');
             switchView('orderStatus');
         }
@@ -1027,20 +1031,8 @@ window.verifyPaymentOTP = async function(orderId, amount) {
             state.currentUser.balance = result.data.new_balance;
         }
         
-        // Clear cart and reset state
-        state.cart = [];
-        state.promoApplied = null;
-        state.discountPercent = 0;
-        
-        // CRITICAL: Force clear special notes after successful payment
-        const notesField = document.getElementById('specialNotes');
-        if (notesField) {
-            notesField.value = '';
-            console.log('Special notes cleared after balance payment');
-        }
-        
+        // Cart already cleared when order was placed, just close modal and navigate
         closePaymentOTPModal();
-        updateCartUI();
         
         const { switchView } = await import('./navigation.js');
         switchView('orderStatus');
@@ -1082,6 +1074,7 @@ function showCustomizationModalWithPresets(product, customization, presetOptions
     const isFood = product.category === 'food';
     const isCoffee = product.category === 'coffee';
     const isVNCoffee = isCoffee && product.type === 'vietnamese';
+    const hasMilkOption = isCoffee || product.onlyMilkOption; // Allow milk for coffee or products with onlyMilkOption (e.g., Matcha Latte)
     
     // Preset values from frequent item
     const presetSize = presetOptions?.size || 'M';
@@ -1149,8 +1142,8 @@ function showCustomizationModalWithPresets(product, customization, presetOptions
         `;
     }
     
-    // Milk options (for coffee) - Pre-select preset milk
-    if (isCoffee && Object.keys(customization.milkOptions).length > 0) {
+    // Milk options (for coffee or products with onlyMilkOption) - Pre-select preset milk
+    if (hasMilkOption && Object.keys(customization.milkOptions).length > 0) {
         modalContent += `
             <div class="form-group">
                 <label><strong>🥛 Milk Options:</strong> <span style="font-size: 12px; color: #666;">(Optional) Choose up to 1 milk. Condensed milk can be added anytime.</span></label>

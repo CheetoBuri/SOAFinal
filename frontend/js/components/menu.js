@@ -3,11 +3,55 @@ import * as api from '../utils/api.js';
 import * as ui from '../utils/ui.js';
 import { state, setMenuItems, setFavorites, isFavorite } from '../utils/state.js';
 
+// Lazy loading observer for images
+let imageObserver = null;
+
+function initLazyLoading() {
+    if (imageObserver) {
+        imageObserver.disconnect();
+    }
+    
+    imageObserver = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const img = entry.target;
+                const placeholder = img.nextElementSibling;
+                
+                // Load the actual image
+                img.src = img.dataset.src;
+                img.classList.remove('lazy-image');
+                img.classList.add('lazy-loaded');
+                
+                // Hide placeholder when image loads
+                img.onload = () => {
+                    if (placeholder && placeholder.classList.contains('image-placeholder')) {
+                        placeholder.style.display = 'none';
+                    }
+                };
+                
+                // Stop observing this image
+                observer.unobserve(img);
+            }
+        });
+    }, {
+        rootMargin: '50px', // Start loading 50px before entering viewport
+        threshold: 0.01
+    });
+    
+    // Observe all lazy images
+    document.querySelectorAll('.lazy-image').forEach(img => {
+        imageObserver.observe(img);
+    });
+}
+
 export async function loadMenu() {
     const result = await api.getMenu();
     if (result.ok) {
         setMenuItems(result.data.items);
         displayProducts(result.data.items);
+        
+        // Initialize lazy loading after products are rendered
+        setTimeout(() => initLazyLoading(), 100);
     }
 }
 
@@ -61,8 +105,15 @@ export function displayProducts(items, targetGridId = null) {
                 typeBadge = `<span class="type-badge food-${item.type}">${typeLabels[item.type] || ''}</span>`;
             }
             
+            // Use lazy loading for images to improve performance
+            const productImage = item.image 
+                ? `<img class="lazy-image" data-src="${item.image}" alt="${item.name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                   <div class="image-placeholder"></div>
+                   <span style="display:none;">${item.icon}</span>`
+                : `<span>${item.icon}</span>`;
+            
             card.innerHTML = `
-                <div class="product-icon">${item.icon}</div>
+                <div class="product-icon">${productImage}</div>
                 ${typeBadge}
                 <div class="product-name">${item.name}</div>
                 <div class="product-price">${ui.formatCurrency(item.price)}</div>
@@ -88,6 +139,9 @@ export function displayProducts(items, targetGridId = null) {
         categorySection.appendChild(categoryGrid);
         grid.appendChild(categorySection);
     });
+    
+    // Re-initialize lazy loading for newly rendered products
+    setTimeout(() => initLazyLoading(), 100);
 }
 
 export async function filterByCategory(category, event) {
@@ -290,9 +344,16 @@ export async function loadFrequentItems() {
                     if (item.customization.sugar) customSummary.push(`${item.customization.sugar}% sugar`);
                 }
                 
+                // Use lazy loading for frequent items images too
+                const iconContent = item.image 
+                    ? `<img class="lazy-image-sidebar" data-src="${item.image}" alt="${item.product_name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                       <div class="image-placeholder-sidebar"></div>
+                       <span style="display:none; font-size:24px;">${item.icon}</span>`
+                    : `<span style="font-size:24px;">${item.icon}</span>`;
+                
                 return `
                     <div class="frequent-item" data-frequent-item='${JSON.stringify(item)}' onclick="window.openFrequentItemModal(this)">
-                        <div class="frequent-item-icon">${item.icon}</div>
+                        <div class="frequent-item-icon">${iconContent}</div>
                         <div class="frequent-item-info">
                             <div class="frequent-item-name">${item.product_name}</div>
                             <div class="frequent-item-meta">
@@ -304,6 +365,9 @@ export async function loadFrequentItems() {
                     </div>
                 `;
             }).join('');
+            
+            // Initialize lazy loading for sidebar images
+            setTimeout(() => initSidebarLazyLoading(), 100);
         } else {
             listDiv.innerHTML = '<p style="color:#999; font-size:12px; text-align:center;">No order history yet</p>';
         }
@@ -311,5 +375,23 @@ export async function loadFrequentItems() {
         console.error('Error loading frequent items:', error);
         listDiv.innerHTML = '<p style="color:#999; font-size:12px; text-align:center;">Unable to load</p>';
     }
+}
+
+function initSidebarLazyLoading() {
+    const sidebarImages = document.querySelectorAll('.lazy-image-sidebar');
+    
+    sidebarImages.forEach(img => {
+        const placeholder = img.nextElementSibling;
+        
+        // Sidebar images load immediately since they're small
+        img.src = img.dataset.src;
+        img.classList.remove('lazy-image-sidebar');
+        
+        img.onload = () => {
+            if (placeholder && placeholder.classList.contains('image-placeholder-sidebar')) {
+                placeholder.style.display = 'none';
+            }
+        };
+    });
 }
 

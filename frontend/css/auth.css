@@ -207,7 +207,6 @@
     position: absolute;
     right: 12px;
     cursor: pointer;
-    font-size: 20px;
     color: var(--gray-400);
     background: none;
     border: none;
@@ -216,11 +215,18 @@
     align-items: center;
     justify-content: center;
     transition: var(--trans-fast);
+    width: 32px;
+    height: 32px;
+    border-radius: 4px;
 }
 
 .password-toggle:hover {
     color: var(--primary);
-    transform: scale(1.1);
+    background-color: rgba(196, 30, 58, 0.05);
+}
+
+.password-toggle:active {
+    transform: scale(0.95);
 }
 
 .forgot-password-link {

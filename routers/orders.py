@@ -232,9 +232,18 @@ def get_orders(user_id: str):
     
     orders = []
     for row in c.fetchall():
+        # Parse items from JSON string if needed
+        items = row['items']
+        if isinstance(items, str):
+            import json
+            try:
+                items = json.loads(items)
+            except:
+                items = []
+        
         orders.append({
             "id": row['id'],
-            "items": row['items'],
+            "items": items,
             "total": row['total'],
             "status": row['status'],
             "special_notes": row['special_notes'],
@@ -271,7 +280,7 @@ def get_frequent_items(user_id: str, limit: int = 5):
     c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     
     c.execute("""
-        SELECT product_id, product_name, product_icon, base_price, order_count, 
+        SELECT product_id, product_name, product_icon, product_image, base_price, order_count, 
                customization, last_ordered_at
         FROM frequent_items
         WHERE user_id = %s
@@ -287,6 +296,7 @@ def get_frequent_items(user_id: str, limit: int = 5):
             "product_id": row['product_id'],
             "product_name": row['product_name'],
             "icon": row['product_icon'],
+            "image": row.get('product_image'),
             "price": row['base_price'],
             "order_count": row['order_count'],
             "customization": customization,
@@ -468,17 +478,21 @@ def mark_order_received(order_id: str, request: OrderActionRequest):
     try:
         items = json.loads(order['items']) if isinstance(order['items'], str) else order['items']
         
-        # Build a lookup dictionary for icons from menu data
+        # Build a lookup dictionary for icons and images from menu data
         icon_lookup = {}
+        image_lookup = {}
         for category_items in MENU_PRODUCTS.values():
             for menu_item in category_items:
                 icon_lookup[menu_item['id']] = menu_item['icon']
+                if 'image' in menu_item:
+                    image_lookup[menu_item['id']] = menu_item['image']
         
         for item in items:
             product_id = item.get('product_id')
             product_name = item.get('product_name') or item.get('name', 'Unknown')
             # Get icon from menu data, fallback to item icon or default
             product_icon = icon_lookup.get(product_id) or item.get('icon', '🍽️')
+            product_image = image_lookup.get(product_id)
             base_price = item.get('price', 0)
             quantity = item.get('quantity', 1)
             
@@ -518,9 +532,9 @@ def mark_order_received(order_id: str, request: OrderActionRequest):
                 # Insert new frequent item
                 c.execute("""
                     INSERT INTO frequent_items 
-                    (user_id, product_id, product_name, product_icon, base_price, order_count, customization, last_ordered_at)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-                """, (user_id, product_id, product_name, product_icon, base_price, quantity, customization_json, current_time))
+                    (user_id, product_id, product_name, product_icon, product_image, base_price, order_count, customization, last_ordered_at)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                """, (user_id, product_id, product_name, product_icon, product_image, base_price, quantity, customization_json, current_time))
     except Exception as e:
         print(f"⚠️ Error saving to frequent_items: {str(e)}")
         # Don't fail the whole operation if frequent_items saving fails

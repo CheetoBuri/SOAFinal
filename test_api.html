@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>API Endpoint Testing</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            margin: 20px;
+            background: #1a1a1a;
+            color: #00ff00;
+        }
+        h1 {
+            color: #00ff00;
+            text-align: center;
+        }
+        .endpoint {
+            margin: 10px 0;
+            padding: 10px;
+            background: #2a2a2a;
+            border-left: 4px solid #444;
+        }
+        .endpoint.success {
+            border-left-color: #00ff00;
+        }
+        .endpoint.error {
+            border-left-color: #ff0000;
+        }
+        .endpoint.warning {
+            border-left-color: #ffaa00;
+        }
+        .method {
+            display: inline-block;
+            padding: 2px 8px;
+            background: #333;
+            border-radius: 3px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        .method.GET { background: #0066cc; color: white; }
+        .method.POST { background: #00aa00; color: white; }
+        .method.DELETE { background: #cc0000; color: white; }
+        .status {
+            float: right;
+            font-weight: bold;
+        }
+        .vietnam-time {
+            font-size: 0.9em;
+            color: #00aaff;
+            margin-left: 20px;
+        }
+        .details {
+            font-size: 0.9em;
+            margin-top: 5px;
+            color: #888;
+        }
+        .summary {
+            background: #2a2a2a;
+            padding: 15px;
+            margin: 20px 0;
+            border: 2px solid #00ff00;
+        }
+        button {
+            background: #00ff00;
+            color: #000;
+            border: none;
+            padding: 10px 30px;
+            font-size: 16px;
+            cursor: pointer;
+            display: block;
+            margin: 20px auto;
+        }
+        button:hover {
+            background: #00dd00;
+        }
+        .progress {
+            text-align: center;
+            font-size: 18px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🚀 API ENDPOINT TESTING</h1>
+    <div class="summary">
+        <h2>Test Configuration</h2>
+        <p>Base URL: http://localhost:3000/api</p>
+        <p>Total Endpoints: <span id="totalEndpoints">0</span></p>
+        <p>Vietnam Time Header: X-Vietnam-Time</p>
+    </div>
+    <button onclick="runAllTests()">▶️ Run All Tests</button>
+    <div class="progress" id="progress"></div>
+    <div id="results"></div>
+    <div class="summary" id="summary" style="display:none;">
+        <h2>📊 Test Summary</h2>
+        <p>✅ Passed: <span id="passed">0</span></p>
+        <p>⚠️ Warnings: <span id="warnings">0</span></p>
+        <p>❌ Failed: <span id="failed">0</span></p>
+        <p>🌍 Vietnam Time Header: <span id="vietnamTimeCheck">-</span></p>
+    </div>
+
+    <script>
+        const BASE_URL = 'http://localhost:3000/api';
+        
+        const endpoints = [
+            // Auth endpoints
+            { method: 'POST', path: '/auth/send-otp', body: {email: 'test@test.com'}, desc: 'Send Registration OTP' },
+            { method: 'POST', path: '/auth/login', body: {identifier: 'test@test.com', password: 'Test123'}, desc: 'Login' },
+            { method: 'POST', path: '/auth/send-reset-otp', body: {email: 'test@test.com'}, desc: 'Send Password Reset OTP' },
+            
+            // Menu endpoints (GET - no auth needed)
+            { method: 'GET', path: '/menu', desc: 'Get All Menu Items' },
+            { method: 'GET', path: '/menu/search?q=coffee', desc: 'Search Menu' },
+            { method: 'GET', path: '/menu/coffee', desc: 'Get Coffee Category' },
+            { method: 'GET', path: '/menu/product/cf_1', desc: 'Get Product Details' },
+            { method: 'GET', path: '/menu/options/all', desc: 'Get Customization Options' },
+            
+            // Locations endpoints (GET - no auth needed)
+            { method: 'GET', path: '/locations/districts', desc: 'Get Districts' },
+            { method: 'GET', path: '/locations/wards?district_code=760', desc: 'Get Wards' },
+            
+            // Cart endpoints (require auth - will return 401)
+            { method: 'GET', path: '/cart', desc: 'Get Cart', expectAuth: true },
+            { method: 'POST', path: '/cart/add', body: {product_id: 'cf_1', quantity: 1}, desc: 'Add to Cart', expectAuth: true },
+            
+            // Orders endpoints  
+            { method: 'GET', path: '/orders/orders', desc: 'Get Order History', expectAuth: true },
+            { method: 'GET', path: '/orders/frequent-items', desc: 'Get Frequent Items', expectAuth: true },
+            
+            // Favorites endpoints (require auth)
+            { method: 'GET', path: '/favorites/1', desc: 'Get Favorites', expectAuth: true },
+            
+            // Reviews endpoints
+            { method: 'GET', path: '/reviews/product/cf_1', desc: 'Get Product Reviews' },
+            
+            // Profile endpoints (require auth)
+            { method: 'GET', path: '/profile/balance', desc: 'Get Balance', expectAuth: true },
+            
+            // Transactions (require auth)
+            { method: 'GET', path: '/transactions', desc: 'Get Transactions', expectAuth: true },
+        ];
+
+        let results = {
+            passed: 0,
+            warnings: 0,
+            failed: 0,
+            vietnamTimePresent: 0,
+            total: 0
+        };
+
+        async function testEndpoint(endpoint) {
+            const options = {
+                method: endpoint.method,
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            };
+
+            if (endpoint.body) {
+                options.body = JSON.stringify(endpoint.body);
+            }
+
+            try {
+                const response = await fetch(BASE_URL + endpoint.path, options);
+                const vietnamTime = response.headers.get('x-vietnam-time');
+                const status = response.status;
+                
+                // Count Vietnam time header
+                if (vietnamTime) {
+                    results.vietnamTimePresent++;
+                }
+
+                // Determine result status
+                let resultClass = 'success';
+                let statusText = `${status}`;
+                
+                if (endpoint.expectAuth && status === 401) {
+                    // Expected unauthorized
+                    results.passed++;
+                    statusText += ' (Expected - Auth Required)';
+                } else if (status >= 200 && status < 300) {
+                    // Success
+                    results.passed++;
+                    resultClass = 'success';
+                } else if (status === 404 || status === 405) {
+                    // Not found or method not allowed (might be endpoint issue)
+                    results.warnings++;
+                    resultClass = 'warning';
+                    statusText += ' (Warning)';
+                } else if (status >= 500) {
+                    // Server error - CRITICAL
+                    results.failed++;
+                    resultClass = 'error';
+                    statusText += ' ❌ SERVER ERROR';
+                } else if (status >= 400) {
+                    // Client error
+                    if (endpoint.expectAuth && status === 401) {
+                        results.passed++;
+                    } else {
+                        results.warnings++;
+                        resultClass = 'warning';
+                        statusText += ' (Client Error)';
+                    }
+                }
+
+                results.total++;
+
+                return {
+                    endpoint,
+                    status,
+                    vietnamTime,
+                    resultClass,
+                    statusText
+                };
+
+            } catch (error) {
+                results.failed++;
+                results.total++;
+                return {
+                    endpoint,
+                    status: 'ERROR',
+                    vietnamTime: null,
+                    resultClass: 'error',
+                    statusText: `Connection Error: ${error.message}`,
+                    error: true
+                };
+            }
+        }
+
+        function displayResult(result) {
+            const resultsDiv = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `endpoint ${result.resultClass}`;
+            
+            div.innerHTML = `
+                <span class="method ${result.endpoint.method}">${result.endpoint.method}</span>
+                <span>${result.endpoint.path}</span>
+                <span class="status">${result.statusText}</span>
+                <div class="details">
+                    ${result.endpoint.desc}
+                    ${result.vietnamTime ? `<span class="vietnam-time">✓ ${result.vietnamTime}</span>` : '<span style="color:#ff0000">✗ No Vietnam Time Header</span>'}
+                </div>
+            `;
+            
+            resultsDiv.appendChild(div);
+        }
+
+        async function runAllTests() {
+            // Reset
+            results = {
+                passed: 0,
+                warnings: 0,
+                failed: 0,
+                vietnamTimePresent: 0,
+                total: 0
+            };
+            
+            document.getElementById('results').innerHTML = '';
+            document.getElementById('summary').style.display = 'none';
+            document.getElementById('totalEndpoints').textContent = endpoints.length;
+            
+            const progress = document.getElementById('progress');
+            
+            // Run tests
+            for (let i = 0; i < endpoints.length; i++) {
+                progress.textContent = `Testing ${i + 1} / ${endpoints.length}...`;
+                const result = await testEndpoint(endpoints[i]);
+                displayResult(result);
+                await new Promise(resolve => setTimeout(resolve, 100)); // Small delay
+            }
+            
+            progress.textContent = '✅ All tests completed!';
+            
+            // Show summary
+            document.getElementById('passed').textContent = results.passed;
+            document.getElementById('warnings').textContent = results.warnings;
+            document.getElementById('failed').textContent = results.failed;
+            document.getElementById('vietnamTimeCheck').textContent = 
+                `${results.vietnamTimePresent} / ${results.total} endpoints`;
+            document.getElementById('summary').style.display = 'block';
+            
+            // Scroll to summary
+            document.getElementById('summary').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Show total endpoints on load
+        document.getElementById('totalEndpoints').textContent = endpoints.length;
+    </script>
+</body>
+</html>

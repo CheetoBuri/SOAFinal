@@ -240,6 +240,7 @@ class Product(BaseModel):
     category: str
     price: float
     icon: str
+    image: Optional[str] = None
     defaultSugar: Optional[str] = "0"
 
 

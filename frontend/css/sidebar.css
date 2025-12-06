@@ -126,6 +126,29 @@
 .frequent-item-icon {
     font-size: 24px;
     flex-shrink: 0;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    overflow: hidden;
+    background: linear-gradient(135deg, #fff5f5 0%, #ffe8e8 100%);
+    position: relative;
+}
+
+.frequent-item-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.image-placeholder-sidebar {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
 }
 
 .frequent-item-info {
