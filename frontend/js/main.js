@@ -54,8 +54,14 @@ window.submitChangePassword = profileComponent.submitChangePassword;
 
 // Landing page functions
 window.showAuthScreen = function() {
-    document.getElementById('landingPage').classList.add('hidden');
-    document.getElementById('authScreen').style.display = 'flex';
+    // Safety: remove any stray modals/overlays that might block clicks
+    document.querySelectorAll('.modal, .modal-overlay').forEach(el => {
+        try { el.remove(); } catch (e) {}
+    });
+    const landing = document.getElementById('landingPage');
+    const auth = document.getElementById('authScreen');
+    if (landing) landing.classList.add('hidden');
+    if (auth) auth.style.display = 'flex';
 };
 
 // Initialize app

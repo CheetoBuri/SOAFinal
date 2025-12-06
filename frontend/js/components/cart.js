@@ -39,7 +39,7 @@ function showCustomizationModal(product, customization) {
     const isVNCoffee = isCoffee && product.type === 'vietnamese';
     
     let modalContent = `
-        <div class="modal-content" style="max-width: 600px; max-height: 90vh; overflow-y: auto;">
+        <div class="modal-content" style="max-inline-size: 600px; max-block-size: 90vh; overflow-y: auto;">
             <button class="modal-close" onclick="window.closeSizeModal()" aria-label="Close">×</button>
             <div class="modal-header">
                 <span>${product.icon} ${product.name}</span>
@@ -56,7 +56,7 @@ function showCustomizationModal(product, customization) {
         modalContent += `
             <div class="form-group">
                 <label><strong>📏 Size:</strong></label>
-                <div class="size-options" style="display: flex; gap: 10px; margin-top: 8px;">
+                <div class="size-options" style="display: flex; gap: 10px; margin-block-start: 8px;">
                     ${Object.entries(customization.sizes).map(([key, data]) => `
                         <label class="option-card ${key === 'M' ? 'selected' : ''}" style="flex: 1; cursor: pointer; padding: 12px; border: 2px solid #ddd; border-radius: 8px; text-align: center; transition: all 0.3s;">
                             <input type="radio" name="size" value="${key}" ${key === 'M' ? 'checked' : ''} 
@@ -75,8 +75,8 @@ function showCustomizationModal(product, customization) {
     if (isCoffee && Object.keys(customization.milkOptions).length > 0) {
         modalContent += `
             <div class="form-group">
-                <label><strong>🥛 Milk Options:</strong> <span style="font-size: 12px; color: #666;">(Choose 1 milk type + optional condensed milk)</span></label>
-                <div class="milk-options" style="display: flex; flex-direction: column; gap: 8px; margin-top: 8px;">
+                <label><strong>🥛 Milk Options:</strong> <span style="font-size: 12px; color: #666;">(Optional) Choose up to 1 milk. Condensed milk can be added anytime.</span></label>
+                <div class="milk-options" style="display: flex; flex-direction: column; gap: 8px; margin-block-start: 8px;">
                     ${Object.entries(customization.milkOptions).map(([key, data]) => `
                         <label class="checkbox-option ${data.default ? 'selected' : ''}" style="cursor: pointer; display: flex; align-items: center; gap: 10px; padding: 10px; border: 2px solid #ddd; border-radius: 8px; transition: all 0.3s;" data-milk-key="${key}">
                             <input type="checkbox" class="milk-checkbox" value="${key}" ${data.default ? 'checked' : ''}
@@ -96,7 +96,7 @@ function showCustomizationModal(product, customization) {
         modalContent += `
             <div class="form-group">
                 <label><strong>🍬 Sugar Level:</strong></label>
-                <select id="sugarSelect" class="form-select" style="width:100%; padding:12px; border:2px solid #ddd; border-radius:8px; margin-top:8px; font-size: 14px;">
+                <select id="sugarSelect" class="form-select" style="inline-size:100%; padding:12px; border:2px solid #ddd; border-radius:8px; margin-block-start:8px; font-size: 14px;">
                     <option value="0" ${defaultSugar === '0' ? 'selected' : ''}>0% (No Sugar)</option>
                     <option value="25" ${defaultSugar === '25' ? 'selected' : ''}>25%</option>
                     <option value="50" ${defaultSugar === '50' ? 'selected' : ''}>50%</option>
@@ -115,7 +115,7 @@ function showCustomizationModal(product, customization) {
         modalContent += `
             <div class="form-group">
                 <label><strong>${upsellTitle}:</strong></label>
-                <div class="upsells-options" style="display: flex; flex-direction: column; gap: 6px; margin-top: 8px;">
+                <div class="upsells-options" style="display: flex; flex-direction: column; gap: 6px; margin-block-start: 8px;">
                     ${Object.entries(customization.upsells).map(([key, data]) => `
                         <label class="checkbox-option" style="cursor: pointer; display: flex; align-items: center; gap: 10px; padding: 10px; border: 2px solid #ddd; border-radius: 8px; transition: all 0.3s;">
                             <input type="checkbox" class="upsell-checkbox" value="${key}" data-price="${data.price}" onchange="window.updateModalPrice()">
@@ -133,7 +133,7 @@ function showCustomizationModal(product, customization) {
         modalContent += `
             <div class="form-group">
                 <label><strong>🎂 Toppings:</strong></label>
-                <div class="toppings-options" style="display: flex; flex-direction: column; gap: 6px; margin-top: 8px;">
+                <div class="toppings-options" style="display: flex; flex-direction: column; gap: 6px; margin-block-start: 8px;">
                     ${Object.entries(customization.toppings).map(([key, data]) => `
                         <label class="checkbox-option" style="cursor: pointer; display: flex; align-items: center; gap: 10px; padding: 10px; border: 2px solid #ddd; border-radius: 8px; transition: all 0.3s;">
                             <input type="checkbox" class="topping-checkbox" value="${key}" data-price="${data.price}" onchange="window.updateModalPrice()">
@@ -148,14 +148,14 @@ function showCustomizationModal(product, customization) {
     
     // Price summary
     modalContent += `
-            <div class="form-group" style="margin-top: 20px; padding: 15px; background: linear-gradient(135deg, #f8f8f8 0%, #e8e8e8 100%); border-radius: 12px; border: 2px solid #c41e3a;">
+            <div class="form-group" style="margin-block-start: 20px; padding: 15px; background: linear-gradient(135deg, #f8f8f8 0%, #e8e8e8 100%); border-radius: 12px; border: 2px solid #c41e3a;">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                     <label style="font-weight: bold; font-size: 18px; margin: 0; color: #333;">Total:</label>
                     <span id="modalFinalPrice" style="font-size: 24px; font-weight: bold; color: #c41e3a;">${ui.formatCurrency(product.price)}</span>
                 </div>
             </div>
             
-            <div class="modal-buttons" style="margin-top: 20px; display: flex; gap: 10px;">
+            <div class="modal-buttons" style="margin-block-start: 20px; display: flex; gap: 10px;">
                 <button class="btn-submit" onclick="window.addToCartFromModal()" style="flex: 2; padding: 14px; font-size: 16px;">
                     🛒 Add to Cart
                 </button>
@@ -190,34 +190,35 @@ function addOptionCardListeners() {
         });
     });
     
-    // Milk option cards - Allow only 1 regular milk + optional condensed milk
+    // Milk option cards - Rules:
+    // - User may choose no milk at all
+    // - If choosing regular milk: allow only one at a time (exclusive)
+    // - Condensed milk can be added with or without a regular milk
     document.querySelectorAll('.milk-options .milk-checkbox').forEach(checkbox => {
         checkbox.addEventListener('change', function() {
             const milkValue = this.value;
             const isCondensed = milkValue === 'condensed' || milkValue === 'condensed_milk';
-            
+
+            // Get current selections AFTER this checkbox has toggled
+            const allMilkCbs = Array.from(document.querySelectorAll('.milk-options .milk-checkbox'));
+            const checkedCbs = allMilkCbs.filter(cb => cb.checked);
+            const checkedRegular = checkedCbs.filter(cb => cb.value !== 'condensed' && cb.value !== 'condensed_milk');
+            const condensedCb = allMilkCbs.find(cb => cb.value === 'condensed' || cb.value === 'condensed_milk');
+
             if (this.checked) {
-                // Get all checked milks (EXCLUDING the one just clicked to check the state BEFORE this change)
-                const otherCheckedMilks = Array.from(document.querySelectorAll('.milk-options .milk-checkbox:checked')).filter(cb => cb !== this);
-                const otherRegularMilks = otherCheckedMilks.filter(cb => cb.value !== 'condensed' && cb.value !== 'condensed_milk');
-                
-                // If this is a regular milk and there's already another regular milk selected
-                if (!isCondensed && otherRegularMilks.length >= 1) {
-                    this.checked = false;
-                    alert('Bạn chỉ có thể chọn 1 loại sữa chính. Có thể thêm sữa đặc nếu muốn.');
-                    return;
+                // If a regular milk was just selected and there is another regular already, uncheck the others (exclusive selection)
+                if (!isCondensed && checkedRegular.length > 1) {
+                    checkedRegular
+                        .filter(cb => cb !== this)
+                        .forEach(cb => {
+                            cb.checked = false;
+                            cb.closest('.checkbox-option')?.classList.remove('selected');
+                        });
                 }
-                
-                // If trying to select condensed milk when no regular milk is selected
-                if (isCondensed && otherRegularMilks.length === 0) {
-                    this.checked = false;
-                    alert('Vui lòng chọn 1 loại sữa chính trước khi thêm sữa đặc.');
-                    return;
-                }
-                
-                this.closest('.checkbox-option').classList.add('selected');
+
+                this.closest('.checkbox-option')?.classList.add('selected');
             } else {
-                this.closest('.checkbox-option').classList.remove('selected');
+                this.closest('.checkbox-option')?.classList.remove('selected');
             }
             updateModalPrice();
         });
@@ -279,7 +280,16 @@ export function addToCartFromModal() {
     
     // Collect selections
     const size = document.querySelector('input[name="size"]:checked')?.value || 'M';
-    const milks = Array.from(document.querySelectorAll('.milk-checkbox:checked')).map(cb => cb.value);
+    const checkedMilkCbs = Array.from(document.querySelectorAll('.milk-checkbox:checked'));
+    const regularMilks = checkedMilkCbs.filter(cb => cb.value !== 'condensed' && cb.value !== 'condensed_milk');
+
+    // Enforce only one regular milk
+    if (regularMilks.length > 1) {
+        alert('Bạn chỉ có thể chọn 1 loại sữa chính.');
+        return;
+    }
+
+    const milks = checkedMilkCbs.map(cb => cb.value);
     const sugar = document.getElementById('sugarSelect')?.value || '0';
     
     const upsells = Array.from(document.querySelectorAll('.upsell-checkbox:checked')).map(cb => cb.value);
@@ -416,7 +426,7 @@ export function updateCartUI() {
             customizations.push(`Toppings: ${toppingLabels}`);
         }
         
-        const customText = customizations.length > 0 ? `<div style="font-size: 11px; color: #999; margin-top: 2px;">${customizations.join(' • ')}</div>` : '';
+        const customText = customizations.length > 0 ? `<div style="font-size: 11px; color: #999; margin-block-start: 2px;">${customizations.join(' • ')}</div>` : '';
         
         return `
             <div class="cart-item">
@@ -511,6 +521,100 @@ export function openCheckoutModal() {
 
     // Pre-fill user information
     const user = state.currentUser;
+        // Ensure app screen is visible
+        const appScreen = document.getElementById('appScreen');
+        if (appScreen && appScreen.style.display === 'none') {
+            appScreen.style.display = 'block';
+        }
+
+        // Ensure checkout modal exists; if missing, inject it
+        let checkoutModal = document.getElementById('checkoutModal');
+        if (!checkoutModal) {
+            const wrapper = document.createElement('div');
+            wrapper.innerHTML = `
+            <div id="checkoutModal" class="modal">
+                <div class="modal-content">
+                    <button class="modal-close" onclick="closeCheckoutModal()" aria-label="Close">×</button>
+                    <div class="modal-header">🛒 Checkout</div>
+                    <form onsubmit="processCheckout(event)">
+                        <div class="form-group">
+                            <label>Customer Name *</label>
+                            <input type="text" id="customerName" required placeholder="Your full name">
+                        </div>
+                        <div class="form-group">
+                            <label>Phone Number *</label>
+                            <input type="tel" id="customerPhone" required placeholder="Your phone number">
+                        </div>
+                        <div class="form-group">
+                            <label>Email *</label>
+                            <input type="email" id="customerEmail" required placeholder="Your email">
+                        </div>
+                        <div class="form-group">
+                            <label>District / Quận *</label>
+                            <select id="deliveryDistrict" required onchange="loadWards()">
+                                <option value="">Choose district...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Ward / Phường *</label>
+                            <select id="deliveryWard" required>
+                                <option value="">Choose ward...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Street Address *</label>
+                            <input type="text" id="deliveryStreet" required placeholder="123 Nguyễn Huệ">
+                        </div>
+                        <div class="form-group">
+                            <label>Payment Method *</label>
+                            <select id="paymentMethod" required>
+                                <option value="">Choose payment method...</option>
+                                <option value="balance">Account Balance</option>
+                                <option value="cash">Cash on Delivery</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Special Notes (Optional)</label>
+                            <textarea id="specialNotes" rows="3" placeholder="Any special requests? (e.g., less sugar, no ice)"></textarea>
+                        </div>
+                        <div id="checkoutOrderItems" style="background:#fff; border:1px solid #ddd; border-radius:8px; padding:15px; margin:15px 0; max-block-size:200px; overflow-y:auto;">
+                            <h4 style="margin:0 0 10px 0; color:#006241; font-size:16px;">📋 Order Items</h4>
+                            <div id="checkoutItemsList"></div>
+                        </div>
+                        <div id="checkoutSummary" style="background:#f5f5f5; padding:15px; border-radius:8px; margin:15px 0;">
+                            <div style="display:flex; justify-content:space-between; margin-block-end:8px;">
+                                <span>Subtotal:</span>
+                                <span id="checkoutSubtotal">₫0</span>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; margin-block-end:8px;">
+                                <span>Discount:</span>
+                                <span id="checkoutDiscount">-₫0</span>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:18px; color:#c41e3a; padding-block-start:8px; border-block-start:2px solid #ddd;">
+                                <span>Total:</span>
+                                <span id="checkoutTotal">₫0</span>
+                            </div>
+                        </div>
+                        <div class="modal-buttons">
+                            <button type="submit" class="btn-submit">Place Order</button>
+                            <button type="button" class="btn-cancel" onclick="closeCheckoutModal()">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>`;
+            document.body.appendChild(wrapper.firstElementChild);
+            checkoutModal = document.getElementById('checkoutModal');
+        }
+
+        const subtotalEl = document.getElementById('checkoutSubtotal');
+        const discountEl = document.getElementById('checkoutDiscount');
+        const totalEl = document.getElementById('checkoutTotal');
+        const itemsListEl = document.getElementById('checkoutItemsList');
+        if (!subtotalEl || !discountEl || !totalEl || !itemsListEl) {
+            console.warn('Checkout modal elements missing after injection. Aborting openCheckoutModal.');
+            return;
+        }
+
     if (user) {
         const nameField = document.getElementById('customerName');
         const emailField = document.getElementById('customerEmail');
@@ -521,7 +625,7 @@ export function openCheckoutModal() {
         if (phoneField && user.phone) phoneField.value = user.phone;
     }
     
-    // Reset address fields before loading districts
+    // CRITICAL: Reset ALL fields including special notes to ensure no data carries over from previous order
     const districtSelect = document.getElementById('deliveryDistrict');
     const wardSelect = document.getElementById('deliveryWard');
     const streetInput = document.getElementById('deliveryStreet');
@@ -533,12 +637,18 @@ export function openCheckoutModal() {
         wardSelect.disabled = true;
     }
     if (streetInput) streetInput.value = '';
+    // Always clear special notes when opening checkout
     if (notesInput) notesInput.value = '';
 
     // Load districts
     loadDistricts();
 
-    // Display order items summary
+        // Load districts (guarded)
+        try {
+            loadDistricts();
+        } catch (e) {
+            console.warn('loadDistricts failed:', e);
+        }
     displayCheckoutItems();
 
     // Calculate totals
@@ -546,16 +656,15 @@ export function openCheckoutModal() {
     const discount = subtotal * (state.discountPercent / 100);
     const total = subtotal - discount;
 
-    document.getElementById('checkoutSubtotal').textContent = ui.formatCurrency(subtotal);
-    document.getElementById('checkoutDiscount').textContent = `-${ui.formatCurrency(Math.round(discount))}`;
-    document.getElementById('checkoutTotal').textContent = ui.formatCurrency(Math.round(total));
+    // Update totals in modal
+    subtotalEl.textContent = ui.formatCurrency(subtotal);
+    discountEl.textContent = `-${ui.formatCurrency(Math.round(discount))}`;
+    totalEl.textContent = ui.formatCurrency(Math.round(total));
 
-    // Open modal
-    const modal = document.getElementById('checkoutModal');
+    // Open modal and attach backdrop close
+    const modal = checkoutModal;
     if (modal) {
         modal.classList.add('active');
-        
-        // Add backdrop click to close
         modal.addEventListener('click', (e) => {
             if (e.target === modal) {
                 closeCheckoutModal();
@@ -570,10 +679,7 @@ function displayCheckoutItems() {
 
     itemsList.innerHTML = state.cart.map(item => {
         const details = [];
-        
-        // Size
-        if (item.size) details.push(`Size: ${item.size}`);
-        
+
         // Sugar level
         if (item.sugar) details.push(`Sugar: ${item.sugar}%`);
         
@@ -631,13 +737,13 @@ function displayCheckoutItems() {
         const detailsText = details.length > 0 ? `<br><span style="font-size:12px; color:#666;">${details.join(' | ')}</span>` : '';
         
         return `
-            <div style="padding:8px 0; border-bottom:1px solid #eee;">
+            <div style="padding:8px 0; border-block-end:1px solid #eee;">
                 <div style="display:flex; justify-content:space-between; align-items:start;">
                     <div style="flex:1;">
                         <strong>${item.name}</strong> x${item.quantity}
                         ${detailsText}
                     </div>
-                    <div style="color:#c41e3a; font-weight:bold; white-space:nowrap; margin-left:10px;">
+                    <div style="color:#c41e3a; font-weight:bold; white-space:nowrap; margin-inline-start:10px;">
                         ${ui.formatCurrency(item.price * item.quantity)}
                     </div>
                 </div>
@@ -650,7 +756,7 @@ export function closeCheckoutModal() {
     const modal = document.getElementById('checkoutModal');
     if (modal) modal.classList.remove('active');
     
-    // Reset address and notes fields
+    // CRITICAL: Reset ALL fields including special notes to prevent data leakage between orders
     const districtSelect = document.getElementById('deliveryDistrict');
     const wardSelect = document.getElementById('deliveryWard');
     const streetInput = document.getElementById('deliveryStreet');
@@ -663,6 +769,7 @@ export function closeCheckoutModal() {
         wardSelect.disabled = true;
     }
     if (streetInput) streetInput.value = '';
+    // Force clear special notes
     if (notesInput) notesInput.value = '';
 }
 
@@ -676,7 +783,8 @@ export async function processCheckout(event) {
     const deliveryWard = document.getElementById('deliveryWard').value.trim();
     const deliveryStreet = document.getElementById('deliveryStreet').value.trim();
     const paymentMethod = document.getElementById('paymentMethod').value;
-    const notes = document.getElementById('orderNotes').value.trim();
+    const notesInputEl = document.getElementById('specialNotes');
+    const notes = notesInputEl ? notesInputEl.value.trim() : '';
 
     if (!customerName || !customerPhone || !customerEmail || !deliveryDistrict || !deliveryWard || !deliveryStreet || !paymentMethod) {
         alert('Vui lòng điền đầy đủ thông tin!');
@@ -735,10 +843,18 @@ export async function processCheckout(event) {
             }
         } else {
             alert(`Order placed successfully! Order ID: ${orderId}`);
+            // Clear cart and reset state
             state.cart = [];
             state.promoApplied = null;
             state.discountPercent = 0;
             updateCartUI();
+            
+            // CRITICAL: Force clear special notes after successful order
+            const notesField = document.getElementById('specialNotes');
+            if (notesField) {
+                notesField.value = '';
+                console.log('Special notes cleared after COD order');
+            }
             
             const { switchView } = await import('./navigation.js');
             switchView('orderStatus');
@@ -803,18 +919,18 @@ function showPaymentOTPModal(orderId, amount) {
     modal.style.zIndex = '3000';
     modal.id = 'paymentOTPModal';
     modal.innerHTML = `
-        <div class="modal-content" style="max-width: 450px;">
+        <div class="modal-content" style="max-inline-size: 450px;">
             <div class="modal-header">🔐 Payment Confirmation</div>
             <div style="padding: 20px;">
-                <p style="color: #666; margin-bottom: 15px;">
+                <p style="color: #666; margin-block-end: 15px;">
                     Enter the 6-digit OTP sent to your email to confirm payment of <strong style="color: #c41e3a;">${ui.formatCurrency(amount)}</strong>
                 </p>
                 <div class="form-group">
                     <label>OTP Code *</label>
                     <input type="text" id="paymentOTPInput" maxlength="6" placeholder="Enter 6 digits" 
-                        style="width:100%; padding:12px; font-size:24px; text-align:center; letter-spacing:5px; border:2px solid #ddd; border-radius:8px;">
+                        style="inline-size:100%; padding:12px; font-size:24px; text-align:center; letter-spacing:5px; border:2px solid #ddd; border-radius:8px;">
                 </div>
-                <p style="color: #999; font-size: 12px; margin-top: 10px;">
+                <p style="color: #999; font-size: 12px; margin-block-start: 10px;">
                     OTP expires in 10 minutes. Check spam folder if you don't see the email.
                 </p>
             </div>
@@ -857,9 +973,17 @@ window.verifyPaymentOTP = async function(orderId, amount) {
             state.currentUser.balance = result.data.new_balance;
         }
         
+        // Clear cart and reset state
         state.cart = [];
         state.promoApplied = null;
         state.discountPercent = 0;
+        
+        // CRITICAL: Force clear special notes after successful payment
+        const notesField = document.getElementById('specialNotes');
+        if (notesField) {
+            notesField.value = '';
+            console.log('Special notes cleared after balance payment');
+        }
         
         closePaymentOTPModal();
         updateCartUI();

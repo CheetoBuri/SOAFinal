@@ -6,6 +6,7 @@ from models.schemas import PaymentOTPRequest, VerifyPaymentOTPRequest
 from models.responses import PaymentOTPResponse, PaymentVerificationResponse
 from database import get_db
 from utils.security import generate_otp, send_email
+from utils.email_service import send_simple_email
 from utils.timezone import get_vietnam_time
 from datetime import timedelta
 
@@ -115,7 +116,7 @@ def send_payment_otp(request: PaymentOTPRequest, background_tasks: BackgroundTas
 
 
 @router.post("/verify-otp", summary="Verify Payment OTP and Complete Payment")
-def verify_payment_otp(request: VerifyPaymentOTPRequest):
+def verify_payment_otp(request: VerifyPaymentOTPRequest, background_tasks: BackgroundTasks):
     """
     Verify OTP code and process payment from user balance.
     
@@ -176,14 +177,14 @@ def verify_payment_otp(request: VerifyPaymentOTPRequest):
         raise HTTPException(status_code=400, detail="Order is not pending payment")
     
     # Deduct from user balance
-    c.execute("SELECT balance FROM users WHERE id = ?", (user_id,))
+    c.execute("SELECT email, balance FROM users WHERE id = ?", (user_id,))
     user = c.fetchone()
     
     if not user:
         conn.close()
         raise HTTPException(status_code=404, detail="User not found")
     
-    user_balance = user[0]
+    user_email, user_balance = user
     
     if user_balance < order_total:
         conn.close()
@@ -228,6 +229,29 @@ def verify_payment_otp(request: VerifyPaymentOTPRequest):
     
     conn.commit()
     conn.close()
+
+    # Send payment success email asynchronously
+    try:
+        html_body = f"""
+        <html>
+            <body style="font-family: Arial, sans-serif; background-color: #f5f5f5; padding: 20px;">
+                <div style="max-width: 520px; margin: 0 auto; background-color: white; padding: 24px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <h2 style="color: #2e7d32; text-align: center;">✅ Payment Successful</h2>
+                    <p style="color: #333;">Your payment for order <strong>#{order_id}</strong> has been completed.</p>
+                    <div style="background-color: #f9f9f9; padding: 12px; border-radius: 6px; margin: 16px 0;">
+                        <p style="margin: 6px 0; color: #666;"><strong>Order ID:</strong> {order_id}</p>
+                        <p style="margin: 6px 0; color: #666;"><strong>Amount Paid:</strong> ₫{order_total:,.0f}</p>
+                        <p style="margin: 6px 0; color: #666;"><strong>New Balance:</strong> ₫{new_balance:,.0f}</p>
+                    </div>
+                    <p style="color: #999; font-size: 12px; text-align: center;">Thank you for your purchase!</p>
+                </div>
+            </body>
+        </html>
+        """
+        background_tasks.add_task(send_email, user_email, "✅ Payment Successful", html_body)
+    except Exception:
+        # Fallback to plain text
+        background_tasks.add_task(send_simple_email, user_email, "Payment Successful", f"Order #{order_id} paid. Amount: {order_total}. New balance: {new_balance}.")
     
     return {
         "status": "success",

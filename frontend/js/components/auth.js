@@ -4,16 +4,19 @@ import * as storage from '../utils/storage.js';
 import * as ui from '../utils/ui.js';
 import { setCurrentUser } from '../utils/state.js';
 import { loadMenu, loadFavorites } from './menu.js';
+import { updateCartUI } from './cart.js';
 import { switchView } from './navigation.js';
 
-export function initAuth() {
+export async function initAuth() {
     // Check if user is already logged in
     const user = storage.getUserFromStorage();
     if (user) {
         setCurrentUser(user);
         showApp();
-        loadMenu();
-        loadFavorites();
+        await loadMenu();
+        await loadFavorites();
+        // Ensure cart UI is initialized for already logged-in users
+        updateCartUI();
     } else {
         // Show landing page initially
         const landingPage = document.getElementById('landingPage');
@@ -40,12 +43,23 @@ export function showApp() {
     ui.hideElement('authScreen');
     ui.showElement('appScreen');
     
+    // Safety: clear active state on overlays/modals that might block clicks
+    try {
+        document.querySelectorAll('.modal-overlay, .modal').forEach(el => {
+            el.classList.remove('active');
+            el.classList.remove('dimmed');
+        });
+    } catch {}
+    
     const user = storage.getUserFromStorage();
     if (user) {
         const displayText = user.username || user.email;
         const userEmailEl = document.getElementById('userEmail');
         if (userEmailEl) userEmailEl.textContent = displayText;
     }
+    
+    // Ensure cart UI is initialized when showing app
+    updateCartUI();
 }
 
 export function switchAuthTab(tab) {
@@ -101,6 +115,8 @@ export async function handleLogin(e) {
         showApp();
         await loadMenu();
         await loadFavorites();
+        // Initialize cart UI to ensure checkout button works
+        updateCartUI();
         switchView('shop');  // Go to shop view (menu)
         ui.clearForm('loginForm');
     } else {
@@ -180,6 +196,8 @@ export async function handleRegister(e) {
         showApp();
         await loadMenu();
         await loadFavorites();
+        // Initialize cart UI to ensure checkout button works
+        updateCartUI();
         switchView('shop');  // Go to shop view (menu)
         resetRegisterForm();
         switchAuthTab('login');
