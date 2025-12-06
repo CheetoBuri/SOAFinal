@@ -69,6 +69,7 @@ CREATE TABLE IF NOT EXISTS orders (
     special_notes TEXT,
     promo_code TEXT,
     discount REAL DEFAULT 0,
+    shipping_fee REAL DEFAULT 30000,
     payment_method TEXT,
     customer_name TEXT,
     customer_phone TEXT,

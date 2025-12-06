@@ -7,6 +7,7 @@ from models.responses import PromoValidationResponse, CheckoutResponse, OrderHis
 from database import get_db
 from utils.timezone import get_vietnam_time
 from utils.email_service import send_refund_email
+from utils.menu_data import MENU_PRODUCTS
 import json
 import uuid
 from datetime import datetime
@@ -92,6 +93,9 @@ def checkout(request: CheckoutRequest):
         # price already includes size modifier and milk extras
         total += price * quantity
     
+    # Shipping fee - fixed at 30,000 VND
+    shipping_fee = 30000
+    
     discount = 0
     promo_code = request.promo_code.upper().strip() if request.promo_code else None
     
@@ -130,7 +134,8 @@ def checkout(request: CheckoutRequest):
         conn.commit()
         conn.close()
     
-    final_total = total - discount
+    # Calculate final total: subtotal - discount + shipping
+    final_total = total - discount + shipping_fee
 
     # Check balance for balance payment BEFORE creating order
     if request.payment_method == "balance":
@@ -170,8 +175,8 @@ def checkout(request: CheckoutRequest):
     # COD: will be 'paid' when user clicks 'Received'
     c.execute("""
         INSERT INTO orders
-        (id, user_id, items, total, special_notes, promo_code, discount, payment_method, customer_name, customer_phone, delivery_district, delivery_ward, delivery_street, status, created_at)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        (id, user_id, items, total, special_notes, promo_code, discount, shipping_fee, payment_method, customer_name, customer_phone, delivery_district, delivery_ward, delivery_street, status, created_at)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
     """, (
         order_id,
         request.user_id,
@@ -180,6 +185,7 @@ def checkout(request: CheckoutRequest):
         request.special_notes,
         promo_code,
         discount,
+        shipping_fee,
         request.payment_method,
         request.customer_name,
         request.customer_phone,
@@ -198,6 +204,7 @@ def checkout(request: CheckoutRequest):
         "order_id": order_id,
         "total": final_total,
         "discount": discount,
+        "shipping_fee": shipping_fee,
         "message": "Order created. Please confirm payment with OTP."
     }
 
@@ -215,7 +222,7 @@ def get_orders(user_id: str):
     c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     
     c.execute("""
-        SELECT id, items, total, status, special_notes, promo_code, discount, 
+        SELECT id, items, total, status, special_notes, promo_code, discount, shipping_fee,
                payment_method, customer_name, customer_phone, delivery_district, 
                delivery_ward, delivery_street, payment_time, created_at, delivered_at
         FROM orders
@@ -233,6 +240,7 @@ def get_orders(user_id: str):
             "special_notes": row['special_notes'],
             "promo_code": row['promo_code'],
             "discount": row['discount'],
+            "shipping_fee": row['shipping_fee'],
             "payment_method": row['payment_method'],
             "customer_name": row['customer_name'],
             "customer_phone": row['customer_phone'],
@@ -460,10 +468,17 @@ def mark_order_received(order_id: str, request: OrderActionRequest):
     try:
         items = json.loads(order['items']) if isinstance(order['items'], str) else order['items']
         
+        # Build a lookup dictionary for icons from menu data
+        icon_lookup = {}
+        for category_items in MENU_PRODUCTS.values():
+            for menu_item in category_items:
+                icon_lookup[menu_item['id']] = menu_item['icon']
+        
         for item in items:
             product_id = item.get('product_id')
             product_name = item.get('product_name') or item.get('name', 'Unknown')
-            product_icon = item.get('icon', '🍽️')
+            # Get icon from menu data, fallback to item icon or default
+            product_icon = icon_lookup.get(product_id) or item.get('icon', '🍽️')
             base_price = item.get('price', 0)
             quantity = item.get('quantity', 1)
             

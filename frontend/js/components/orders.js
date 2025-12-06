@@ -220,6 +220,7 @@ export async function confirmReceived(orderId) {
 
 function formatOrderCard(order) {
     const itemsList = formatOrderItems(order.items);
+    const priceBreakdown = formatPriceBreakdown(order);
     const createdDate = ui.formatDate(order.created_at);
     const paymentDate = order.payment_time ? ui.formatDate(order.payment_time) : null;
     const deliveredDate = order.delivered_at ? ui.formatDate(order.delivered_at) : null;
@@ -236,19 +237,21 @@ function formatOrderCard(order) {
                 </div>
                 <div class="order-status status-${order.status}">${order.status.toUpperCase()}</div>
             </div>
-            <div class="order-items">${itemsList}</div>
-            ${address ? `<div style="color:#666; font-size:13px; margin-top:8px;">📍 ${address}</div>` : ''}
-            ${order.special_notes ? `<div style="color:#999; font-size:12px; margin-top:8px;">📝 ${order.special_notes}</div>` : ''}
-            <div class="order-footer">
-                <span>Payment: ${order.payment_method}</span>
-                <div class="order-total">${ui.formatCurrency(order.total)}</div>
+            <div style="margin:12px 0;">
+                <h4 style="margin:0 0 8px 0; color:#006241; font-size:14px;">📋 Order Items</h4>
+                ${itemsList}
             </div>
+            ${priceBreakdown}
+            ${address ? `<div style="color:#666; font-size:13px; margin-top:10px;">📍 ${address}</div>` : ''}
+            ${order.special_notes ? `<div style="color:#999; font-size:12px; margin-top:8px;">📝 ${order.special_notes}</div>` : ''}
+            <div style="color:#666; font-size:13px; margin-top:8px;">💳 Payment: ${order.payment_method}</div>
         </div>
     `;
 }
 
 function formatActiveOrderCard(order) {
     const itemsList = formatOrderItems(order.items);
+    const priceBreakdown = formatPriceBreakdown(order);
     const address = formatAddress(order);
     
     // Determine status badges and payment method display
@@ -293,8 +296,12 @@ function formatActiveOrderCard(order) {
                 ${statusBadges}
                 ${paymentMethodText}
             </div>
-            <div class="order-items">${itemsList}</div>
-            ${address ? `<div style="color:#666; font-size:13px; margin-top:8px;">📍 ${address}</div>` : ''}
+            <div style="margin:12px 0;">
+                <h4 style="margin:0 0 8px 0; color:#006241; font-size:14px;">📋 Order Items</h4>
+                ${itemsList}
+            </div>
+            ${priceBreakdown}
+            ${address ? `<div style="color:#666; font-size:13px; margin-top:10px;">📍 ${address}</div>` : ''}
             ${order.special_notes ? `<div style="color:#999; font-size:12px; margin-top:8px;">📝 ${order.special_notes}</div>` : ''}
             ${formatOrderActions(order)}
         </div>
@@ -328,7 +335,7 @@ function formatOrderActions(order) {
 function formatOrderItems(items) {
     if (!Array.isArray(items)) {
         console.error('Invalid items format:', items);
-        return ['No items'];
+        return '<div style="color:#999;">No items</div>';
     }
     
     return items.map(item => {
@@ -366,9 +373,55 @@ function formatOrderItems(items) {
             details += `, Sugar ${item.sugar}%`;
         }
         
-        details += ` x${item.quantity}`;
-        return details;
-    }).join(', ');
+        const itemPrice = item.price || 0;
+        const itemTotal = itemPrice * (item.quantity || 1);
+        
+        return `
+            <div style="display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid #f0f0f0;">
+                <span style="flex:1;">${details} x${item.quantity}</span>
+                <span style="color:#006241; font-weight:500;">${ui.formatCurrency(itemTotal)}</span>
+            </div>
+        `;
+    }).join('');
+}
+
+function formatPriceBreakdown(order) {
+    // Calculate subtotal from items
+    let subtotal = 0;
+    if (Array.isArray(order.items)) {
+        subtotal = order.items.reduce((sum, item) => {
+            const itemPrice = item.price || 0;
+            const itemTotal = itemPrice * (item.quantity || 1);
+            return sum + itemTotal;
+        }, 0);
+    }
+    
+    const discount = order.discount || 0;
+    const shippingFee = order.shipping_fee || 0;
+    const total = order.total || 0;
+    
+    return `
+        <div style="background:#f9f9f9; padding:12px; border-radius:6px; margin-top:10px; font-size:13px;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+                <span style="color:#666;">Subtotal:</span>
+                <span style="font-weight:500;">${ui.formatCurrency(subtotal)}</span>
+            </div>
+            ${discount > 0 ? `
+            <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+                <span style="color:#666;">Discount${order.promo_code ? ` (${order.promo_code})` : ''}:</span>
+                <span style="color:#28a745; font-weight:500;">-${ui.formatCurrency(discount)}</span>
+            </div>
+            ` : ''}
+            <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+                <span style="color:#666;">🚚 Shipping Fee:</span>
+                <span style="font-weight:500;">${ui.formatCurrency(shippingFee)}</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; padding-top:8px; border-top:2px solid #ddd; margin-top:6px;">
+                <span style="color:#000; font-weight:600; font-size:14px;">Total:</span>
+                <span style="color:#c41e3a; font-weight:700; font-size:15px;">${ui.formatCurrency(total)}</span>
+            </div>
+        </div>
+    `;
 }
 
 function formatAddress(order) {

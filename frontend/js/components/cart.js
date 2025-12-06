@@ -562,9 +562,14 @@ export function openCheckoutModal() {
             appScreen.style.display = 'block';
         }
 
-        // Ensure checkout modal exists; if missing, inject it
+        // Force remove old checkout modal to ensure latest HTML is used
         let checkoutModal = document.getElementById('checkoutModal');
-        if (!checkoutModal) {
+        if (checkoutModal) {
+            checkoutModal.remove();
+        }
+        
+        // Always recreate checkout modal with latest HTML
+        {
             const wrapper = document.createElement('div');
             wrapper.innerHTML = `
             <div id="checkoutModal" class="modal">
@@ -624,6 +629,10 @@ export function openCheckoutModal() {
                             <div style="display:flex; justify-content:space-between; margin-block-end:8px;">
                                 <span>Discount:</span>
                                 <span id="checkoutDiscount">-₫0</span>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; margin-block-end:8px;">
+                                <span>🚚 Shipping Fee:</span>
+                                <span id="checkoutShipping">₫30,000</span>
                             </div>
                             <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:18px; color:#c41e3a; padding-block-start:8px; border-block-start:2px solid #ddd;">
                                 <span>Total:</span>
@@ -687,13 +696,16 @@ export function openCheckoutModal() {
     displayCheckoutItems();
 
     // Calculate totals
+    const SHIPPING_FEE = 30000;
     const subtotal = state.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     const discount = subtotal * (state.discountPercent / 100);
-    const total = subtotal - discount;
+    const total = subtotal - discount + SHIPPING_FEE;
 
     // Update totals in modal
     subtotalEl.textContent = ui.formatCurrency(subtotal);
     discountEl.textContent = `-${ui.formatCurrency(Math.round(discount))}`;
+    const shippingEl = document.getElementById('checkoutShipping');
+    if (shippingEl) shippingEl.textContent = ui.formatCurrency(SHIPPING_FEE);
     totalEl.textContent = ui.formatCurrency(Math.round(total));
 
     // Open modal and attach backdrop close
@@ -814,7 +826,10 @@ export async function processCheckout(event) {
     const customerName = document.getElementById('customerName').value.trim();
     const customerPhone = document.getElementById('customerPhone').value.trim();
     const customerEmail = document.getElementById('customerEmail').value.trim();
-    const deliveryDistrict = document.getElementById('deliveryDistrict').value.trim();
+    const districtSelect = document.getElementById('deliveryDistrict');
+    const deliveryDistrictCode = districtSelect.value.trim();
+    // Get district name from the selected option
+    const deliveryDistrict = districtSelect.selectedOptions[0]?.getAttribute('data-name') || districtSelect.selectedOptions[0]?.textContent || deliveryDistrictCode;
     const deliveryWard = document.getElementById('deliveryWard').value.trim();
     const deliveryStreet = document.getElementById('deliveryStreet').value.trim();
     const paymentMethod = document.getElementById('paymentMethod').value;
@@ -910,8 +925,10 @@ async function loadDistricts() {
             
             result.data.districts.forEach(district => {
                 const option = document.createElement('option');
-                option.value = district;
-                option.textContent = district;
+                // Store both code and name: code is used for API, name for display
+                option.value = district.code || district;
+                option.textContent = district.name || district;
+                option.setAttribute('data-name', district.name || district);
                 select.appendChild(option);
             });
         }
@@ -923,18 +940,19 @@ async function loadDistricts() {
 window.loadWards = async function() {
     const districtSelect = document.getElementById('deliveryDistrict');
     const wardSelect = document.getElementById('deliveryWard');
-    const district = districtSelect.value;
+    const districtCode = districtSelect.value;
     
     wardSelect.innerHTML = '<option value="">Choose ward...</option>';
     wardSelect.disabled = false;
     
-    if (!district) {
+    if (!districtCode) {
         wardSelect.disabled = true;
         return;
     }
     
     try {
-        const result = await api.getWards(district);
+        // Use district_code parameter instead of district name
+        const result = await api.apiCall(`/locations/wards?district_code=${districtCode}`);
         
         if (result.ok && result.data.wards) {
             result.data.wards.forEach(ward => {
