@@ -67,12 +67,21 @@ export function displayProducts(items, targetGridId = null) {
                 <div class="product-name">${item.name}</div>
                 <div class="product-price">${ui.formatCurrency(item.price)}</div>
                 <div class="product-buttons">
-                    <button class="btn-small btn-add" onclick="window.showAddToCart('${item.id}')">Add</button>
-                    <button class="btn-small btn-favorite ${favorited ? 'favorited' : ''}" onclick="window.toggleFavorite('${item.id}')" title="${favorited ? 'Remove from favorites' : 'Add to favorites'}">
+                    <button class="btn-small btn-favorite ${favorited ? 'favorited' : ''}" onclick="event.stopPropagation(); window.toggleFavorite('${item.id}')" title="${favorited ? 'Remove from favorites' : 'Add to favorites'}">
                         ${favorited ? '❤️' : '🤍'}
                     </button>
                 </div>
             `;
+            
+            // Click on card to open customization modal
+            card.style.cursor = 'pointer';
+            card.addEventListener('click', (e) => {
+                // Don't open modal if clicking on favorite button
+                if (!e.target.closest('.btn-favorite')) {
+                    window.showAddToCart(item.id);
+                }
+            });
+            
             categoryGrid.appendChild(card);
         });
         
