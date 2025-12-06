@@ -93,12 +93,12 @@ export function switchAuthTab(tab) {
 
 export async function handleLogin(e) {
     e.preventDefault();
-    const email = document.getElementById('loginEmail').value;
+    const identifier = document.getElementById('loginEmail').value; // can be email or username
     const password = document.getElementById('loginPassword').value;
     
     ui.clearError('loginError');
 
-    const result = await api.loginUser(email, password);
+    const result = await api.loginUser(identifier, password);
     
     if (result.ok) {
         const user = {
@@ -120,7 +120,11 @@ export async function handleLogin(e) {
         switchView('shop');  // Go to shop view (menu)
         ui.clearForm('loginForm');
     } else {
-        ui.displayError('loginError', result.data.detail);
+        const detail = (result?.data?.detail || '').toLowerCase();
+        const friendly = (result.status === 401 || detail.includes('invalid credentials') || detail.includes('incorrect'))
+            ? 'Incorrect email/username or password'
+            : (result?.data?.detail || 'Login failed');
+        ui.displayError('loginError', friendly);
     }
 }
 
