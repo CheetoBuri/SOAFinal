@@ -16,16 +16,123 @@ document.addEventListener('click', (e) => {
 });
 
 // Settings Modal
-window.openSettingsModal = function() {
-    const settings = document.getElementById('settingsModal');
-    if (settings) {
-        settings.classList.add('active');
-        settings.classList.remove('dimmed');
+window.openSettingsModal = function(event) {
+    // Prevent event bubbling if called from dropdown
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        event.stopImmediatePropagation();
     }
+    
+    // Close dropdown first
     const userDropdown = document.getElementById('userDropdown');
     if (userDropdown) {
         userDropdown.classList.remove('active');
     }
+    
+    // Use setTimeout to ensure dropdown closes before opening modal
+    setTimeout(() => {
+        let settings = document.getElementById('settingsModal');
+        if (!settings) {
+            // Safely inject a single instance matching index.html structure
+            const wrapper = document.createElement('div');
+            wrapper.id = 'settingsModal';
+            wrapper.className = 'modal-overlay';
+            wrapper.setAttribute('onclick', 'closeSettingsModal(event)');
+            wrapper.innerHTML = `
+                <div class="modal-popup" onclick="event.stopPropagation()">
+                    <div class="modal-popup-header">
+                        <h3>Settings</h3>
+                        <button class="modal-close-btn" onclick="closeSettingsModal()">×</button>
+                    </div>
+                    <div class="modal-popup-content">
+                        <div class="settings-section">
+                            <h3>ACCOUNT DETAILS</h3>
+                            <button class="settings-item" onclick="openPersonalInfoModal()">
+                                <div class="settings-item-icon">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                        <circle cx="12" cy="7" r="4"></circle>
+                                    </svg>
+                                </div>
+                                <span>Personal Information</span>
+                                <svg class="settings-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="9 18 15 12 9 6"></polyline>
+                                </svg>
+                            </button>
+                            <button class="settings-item" onclick="settingsOpenChangeEmailModal()">
+                                <div class="settings-item-icon">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                                        <polyline points="22,6 12,13 2,6"></polyline>
+                                    </svg>
+                                </div>
+                                <span>Change Email</span>
+                                <svg class="settings-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="9 18 15 12 9 6"></polyline>
+                                </svg>
+                            </button>
+                            <button class="settings-item" onclick="settingsOpenChangePhoneModal()">
+                                <div class="settings-item-icon">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                                    </svg>
+                                </div>
+                                <span>Change Phone</span>
+                                <svg class="settings-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="9 18 15 12 9 6"></polyline>
+                                </svg>
+                            </button>
+                            <button class="settings-item" onclick="settingsOpenChangeUsernameModal()">
+                                <div class="settings-item-icon">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                        <circle cx="12" cy="7" r="4"></circle>
+                                    </svg>
+                                </div>
+                                <span>Change Username</span>
+                                <svg class="settings-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="9 18 15 12 9 6"></polyline>
+                                </svg>
+                            </button>
+                            <button class="settings-item" onclick="settingsOpenChangePasswordModal()">
+                                <div class="settings-item-icon">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                                    </svg>
+                                </div>
+                                <span>Change Password</span>
+                                <svg class="settings-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="9 18 15 12 9 6"></polyline>
+                                </svg>
+                            </button>
+                            <button class="settings-item" onclick="openTransactionHistoryModal()">
+                                <div class="settings-item-icon">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <line x1="12" y1="1" x2="12" y2="23"></line>
+                                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                                    </svg>
+                                </div>
+                                <span>Transaction History</span>
+                                <svg class="settings-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="9 18 15 12 9 6"></polyline>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>`;
+            document.body.appendChild(wrapper);
+            settings = wrapper;
+        }
+        settings.classList.add('active');
+        settings.classList.remove('dimmed');
+        try { 
+            ensureAllModalsExist();
+            initSettingsInteractivity(); 
+        } catch {}
+        console.log('Settings modal opened');
+    }, 50);
 };
 
 window.closeSettingsModal = function(event) {
@@ -51,10 +158,14 @@ window.openPersonalInfoModal = async function() {
         phone: localStorage.getItem('userPhone')
     };
     
-    document.getElementById('displayEmail').textContent = user.email || '-';
-    document.getElementById('displayUsername').textContent = user.username || '-';
-    document.getElementById('displayFullName').textContent = user.full_name || '-';
-    document.getElementById('displayPhone').textContent = user.phone || '-';
+    const elEmail = document.getElementById('displayEmail');
+    const elUsername = document.getElementById('displayUsername');
+    const elFullName = document.getElementById('displayFullName');
+    const elPhone = document.getElementById('displayPhone');
+    if (elEmail) elEmail.textContent = user.email || '-';
+    if (elUsername) elUsername.textContent = user.username || '-';
+    if (elFullName) elFullName.textContent = user.full_name || '-';
+    if (elPhone) elPhone.textContent = user.phone || '-';
 
     // Try to load live balance when user id exists
     const userId = user.id;
@@ -62,21 +173,27 @@ window.openPersonalInfoModal = async function() {
         try {
             const res = await fetch(`/api/user/balance?user_id=${userId}`);
             const data = await res.json();
-            if (res.ok && typeof data.balance !== 'undefined') {
-                document.getElementById('displayBalance').textContent = formatCurrency(data.balance);
-            } else {
-                document.getElementById('displayBalance').textContent = formatCurrency(0);
+            const balEl = document.getElementById('displayBalance');
+            if (balEl) {
+                if (res.ok && typeof data.balance !== 'undefined') {
+                    balEl.textContent = formatCurrency(data.balance);
+                } else {
+                    balEl.textContent = formatCurrency(0);
+                }
             }
         } catch (e) {
-            document.getElementById('displayBalance').textContent = formatCurrency(0);
+            const balEl = document.getElementById('displayBalance');
+            if (balEl) balEl.textContent = formatCurrency(0);
         }
     } else {
-        document.getElementById('displayBalance').textContent = formatCurrency(0);
+        const balEl = document.getElementById('displayBalance');
+        if (balEl) balEl.textContent = formatCurrency(0);
     }
+    const memEl = document.getElementById('displayMemberSince');
+    if (memEl) memEl.textContent = '-';
 
-    document.getElementById('displayMemberSince').textContent = '-';
-
-    document.getElementById('personalInfoModal').classList.add('active');
+    const pi = document.getElementById('personalInfoModal');
+    if (pi) pi.classList.add('active');
 };
 
 window.closePersonalInfoModal = function(event) {
@@ -88,7 +205,8 @@ window.closePersonalInfoModal = function(event) {
 
 // Transaction History Modal
 window.openTransactionHistoryModal = function() {
-    document.getElementById('transactionHistoryModal').classList.add('active');
+    const th = document.getElementById('transactionHistoryModal');
+    if (th) th.classList.add('active');
     loadTransactions();
 };
 
@@ -102,7 +220,10 @@ window.closeTransactionHistoryModal = function(event) {
 async function loadTransactions() {
     const userId = localStorage.getItem('userId');
     const list = document.getElementById('transactionsList');
-    
+    if (!list) {
+        // Transactions container not present; avoid throwing and exit gracefully
+        return;
+    }
     try {
         const response = await fetch(`/api/transactions?user_id=${encodeURIComponent(userId || '')}`);
         const data = await response.json();
@@ -135,7 +256,9 @@ async function loadTransactions() {
             list.innerHTML = '<p style="color:#999; text-align:center; padding:20px;">No transactions yet</p>';
         }
     } catch (err) {
-        list.innerHTML = '<p style="color:#dc3545; text-align:center; padding:20px;">Failed to load transactions</p>';
+        if (list) {
+            list.innerHTML = '<p style="color:#dc3545; text-align:center; padding:20px;">Failed to load transactions</p>';
+        }
     }
 }
 
@@ -147,10 +270,14 @@ window.openChangeEmailModal = function(event) {
     const personal = document.getElementById('personalInfoModal');
     if (personal) personal.classList.remove('active');
     const currentEmail = localStorage.getItem('userEmail');
-    document.getElementById('currentEmailDisplay').value = currentEmail || '';
-    document.getElementById('newEmailInput').value = '';
-    document.getElementById('emailChangePassword').value = '';
-    setTimeout(() => document.getElementById('changeEmailModal').classList.add('active'), 0);
+    const curEl = document.getElementById('currentEmailDisplay');
+    const newEl = document.getElementById('newEmailInput');
+    const pwdEl = document.getElementById('emailChangePassword');
+    if (curEl) curEl.value = currentEmail || '';
+    if (newEl) newEl.value = '';
+    if (pwdEl) pwdEl.value = '';
+    const modal = document.getElementById('changeEmailModal');
+    if (modal) setTimeout(() => modal.classList.add('active'), 0);
 };
 
 // Dedicated handlers for Settings screen to avoid conflicts with main.js rebindings
@@ -158,13 +285,17 @@ window.settingsOpenChangeEmailModal = function(event) {
     if (event) event.stopPropagation();
     // Don't close settings modal - keep it open like Personal Info (it will be dimmed behind)
     const currentEmail = localStorage.getItem('userEmail');
-    document.getElementById('currentEmailDisplay').value = currentEmail || '';
-    document.getElementById('newEmailInput').value = '';
-    document.getElementById('emailChangePassword').value = '';
+    const curEl = document.getElementById('currentEmailDisplay');
+    const newEl = document.getElementById('newEmailInput');
+    const pwdEl = document.getElementById('emailChangePassword');
+    if (curEl) curEl.value = currentEmail || '';
+    if (newEl) newEl.value = '';
+    if (pwdEl) pwdEl.value = '';
     // Add a class to dim the settings modal
     const settings = document.getElementById('settingsModal');
     if (settings) settings.classList.add('dimmed');
-    document.getElementById('changeEmailModal').classList.add('active');
+    const modal = document.getElementById('changeEmailModal');
+    if (modal) modal.classList.add('active');
 };
 
 window.closeChangeEmailModalNew = function(event) {
@@ -292,8 +423,6 @@ window.submitChangeEmailNew = async function(event) {
         alert('Error processing email change: ' + (err.message || err));
     }
 };
-
-// Change Phone Modal
 window.openChangePhoneModal = function(event) {
     if (event) event.stopPropagation();
     const settings = document.getElementById('settingsModal');
@@ -301,23 +430,31 @@ window.openChangePhoneModal = function(event) {
     const personal = document.getElementById('personalInfoModal');
     if (personal) personal.classList.remove('active');
     const currentPhone = localStorage.getItem('userPhone');
-    document.getElementById('currentPhoneDisplay').value = currentPhone || '';
-    document.getElementById('newPhoneInput').value = '';
-    document.getElementById('phoneChangePassword').value = '';
-    setTimeout(() => document.getElementById('changePhoneModal').classList.add('active'), 0);
+    const curEl = document.getElementById('currentPhoneDisplay');
+    const newEl = document.getElementById('newPhoneInput');
+    const pwdEl = document.getElementById('phoneChangePassword');
+    if (curEl) curEl.value = currentPhone || '';
+    if (newEl) newEl.value = '';
+    if (pwdEl) pwdEl.value = '';
+    const modal = document.getElementById('changePhoneModal');
+    if (modal) setTimeout(() => modal.classList.add('active'), 0);
 };
 
 window.settingsOpenChangePhoneModal = function(event) {
     if (event) event.stopPropagation();
     // Don't close settings modal - keep it open like Personal Info (it will be dimmed behind)
     const currentPhone = localStorage.getItem('userPhone');
-    document.getElementById('currentPhoneDisplay').value = currentPhone || '';
-    document.getElementById('newPhoneInput').value = '';
-    document.getElementById('phoneChangePassword').value = '';
+    const curEl = document.getElementById('currentPhoneDisplay');
+    const newEl = document.getElementById('newPhoneInput');
+    const pwdEl = document.getElementById('phoneChangePassword');
+    if (curEl) curEl.value = currentPhone || '';
+    if (newEl) newEl.value = '';
+    if (pwdEl) pwdEl.value = '';
     // Add a class to dim the settings modal
     const settings = document.getElementById('settingsModal');
     if (settings) settings.classList.add('dimmed');
-    document.getElementById('changePhoneModal').classList.add('active');
+    const modal = document.getElementById('changePhoneModal');
+    if (modal) modal.classList.add('active');
 };
 
 window.closeChangePhoneModalNew = function(event) {
@@ -389,23 +526,31 @@ window.openChangeUsernameModal = function(event) {
     const personal = document.getElementById('personalInfoModal');
     if (personal) personal.classList.remove('active');
     const currentUsername = localStorage.getItem('userUsername');
-    document.getElementById('currentUsernameDisplay').value = currentUsername || '';
-    document.getElementById('newUsernameInput').value = '';
-    document.getElementById('usernameChangePassword').value = '';
-    setTimeout(() => document.getElementById('changeUsernameModal').classList.add('active'), 0);
+    const curEl = document.getElementById('currentUsernameDisplay');
+    const newEl = document.getElementById('newUsernameInput');
+    const pwdEl = document.getElementById('usernameChangePassword');
+    if (curEl) curEl.value = currentUsername || '';
+    if (newEl) newEl.value = '';
+    if (pwdEl) pwdEl.value = '';
+    const modal = document.getElementById('changeUsernameModal');
+    if (modal) setTimeout(() => modal.classList.add('active'), 0);
 };
 
 window.settingsOpenChangeUsernameModal = function(event) {
     if (event) event.stopPropagation();
     // Don't close settings modal - keep it open like Personal Info (it will be dimmed behind)
     const currentUsername = localStorage.getItem('userUsername');
-    document.getElementById('currentUsernameDisplay').value = currentUsername || '';
-    document.getElementById('newUsernameInput').value = '';
-    document.getElementById('usernameChangePassword').value = '';
+    const curEl = document.getElementById('currentUsernameDisplay');
+    const newEl = document.getElementById('newUsernameInput');
+    const pwdEl = document.getElementById('usernameChangePassword');
+    if (curEl) curEl.value = currentUsername || '';
+    if (newEl) newEl.value = '';
+    if (pwdEl) pwdEl.value = '';
     // Add a class to dim the settings modal
     const settings = document.getElementById('settingsModal');
     if (settings) settings.classList.add('dimmed');
-    document.getElementById('changeUsernameModal').classList.add('active');
+    const modal = document.getElementById('changeUsernameModal');
+    if (modal) modal.classList.add('active');
 };
 
 window.closeChangeUsernameModalNew = function(event) {
@@ -478,22 +623,30 @@ window.openChangePasswordModal = function(event) {
     if (settings) settings.classList.remove('active');
     const personal = document.getElementById('personalInfoModal');
     if (personal) personal.classList.remove('active');
-    document.getElementById('currentPasswordInput').value = '';
-    document.getElementById('newPasswordInput').value = '';
-    document.getElementById('confirmPasswordInput').value = '';
-    setTimeout(() => document.getElementById('changePasswordModal').classList.add('active'), 0);
+    const curEl = document.getElementById('currentPasswordInput');
+    const newEl = document.getElementById('newPasswordInput');
+    const confEl = document.getElementById('confirmPasswordInput');
+    if (curEl) curEl.value = '';
+    if (newEl) newEl.value = '';
+    if (confEl) confEl.value = '';
+    const modal = document.getElementById('changePasswordModal');
+    if (modal) setTimeout(() => modal.classList.add('active'), 0);
 };
 
 window.settingsOpenChangePasswordModal = function(event) {
     if (event) event.stopPropagation();
     // Don't close settings modal - keep it open like Personal Info (it will be dimmed behind)
-    document.getElementById('currentPasswordInput').value = '';
-    document.getElementById('newPasswordInput').value = '';
-    document.getElementById('confirmPasswordInput').value = '';
+    const curEl = document.getElementById('currentPasswordInput');
+    const newEl = document.getElementById('newPasswordInput');
+    const confEl = document.getElementById('confirmPasswordInput');
+    if (curEl) curEl.value = '';
+    if (newEl) newEl.value = '';
+    if (confEl) confEl.value = '';
     // Add a class to dim the settings modal
     const settings = document.getElementById('settingsModal');
     if (settings) settings.classList.add('dimmed');
-    document.getElementById('changePasswordModal').classList.add('active');
+    const modal = document.getElementById('changePasswordModal');
+    if (modal) modal.classList.add('active');
 };
 
 // Clear password fields helper function
@@ -644,3 +797,257 @@ function formatDate(dateString) {
         minute: '2-digit'
     });
 }
+
+function initSettingsInteractivity() {
+    const root = document.getElementById('settingsModal');
+    if (!root) {
+        console.warn('initSettingsInteractivity: root modal not found');
+        return;
+    }
+
+    const map = [
+        { selectorIndex: 1, handler: () => openPersonalInfoModal(), name: 'Personal Info' },
+        { selectorIndex: 2, handler: () => settingsOpenChangeEmailModal(), name: 'Change Email' },
+        { selectorIndex: 3, handler: () => settingsOpenChangePhoneModal(), name: 'Change Phone' },
+        { selectorIndex: 4, handler: () => settingsOpenChangeUsernameModal(), name: 'Change Username' },
+        { selectorIndex: 5, handler: () => settingsOpenChangePasswordModal(), name: 'Change Password' },
+        { selectorIndex: 6, handler: () => openTransactionHistoryModal(), name: 'Transaction History' },
+    ];
+
+    map.forEach(({ selectorIndex, handler, name }) => {
+        const btn = root.querySelector(`.settings-item:nth-of-type(${selectorIndex})`);
+        if (btn) {
+            if (!btn.__bound) {
+                btn.addEventListener('click', (e) => {
+                    console.log(`Settings button clicked: ${name}`);
+                    e.stopPropagation();
+                    e.preventDefault();
+                    try {
+                        handler(e);
+                    } catch (err) {
+                        console.error(`Error in ${name} handler:`, err);
+                    }
+                });
+                btn.__bound = true;
+                console.log(`Bound ${name} to button ${selectorIndex}`);
+            }
+        } else {
+            console.warn(`Button ${selectorIndex} (${name}) not found in settings modal`);
+        }
+    });
+}
+
+// Ensure all required modals exist in DOM
+function ensureAllModalsExist() {
+    // Personal Info Modal
+    if (!document.getElementById('personalInfoModal')) {
+        const pi = document.createElement('div');
+        pi.id = 'personalInfoModal';
+        pi.className = 'modal-overlay';
+        pi.setAttribute('onclick', 'closePersonalInfoModal(event)');
+        pi.innerHTML = `
+            <div class="modal-popup" onclick="event.stopPropagation()">
+                <div class="modal-popup-header">
+                    <h3>Personal Information</h3>
+                    <button class="modal-close-btn" onclick="closePersonalInfoModal()">×</button>
+                </div>
+                <div class="modal-popup-content">
+                    <div class="info-display">
+                        <div class="info-item">
+                            <span class="info-label">Email</span>
+                            <span class="info-value" id="displayEmail">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Username</span>
+                            <span class="info-value" id="displayUsername">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Full Name</span>
+                            <span class="info-value" id="displayFullName">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Phone</span>
+                            <span class="info-value" id="displayPhone">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Balance</span>
+                            <span class="info-value" id="displayBalance" style="color: var(--primary); font-weight: 700;">₫0</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Member Since</span>
+                            <span class="info-value" id="displayMemberSince">-</span>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+        document.body.appendChild(pi);
+    }
+
+    // Transaction History Modal
+    if (!document.getElementById('transactionHistoryModal')) {
+        const th = document.createElement('div');
+        th.id = 'transactionHistoryModal';
+        th.className = 'modal-overlay';
+        th.setAttribute('onclick', 'closeTransactionHistoryModal(event)');
+        th.innerHTML = `
+            <div class="modal-popup" onclick="event.stopPropagation()">
+                <div class="modal-popup-header">
+                    <h3>Transaction History</h3>
+                    <button class="modal-close-btn" onclick="closeTransactionHistoryModal()">×</button>
+                </div>
+                <div class="modal-popup-content">
+                    <div id="transactionsList" class="transactions-list">
+                        <p style="color:#999; text-align:center; padding:20px;">Loading...</p>
+                    </div>
+                </div>
+            </div>`;
+        document.body.appendChild(th);
+    }
+
+    // Change Email Modal
+    if (!document.getElementById('changeEmailModal')) {
+        const ce = document.createElement('div');
+        ce.id = 'changeEmailModal';
+        ce.className = 'modal-overlay';
+        ce.setAttribute('onclick', 'closeChangeEmailModalNew(event)');
+        ce.innerHTML = `
+            <div class="modal-popup-small" onclick="event.stopPropagation()">
+                <div class="modal-popup-header">
+                    <h3>Change Email</h3>
+                    <button class="modal-close-btn" onclick="closeChangeEmailModalNew()">×</button>
+                </div>
+                <div class="modal-popup-content">
+                    <form onsubmit="submitChangeEmailNew(event)">
+                        <div class="form-group">
+                            <label>Current Email</label>
+                            <input type="email" id="currentEmailDisplay" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>New Email</label>
+                            <input type="email" id="newEmailInput" required placeholder="new@email.com">
+                        </div>
+                        <div class="form-group">
+                            <label>Password</label>
+                            <input type="password" id="emailChangePassword" required placeholder="Enter password">
+                        </div>
+                        <div class="modal-actions">
+                            <button type="button" class="btn-cancel" onclick="closeChangeEmailModalNew()">Cancel</button>
+                            <button type="submit" class="btn-save">Save</button>
+                        </div>
+                    </form>
+                </div>
+            </div>`;
+        document.body.appendChild(ce);
+    }
+
+    // Change Phone Modal
+    if (!document.getElementById('changePhoneModal')) {
+        const cp = document.createElement('div');
+        cp.id = 'changePhoneModal';
+        cp.className = 'modal-overlay';
+        cp.setAttribute('onclick', 'closeChangePhoneModalNew(event)');
+        cp.innerHTML = `
+            <div class="modal-popup-small" onclick="event.stopPropagation()">
+                <div class="modal-popup-header">
+                    <h3>Change Phone</h3>
+                    <button class="modal-close-btn" onclick="closeChangePhoneModalNew()">×</button>
+                </div>
+                <div class="modal-popup-content">
+                    <form onsubmit="submitChangePhoneNew(event)">
+                        <div class="form-group">
+                            <label>Current Phone</label>
+                            <input type="tel" id="currentPhoneDisplay" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>New Phone</label>
+                            <input type="tel" id="newPhoneInput" required placeholder="0123456789">
+                        </div>
+                        <div class="form-group">
+                            <label>Password</label>
+                            <input type="password" id="phoneChangePassword" required placeholder="Enter password">
+                        </div>
+                        <div class="modal-actions">
+                            <button type="button" class="btn-cancel" onclick="closeChangePhoneModalNew()">Cancel</button>
+                            <button type="submit" class="btn-save">Save</button>
+                        </div>
+                    </form>
+                </div>
+            </div>`;
+        document.body.appendChild(cp);
+    }
+
+    // Change Username Modal
+    if (!document.getElementById('changeUsernameModal')) {
+        const cu = document.createElement('div');
+        cu.id = 'changeUsernameModal';
+        cu.className = 'modal-overlay';
+        cu.setAttribute('onclick', 'closeChangeUsernameModalNew(event)');
+        cu.innerHTML = `
+            <div class="modal-popup-small" onclick="event.stopPropagation()">
+                <div class="modal-popup-header">
+                    <h3>Change Username</h3>
+                    <button class="modal-close-btn" onclick="closeChangeUsernameModalNew()">×</button>
+                </div>
+                <div class="modal-popup-content">
+                    <form onsubmit="submitChangeUsernameNew(event)">
+                        <div class="form-group">
+                            <label>Current Username</label>
+                            <input type="text" id="currentUsernameDisplay" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>New Username</label>
+                            <input type="text" id="newUsernameInput" required placeholder="newusername">
+                        </div>
+                        <div class="form-group">
+                            <label>Password</label>
+                            <input type="password" id="usernameChangePassword" required placeholder="Enter password">
+                        </div>
+                        <div class="modal-actions">
+                            <button type="button" class="btn-cancel" onclick="closeChangeUsernameModalNew()">Cancel</button>
+                            <button type="submit" class="btn-save">Save</button>
+                        </div>
+                    </form>
+                </div>
+            </div>`;
+        document.body.appendChild(cu);
+    }
+
+    // Change Password Modal
+    if (!document.getElementById('changePasswordModal')) {
+        const cpw = document.createElement('div');
+        cpw.id = 'changePasswordModal';
+        cpw.className = 'modal-overlay';
+        cpw.setAttribute('onclick', 'closeChangePasswordModalNew(event)');
+        cpw.innerHTML = `
+            <div class="modal-popup-small" onclick="event.stopPropagation()">
+                <div class="modal-popup-header">
+                    <h3>Change Password</h3>
+                    <button class="modal-close-btn" onclick="closeChangePasswordModalNew()">×</button>
+                </div>
+                <div class="modal-popup-content">
+                    <form onsubmit="submitChangePasswordNew(event)">
+                        <div class="form-group">
+                            <label>Current Password</label>
+                            <input type="password" id="currentPasswordInput" required placeholder="Current password">
+                        </div>
+                        <div class="form-group">
+                            <label>New Password</label>
+                            <input type="password" id="newPasswordInput" required placeholder="New password">
+                        </div>
+                        <div class="form-group">
+                            <label>Confirm New Password</label>
+                            <input type="password" id="confirmPasswordInput" required placeholder="Confirm password">
+                        </div>
+                        <div class="modal-actions">
+                            <button type="button" class="btn-cancel" onclick="closeChangePasswordModalNew()">Cancel</button>
+                            <button type="submit" class="btn-save">Save</button>
+                        </div>
+                    </form>
+                </div>
+            </div>`;
+        document.body.appendChild(cpw);
+    }
+}
+
+// Try to bind once on load
+try { initSettingsInteractivity(); } catch {}

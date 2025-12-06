@@ -839,6 +839,7 @@ export async function processCheckout(event) {
             quantity: item.quantity,
             size: item.size || 'M',
             sugar: item.sugar || '0',
+            temperature: item.temperature || null,
             milks: item.milk ? [item.milk] : [],
             toppings: [...(item.upsells || []), ...(item.toppings || [])],
             price: item.price

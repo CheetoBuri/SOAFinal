@@ -6,6 +6,7 @@ from models.schemas import AddToCartRequest
 from models.responses import StatusResponse, CartResponse
 from database import get_db
 import json
+import psycopg2.extras
 
 router = APIRouter(prefix="/api/cart", tags=["8️⃣ Cart (Optional)"])
 
@@ -30,21 +31,21 @@ def add_to_cart(request: AddToCartRequest):
     cart_item = item.dict() if hasattr(item, 'dict') else item
     
     conn = get_db()
-    c = conn.cursor()
+    c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     
     # Check if user has existing cart
-    c.execute("SELECT items FROM cart WHERE user_id = ?", (user_id,))
+    c.execute("SELECT items FROM cart WHERE user_id = %s", (user_id,))
     result = c.fetchone()
     
     if result:
         # Update existing cart
-        items = json.loads(result[0])
+        items = json.loads(result['items'])
         items.append(cart_item)
-        c.execute("UPDATE cart SET items = ?, updated_at = CURRENT_TIMESTAMP WHERE user_id = ?", 
+        c.execute("UPDATE cart SET items = %s, updated_at = CURRENT_TIMESTAMP WHERE user_id = %s", 
                  (json.dumps(items), user_id))
     else:
         # Create new cart
-        c.execute("INSERT INTO cart (user_id, items) VALUES (?, ?)", 
+        c.execute("INSERT INTO cart (user_id, items) VALUES (%s, %s)", 
                  (user_id, json.dumps([cart_item])))
     
     conn.commit()
@@ -69,9 +70,9 @@ def get_cart(user_id: str):
         raise HTTPException(status_code=400, detail="user_id query parameter required")
     
     conn = get_db()
-    c = conn.cursor()
+    c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     
-    c.execute("SELECT items FROM cart WHERE user_id = ?", (user_id,))
+    c.execute("SELECT items FROM cart WHERE user_id = %s", (user_id,))
     result = c.fetchone()
     
     conn.close()
@@ -79,7 +80,7 @@ def get_cart(user_id: str):
     if not result:
         return {"items": []}
     
-    items = json.loads(result[0])
+    items = json.loads(result['items'])
     # Ensure product_id is set for backward compatibility with remove endpoint
     for item in items:
         if "id" in item and not item.get("product_id"):
@@ -101,9 +102,9 @@ def clear_cart(user_id: str):
         raise HTTPException(status_code=400, detail="user_id query parameter required")
     
     conn = get_db()
-    c = conn.cursor()
+    c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     
-    c.execute("DELETE FROM cart WHERE user_id = ?", (user_id,))
+    c.execute("DELETE FROM cart WHERE user_id = %s", (user_id,))
     
     conn.commit()
     conn.close()
@@ -128,16 +129,16 @@ def remove_from_cart(product_id: str, user_id: str):
         raise HTTPException(status_code=400, detail="user_id query parameter required")
     
     conn = get_db()
-    c = conn.cursor()
+    c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     
-    c.execute("SELECT items FROM cart WHERE user_id = ?", (user_id,))
+    c.execute("SELECT items FROM cart WHERE user_id = %s", (user_id,))
     result = c.fetchone()
     
     if not result:
         conn.close()
         raise HTTPException(status_code=404, detail="Cart not found")
     
-    items = json.loads(result[0])
+    items = json.loads(result['items'])
     
     # Remove first occurrence of product with matching id
     found = False
@@ -152,9 +153,9 @@ def remove_from_cart(product_id: str, user_id: str):
         raise HTTPException(status_code=404, detail="Item not found in cart")
     
     if items:
-        c.execute("UPDATE cart SET items = ? WHERE user_id = ?", (json.dumps(items), user_id))
+        c.execute("UPDATE cart SET items = %s WHERE user_id = %s", (json.dumps(items), user_id))
     else:
-        c.execute("DELETE FROM cart WHERE user_id = ?", (user_id,))
+        c.execute("DELETE FROM cart WHERE user_id = %s", (user_id,))
     
     conn.commit()
     conn.close()

@@ -10,6 +10,7 @@ from utils.timezone import get_vietnam_time
 import re
 import secrets
 from datetime import datetime, timedelta
+import psycopg2.extras
 
 router = APIRouter(prefix="/api/auth", tags=["1️⃣ Authentication"])
 
@@ -30,10 +31,10 @@ def send_otp(request: OTPRequest, background_tasks: BackgroundTasks):
         raise HTTPException(status_code=400, detail="Invalid email format")
     
     conn = get_db()
-    c = conn.cursor()
+    c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     
     # Check if email already registered - STOP before sending OTP
-    c.execute("SELECT id, email FROM users WHERE email = ?", (email,))
+    c.execute("SELECT id, email FROM users WHERE email = %s", (email,))
     existing = c.fetchone()
     if existing:
         conn.close()
@@ -41,12 +42,13 @@ def send_otp(request: OTPRequest, background_tasks: BackgroundTasks):
     
     # Generate OTP
     otp = generate_otp()
-    expires_at = (get_vietnam_time() + timedelta(minutes=10)).isoformat()
+    # Save expires_at as naive datetime in Vietnam timezone
+    expires_at = (get_vietnam_time() + timedelta(minutes=10)).replace(tzinfo=None)
     
     # Save OTP
     c.execute("""
         INSERT INTO otp_codes (email, code, expires_at)
-        VALUES (?, ?, ?)
+        VALUES (%s, %s, %s)
     """, (email, otp, expires_at))
     
     conn.commit()
@@ -95,12 +97,14 @@ def verify_otp(request: VerifyOTPRequest):
     otp_code = request.otp_code.strip()
     
     conn = get_db()
-    c = conn.cursor()
+    c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     
-    # Check OTP validity
+    # Check OTP validity and expiration in one query (compare with Vietnam time)
     c.execute("""
-        SELECT code, expires_at FROM otp_codes 
-        WHERE email = ? AND code = ? AND verified = 0
+        SELECT code, expires_at,
+               CASE WHEN expires_at > (NOW() AT TIME ZONE 'Asia/Ho_Chi_Minh') THEN TRUE ELSE FALSE END as is_valid
+        FROM otp_codes 
+        WHERE email = %s AND code = %s AND verified = FALSE
         ORDER BY created_at DESC LIMIT 1
     """, (email, otp_code))
     
@@ -108,16 +112,14 @@ def verify_otp(request: VerifyOTPRequest):
     
     if not result:
         conn.close()
-        raise HTTPException(status_code=400, detail="Invalid or expired OTP")
+        raise HTTPException(status_code=400, detail="Invalid OTP code")
     
-    expires_at = datetime.fromisoformat(result[1])
-    # Use timezone-aware comparison to avoid TypeError
-    if get_vietnam_time() > expires_at:
+    if not result['is_valid']:
         conn.close()
         raise HTTPException(status_code=400, detail="OTP expired")
     
     # Check if email already exists
-    c.execute("SELECT id, email FROM users WHERE email = ?", (email,))
+    c.execute("SELECT id, email FROM users WHERE email = %s", (email,))
     existing_user = c.fetchone()
     if existing_user:
         conn.close()
@@ -126,32 +128,33 @@ def verify_otp(request: VerifyOTPRequest):
     # Check if username already exists (if provided)
     if request.username:
         username = request.username.lower().strip()
-        c.execute("SELECT id FROM users WHERE username = ?", (username,))
+        c.execute("SELECT id FROM users WHERE username = %s", (username,))
         if c.fetchone():
             conn.close()
             raise HTTPException(status_code=400, detail="Username already taken")
     
     # Check if phone already exists
     if request.phone:
-        c.execute("SELECT id FROM users WHERE phone = ?", (request.phone,))
+        c.execute("SELECT id FROM users WHERE phone = %s", (request.phone,))
         if c.fetchone():
             conn.close()
             raise HTTPException(status_code=400, detail=f"Phone number '{request.phone}' is already registered with another account.")
     
     # Create new user with auto-increment ID
-    c.execute("SELECT MAX(CAST(id AS INTEGER)) FROM users WHERE id GLOB '[0-9]*'")
-    max_id = c.fetchone()[0]
+    c.execute("SELECT MAX(CAST(id AS INTEGER)) FROM users WHERE id ~ '^[0-9]+$'")
+    result = c.fetchone()
+    max_id = result['max'] if result else None
     user_id = str((max_id or 0) + 1)
     
     # Use provided password or generate random one
     password_hash = hash_password(request.password) if request.password else hash_password(secrets.token_hex(16))
     c.execute("""
         INSERT INTO users (id, email, username, full_name, phone, password_hash)
-        VALUES (?, ?, ?, ?, ?, ?)
+        VALUES (%s, %s, %s, %s, %s, %s)
     """, (user_id, email, request.username.lower().strip() if request.username else None, request.full_name, request.phone, password_hash))
     
     # Mark OTP as verified
-    c.execute("UPDATE otp_codes SET verified = 1 WHERE email = ? AND code = ?", (email, otp_code))
+    c.execute("UPDATE otp_codes SET verified = TRUE WHERE email = %s AND code = %s", (email, otp_code))
     
     conn.commit()
     conn.close()
@@ -186,13 +189,13 @@ def login(request: LoginRequest):
     password = request.password.strip()
     
     conn = get_db()
-    c = conn.cursor()
+    c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     
     # Check if identifier is email or username
     c.execute("""
         SELECT id, full_name, password_hash, email, username, phone 
         FROM users 
-        WHERE email = ? OR username = ?
+        WHERE email = %s OR username = %s
     """, (identifier, identifier))
     result = c.fetchone()
     conn.close()
@@ -200,16 +203,16 @@ def login(request: LoginRequest):
     if not result:
         raise HTTPException(status_code=401, detail="Invalid credentials")
     
-    if not verify_password(password, result[2]):
+    if not verify_password(password, result['password_hash']):
         raise HTTPException(status_code=401, detail="Invalid credentials")
     
     return {
         "status": "success",
-        "user_id": result[0],
-        "email": result[3],  # Use email from database
-        "name": result[1],
-        "username": result[4],  # Add username to response
-        "phone": result[5]  # Add phone to response
+        "user_id": result['id'],
+        "email": result['email'],
+        "name": result['full_name'],
+        "username": result['username'],
+        "phone": result['phone']
     }
 
 
@@ -226,9 +229,9 @@ def get_current_user(user_id: str):
         raise HTTPException(status_code=401, detail="Not authenticated")
     
     conn = get_db()
-    c = conn.cursor()
+    c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     
-    c.execute("SELECT id, email, full_name, phone, balance, username FROM users WHERE id = ?", (user_id,))
+    c.execute("SELECT id, email, full_name, phone, balance, username FROM users WHERE id = %s", (user_id,))
     result = c.fetchone()
     conn.close()
     
@@ -236,12 +239,12 @@ def get_current_user(user_id: str):
         raise HTTPException(status_code=404, detail="User not found")
     
     return {
-        "user_id": result[0],
-        "email": result[1],
-        "name": result[2],
-        "phone": result[3],
-        "balance": result[4],
-        "username": result[5]
+        "user_id": result['id'],
+        "email": result['email'],
+        "name": result['full_name'],
+        "phone": result['phone'],
+        "balance": result['balance'],
+        "username": result['username']
     }
 
 
@@ -257,10 +260,10 @@ def send_reset_otp(request: OTPRequest, background_tasks: BackgroundTasks):
     email = request.email.lower().strip()
     
     conn = get_db()
-    c = conn.cursor()
+    c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     
     # Check if user exists
-    c.execute("SELECT id FROM users WHERE email = ?", (email,))
+    c.execute("SELECT id FROM users WHERE email = %s", (email,))
     user = c.fetchone()
     
     if not user:
@@ -269,12 +272,13 @@ def send_reset_otp(request: OTPRequest, background_tasks: BackgroundTasks):
     
     # Generate OTP
     otp = generate_otp()
-    expires_at = (get_vietnam_time() + timedelta(minutes=10)).isoformat()
+    # Save expires_at as naive datetime in Vietnam timezone
+    expires_at = (get_vietnam_time() + timedelta(minutes=10)).replace(tzinfo=None)
     
     # Save OTP
     c.execute("""
         INSERT INTO otp_codes (email, code, expires_at)
-        VALUES (?, ?, ?)
+        VALUES (%s, %s, %s)
     """, (email, otp, expires_at))
     
     conn.commit()
@@ -311,12 +315,14 @@ def reset_password(request: ResetPasswordRequest):
     otp_code = request.otp_code.strip()
     
     conn = get_db()
-    c = conn.cursor()
+    c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     
-    # Verify OTP
+    # Verify OTP and check expiration in one query (compare with Vietnam time)
     c.execute("""
-        SELECT code, expires_at FROM otp_codes 
-        WHERE email = ? AND code = ? AND verified = 0
+        SELECT code, expires_at, 
+               CASE WHEN expires_at > (NOW() AT TIME ZONE 'Asia/Ho_Chi_Minh') THEN TRUE ELSE FALSE END as is_valid
+        FROM otp_codes 
+        WHERE email = %s AND code = %s AND verified = FALSE
         ORDER BY created_at DESC LIMIT 1
     """, (email, otp_code))
     
@@ -324,19 +330,18 @@ def reset_password(request: ResetPasswordRequest):
     
     if not result:
         conn.close()
-        raise HTTPException(status_code=400, detail="Invalid or expired OTP")
+        raise HTTPException(status_code=400, detail="Invalid OTP code")
     
-    expires_at = datetime.fromisoformat(result[1])
-    if get_vietnam_time() > expires_at:
+    if not result['is_valid']:
         conn.close()
         raise HTTPException(status_code=400, detail="OTP expired")
     
     # Update password
     new_hash = hash_password(request.new_password)
-    c.execute("UPDATE users SET password_hash = ? WHERE email = ?", (new_hash, email))
+    c.execute("UPDATE users SET password_hash = %s WHERE email = %s", (new_hash, email))
     
     # Mark OTP as verified
-    c.execute("UPDATE otp_codes SET verified = 1 WHERE email = ? AND code = ?", (email, otp_code))
+    c.execute("UPDATE otp_codes SET verified = TRUE WHERE email = %s AND code = %s", (email, otp_code))
     
     conn.commit()
     conn.close()

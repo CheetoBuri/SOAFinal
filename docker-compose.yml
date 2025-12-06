@@ -1,6 +1,26 @@
 version: '3.8'
 
 services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: cafe-postgres
+    environment:
+      POSTGRES_USER: cafe_user
+      POSTGRES_PASSWORD: cafe_password
+      POSTGRES_DB: cafe_orders
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init_postgres.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cafe_user"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - cafe-network
+
   cafe-ordering:
     build: .
     container_name: cafe-ordering-system
@@ -9,10 +29,14 @@ services:
     environment:
       - GMAIL_ADDRESS=huynhnhattien0411@gmail.com
       - GMAIL_PASSWORD=rqdbmyhpfglksotn
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=cafe_orders
+      - DB_USER=cafe_user
+      - DB_PASSWORD=cafe_password
     volumes:
       - ./data:/app/data
       - ./backups:/app/backups
-      - ./cafe_orders.db:/app/cafe_orders.db
       # Mount frontend files for hot reload (dev only)
       - ./frontend:/app/frontend
       - ./index.html:/app/index.html
@@ -21,6 +45,9 @@ services:
       - ./routers:/app/routers
       - ./models:/app/models
       - ./utils:/app/utils
+    depends_on:
+      postgres:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
       interval: 30s
@@ -34,3 +61,6 @@ services:
 networks:
   cafe-network:
     driver: bridge
+
+volumes:
+  postgres_data:

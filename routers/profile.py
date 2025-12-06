@@ -1,7 +1,6 @@
 """
 User Profile routes: Change email, phone, password
 """
-import sqlite3
 from fastapi import APIRouter, HTTPException
 from models.schemas import ChangeEmailRequest, ChangePhoneRequest, ChangePasswordRequest, ChangeUsernameRequest
 from models.responses import StatusResponse, BalanceResponse
@@ -11,6 +10,7 @@ from utils.timezone import get_vietnam_time
 from utils.email_service import send_simple_email
 import uuid
 import json
+import psycopg2.extras
 
 router = APIRouter(prefix="/api/user", tags=["6️⃣ User Profile"])
 
@@ -27,28 +27,28 @@ def change_email(request: ChangeEmailRequest):
     Returns success status and message.
     """
     conn = get_db()
-    c = conn.cursor()
+    c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     
     # Verify user and password
-    c.execute("SELECT password_hash FROM users WHERE id = ?", (request.user_id,))
+    c.execute("SELECT password_hash FROM users WHERE id = %s", (request.user_id,))
     result = c.fetchone()
     
     if not result:
         conn.close()
         raise HTTPException(status_code=404, detail="User not found")
     
-    if not verify_password(request.password, result[0]):
+    if not verify_password(request.password, result['password_hash']):
         conn.close()
         raise HTTPException(status_code=401, detail="Invalid password")
     
     # Check if new email already exists
-    c.execute("SELECT id FROM users WHERE email = ? AND id != ?", (request.new_email, request.user_id))
+    c.execute("SELECT id FROM users WHERE email = %s AND id != %s", (request.new_email, request.user_id))
     if c.fetchone():
         conn.close()
         raise HTTPException(status_code=400, detail="Email already in use")
     
     # Update email
-    c.execute("UPDATE users SET email = ? WHERE id = ?", (request.new_email, request.user_id))
+    c.execute("UPDATE users SET email = %s WHERE id = %s", (request.new_email, request.user_id))
     conn.commit()
     conn.close()
     
@@ -67,28 +67,28 @@ def change_username(request: ChangeUsernameRequest):
     Returns success status and message.
     """
     conn = get_db()
-    c = conn.cursor()
+    c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     
     # Verify user and password
-    c.execute("SELECT password_hash FROM users WHERE id = ?", (request.user_id,))
+    c.execute("SELECT password_hash FROM users WHERE id = %s", (request.user_id,))
     result = c.fetchone()
     
     if not result:
         conn.close()
         raise HTTPException(status_code=404, detail="User not found")
     
-    if not verify_password(request.password, result[0]):
+    if not verify_password(request.password, result['password_hash']):
         conn.close()
         raise HTTPException(status_code=401, detail="Invalid password")
     
     # Check if new username already exists
-    c.execute("SELECT id FROM users WHERE username = ? AND id != ?", (request.new_username, request.user_id))
+    c.execute("SELECT id FROM users WHERE username = %s AND id != %s", (request.new_username, request.user_id))
     if c.fetchone():
         conn.close()
         raise HTTPException(status_code=400, detail="Username already taken")
     
     # Update username
-    c.execute("UPDATE users SET username = ? WHERE id = ?", (request.new_username, request.user_id))
+    c.execute("UPDATE users SET username = %s WHERE id = %s", (request.new_username, request.user_id))
     conn.commit()
     conn.close()
     
@@ -114,30 +114,30 @@ def change_phone(request: ChangePhoneRequest):
         conn = None
         try:
             conn = get_db()
-            c = conn.cursor()
+            c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
             
             # Verify user and password
-            c.execute("SELECT password_hash FROM users WHERE id = ?", (request.user_id,))
+            c.execute("SELECT password_hash FROM users WHERE id = %s", (request.user_id,))
             result = c.fetchone()
             
             if not result:
                 raise HTTPException(status_code=404, detail="User not found")
             
-            if not verify_password(request.password, result[0]):
+            if not verify_password(request.password, result['password_hash']):
                 raise HTTPException(status_code=401, detail="Invalid password")
             
             # Check if new phone already exists (excluding current user)
-            c.execute("SELECT id FROM users WHERE phone = ? AND id != ?", (request.new_phone, request.user_id))
+            c.execute("SELECT id FROM users WHERE phone = %s AND id != %s", (request.new_phone, request.user_id))
             if c.fetchone():
                 raise HTTPException(status_code=400, detail=f"Phone number '{request.new_phone}' is already registered with another account.")
             
             # Update phone
-            c.execute("UPDATE users SET phone = ? WHERE id = ?", (request.new_phone, request.user_id))
+            c.execute("UPDATE users SET phone = %s WHERE id = %s", (request.new_phone, request.user_id))
             conn.commit()
             
             return {"status": "success", "message": "Phone updated successfully"}
-        except sqlite3.OperationalError as e:
-            if "database is locked" in str(e) and attempt < max_retries - 1:
+        except Exception as e:
+            if "deadlock" in str(e).lower() and attempt < max_retries - 1:
                 time.sleep(retry_delay * (1.5 ** attempt))  # Slower exponential backoff
                 continue
             else:
@@ -159,23 +159,23 @@ def change_password(request: ChangePasswordRequest):
     Returns success status and message.
     """
     conn = get_db()
-    c = conn.cursor()
+    c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     
     # Verify user and current password
-    c.execute("SELECT password_hash FROM users WHERE id = ?", (request.user_id,))
+    c.execute("SELECT password_hash FROM users WHERE id = %s", (request.user_id,))
     result = c.fetchone()
     
     if not result:
         conn.close()
         raise HTTPException(status_code=404, detail="User not found")
     
-    if not verify_password(request.current_password, result[0]):
+    if not verify_password(request.current_password, result['password_hash']):
         conn.close()
         raise HTTPException(status_code=401, detail="Current password is incorrect")
     
     # Update password
     new_hash = hash_password(request.new_password)
-    c.execute("UPDATE users SET password_hash = ? WHERE id = ?", (new_hash, request.user_id))
+    c.execute("UPDATE users SET password_hash = %s WHERE id = %s", (new_hash, request.user_id))
     conn.commit()
     conn.close()
     
@@ -187,15 +187,15 @@ def change_password(request: ChangePasswordRequest):
 def verify_current_password(user_id: str, current_password: str):
     """Verify if the provided password matches the user's current password"""
     conn = get_db()
-    c = conn.cursor()
-    c.execute("SELECT password_hash FROM users WHERE id = ?", (user_id,))
+    c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    c.execute("SELECT password_hash FROM users WHERE id = %s", (user_id,))
     row = c.fetchone()
     conn.close()
     
     if not row:
         raise HTTPException(status_code=404, detail="User not found")
     
-    if not verify_password(current_password, row[0]):
+    if not verify_password(current_password, row['password_hash']):
         raise HTTPException(status_code=400, detail="Current password is incorrect")
     
     return {"status": "success", "message": "Password verified"}
@@ -205,13 +205,13 @@ def verify_current_password(user_id: str, current_password: str):
 @router.post("/send-change-password-otp", summary="Send OTP to current email for password change")
 def send_change_password_otp(user_id: str):
     conn = get_db()
-    c = conn.cursor()
-    c.execute("SELECT email FROM users WHERE id = ?", (user_id,))
+    c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    c.execute("SELECT email FROM users WHERE id = %s", (user_id,))
     row = c.fetchone()
     if not row:
         conn.close()
         raise HTTPException(status_code=404, detail="User not found")
-    email = row[0]
+    email = row['email']
 
     # generate OTP
     code = str(uuid.uuid4().int)[:6]
@@ -222,7 +222,7 @@ def send_change_password_otp(user_id: str):
     # store OTP in payment_otp-like table; reuse payment_otp for generic OTPs
     c.execute("""
         INSERT INTO payment_otp (user_id, order_id, code, amount, expires_at, verified)
-        VALUES (?, ?, ?, 0.0, ?, 0)
+        VALUES (%s, %s, %s, 0.0, %s, FALSE)
     """, (user_id, f"PWD-{uuid.uuid4().hex[:8]}", code, expires))
     conn.commit()
     conn.close()
@@ -238,12 +238,11 @@ def send_change_password_otp(user_id: str):
 @router.post("/verify-change-password-otp", summary="Verify OTP and change password")
 def verify_change_password_otp(user_id: str, otp_code: str, new_password: str):
     conn = get_db()
-    c = conn.cursor()
-    # get latest otp for user
-    c.execute(
-        """
+    c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    # get latest password reset otp for user
+    c.execute("""
         SELECT code, expires_at, verified FROM payment_otp
-        WHERE user_id = ? AND verified = 0
+        WHERE user_id = %s AND verified = FALSE AND order_id ~ '^PWD-'
         ORDER BY created_at DESC LIMIT 1
         """,
         (user_id,)
@@ -252,10 +251,18 @@ def verify_change_password_otp(user_id: str, otp_code: str, new_password: str):
     if not row:
         conn.close()
         raise HTTPException(status_code=404, detail="No OTP found")
-    code, expires_at, verified = row
+    
+    code = row['code']
+    expires_at = row['expires_at']
+    verified = row['verified']
+    
     from datetime import datetime
     # verified rows are excluded above; no need to recheck here
-    if get_vietnam_time() > datetime.fromisoformat(expires_at):
+    # Use naive datetime comparison
+    current_time = get_vietnam_time().replace(tzinfo=None)
+    if isinstance(expires_at, str):
+        expires_at = datetime.fromisoformat(expires_at)
+    if current_time > expires_at:
         conn.close()
         raise HTTPException(status_code=400, detail="OTP expired")
     if otp_code != code:
@@ -264,9 +271,9 @@ def verify_change_password_otp(user_id: str, otp_code: str, new_password: str):
 
     # update password
     new_hash = hash_password(new_password)
-    c.execute("UPDATE users SET password_hash = ? WHERE id = ?", (new_hash, user_id))
+    c.execute("UPDATE users SET password_hash = %s WHERE id = %s", (new_hash, user_id))
     # mark otp used
-    c.execute("UPDATE payment_otp SET verified = 1 WHERE user_id = ? AND code = ?", (user_id, code))
+    c.execute("UPDATE payment_otp SET verified = TRUE WHERE user_id = %s AND code = %s", (user_id, code))
     conn.commit()
     conn.close()
     return {"status": "success", "message": "Password changed successfully"}
@@ -277,9 +284,9 @@ def send_change_email_otp(user_id: str, new_email: str):
     if not new_email:
         raise HTTPException(status_code=400, detail="new_email required")
     conn = get_db()
-    c = conn.cursor()
+    c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     # Ensure new email not used
-    c.execute("SELECT id FROM users WHERE email = ?", (new_email,))
+    c.execute("SELECT id FROM users WHERE email = %s", (new_email,))
     if c.fetchone():
         conn.close()
         raise HTTPException(status_code=400, detail="Email already in use")
@@ -290,7 +297,7 @@ def send_change_email_otp(user_id: str, new_email: str):
 
     c.execute("""
         INSERT INTO payment_otp (user_id, order_id, code, amount, expires_at, verified)
-        VALUES (?, ?, ?, 0.0, ?, 0)
+        VALUES (%s, %s, %s, 0.0, %s, FALSE)
     """, (user_id, f"EML-{uuid.uuid4().hex[:8]}", code, expires))
     conn.commit()
     conn.close()
@@ -304,12 +311,11 @@ def send_change_email_otp(user_id: str, new_email: str):
 @router.post("/verify-change-email-otp", summary="Verify OTP and change email")
 def verify_change_email_otp(user_id: str, new_email: str, otp_code: str):
     conn = get_db()
-    c = conn.cursor()
-    # latest otp
-    c.execute(
-        """
+    c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    # latest email change otp
+    c.execute("""
         SELECT code, expires_at, verified FROM payment_otp
-        WHERE user_id = ? AND verified = 0
+        WHERE user_id = %s AND verified = FALSE AND order_id ~ '^EML-'
         ORDER BY created_at DESC LIMIT 1
         """,
         (user_id,)
@@ -318,10 +324,18 @@ def verify_change_email_otp(user_id: str, new_email: str, otp_code: str):
     if not row:
         conn.close()
         raise HTTPException(status_code=404, detail="No OTP found")
-    code, expires_at, verified = row
+    
+    code = row['code']
+    expires_at = row['expires_at']
+    verified = row['verified']
+    
     from datetime import datetime
     # verified rows are excluded above
-    if get_vietnam_time() > datetime.fromisoformat(expires_at):
+    # Use naive datetime comparison
+    current_time = get_vietnam_time().replace(tzinfo=None)
+    if isinstance(expires_at, str):
+        expires_at = datetime.fromisoformat(expires_at)
+    if current_time > expires_at:
         conn.close()
         raise HTTPException(status_code=400, detail="OTP expired")
     if otp_code != code:
@@ -329,9 +343,9 @@ def verify_change_email_otp(user_id: str, new_email: str, otp_code: str):
         raise HTTPException(status_code=400, detail="Invalid OTP")
 
     # change email
-    c.execute("UPDATE users SET email = ? WHERE id = ?", (new_email, user_id))
+    c.execute("UPDATE users SET email = %s WHERE id = %s", (new_email, user_id))
     # mark used
-    c.execute("UPDATE payment_otp SET verified = 1 WHERE user_id = ? AND code = ?", (user_id, code))
+    c.execute("UPDATE payment_otp SET verified = TRUE WHERE user_id = %s AND code = %s", (user_id, code))
     conn.commit()
     conn.close()
     return {"status": "success", "message": "Email changed successfully"}
@@ -351,9 +365,9 @@ def get_balance(user_id: str):
         raise HTTPException(status_code=400, detail="user_id query parameter required")
     
     conn = get_db()
-    c = conn.cursor()
+    c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     
-    c.execute("SELECT balance FROM users WHERE id = ?", (user_id,))
+    c.execute("SELECT balance FROM users WHERE id = %s", (user_id,))
     result = c.fetchone()
     
     conn.close()
@@ -361,7 +375,7 @@ def get_balance(user_id: str):
     if not result:
         raise HTTPException(status_code=404, detail="User not found")
     
-    return {"balance": result[0]}
+    return {"balance": result['balance']}
 
 
 # ====== DEV RESET UTILITIES (LOCAL USE ONLY) ======
@@ -369,18 +383,18 @@ def get_balance(user_id: str):
 def delete_user_dev(user_id: str):
     """Delete a user and all related records. For local testing only."""
     conn = get_db()
-    c = conn.cursor()
+    c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     try:
-        c.execute("DELETE FROM favorites WHERE user_id = ?", (user_id,))
-        c.execute("DELETE FROM orders WHERE user_id = ?", (user_id,))
-        c.execute("DELETE FROM cart WHERE user_id = ?", (user_id,))
-        c.execute("DELETE FROM reviews WHERE user_id = ?", (user_id,))
-        c.execute("DELETE FROM payment_otp WHERE user_id = ?", (user_id,))
-        c.execute("SELECT email FROM users WHERE id = ?", (user_id,))
+        c.execute("DELETE FROM favorites WHERE user_id = %s", (user_id,))
+        c.execute("DELETE FROM orders WHERE user_id = %s", (user_id,))
+        c.execute("DELETE FROM cart WHERE user_id = %s", (user_id,))
+        c.execute("DELETE FROM reviews WHERE user_id = %s", (user_id,))
+        c.execute("DELETE FROM payment_otp WHERE user_id = %s", (user_id,))
+        c.execute("SELECT email FROM users WHERE id = %s", (user_id,))
         row = c.fetchone()
-        if row and row[0]:
-            c.execute("DELETE FROM otp_codes WHERE email = ?", (row[0],))
-        c.execute("DELETE FROM users WHERE id = ?", (user_id,))
+        if row and row['email']:
+            c.execute("DELETE FROM otp_codes WHERE email = %s", (row['email'],))
+        c.execute("DELETE FROM users WHERE id = %s", (user_id,))
         conn.commit()
         return {"status": "success", "message": "User deleted"}
     finally:
@@ -394,7 +408,7 @@ def reset_database_dev():
     Robust to missing optional tables: skips gracefully if a table doesn't exist.
     """
     conn = get_db()
-    c = conn.cursor()
+    c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     tables = [
         "favorites",
         "orders",
@@ -408,9 +422,9 @@ def reset_database_dev():
         for t in tables:
             try:
                 c.execute(f"DELETE FROM {t}")
-            except sqlite3.OperationalError as e:
+            except Exception as e:
                 # Skip missing tables
-                if "no such table" in str(e):
+                if "does not exist" in str(e):
                     continue
                 else:
                     raise

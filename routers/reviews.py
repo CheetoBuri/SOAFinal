@@ -7,6 +7,7 @@ from models.responses import StatusResponse
 from database import get_db
 from utils.timezone import get_vietnam_time
 from datetime import datetime
+import psycopg2.extras
 
 router = APIRouter(prefix="/api/reviews", tags=["Reviews"])
 
@@ -28,13 +29,13 @@ def submit_review(request: ReviewSubmit):
         raise HTTPException(status_code=400, detail="Rating must be between 1 and 5")
     
     conn = get_db()
-    c = conn.cursor()
+    c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     
     try:
         c.execute("""
             INSERT OR REPLACE INTO reviews
             (user_id, product_id, rating, review_text, order_id, created_at, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
         """, (
             request.user_id,
             request.product_id,
@@ -71,7 +72,7 @@ def get_product_reviews(product_id: str, limit: int = 20, offset: int = 0):
     Returns average rating, review count, and list of reviews.
     """
     conn = get_db()
-    c = conn.cursor()
+    c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     
     # Get aggregate stats
     c.execute("""
@@ -79,20 +80,20 @@ def get_product_reviews(product_id: str, limit: int = 20, offset: int = 0):
             COUNT(*) as total,
             AVG(rating) as avg_rating
         FROM reviews
-        WHERE product_id = ?
+        WHERE product_id = %s
     """, (product_id,))
     
     stats = c.fetchone()
-    total_reviews = stats[0] if stats[0] else 0
-    avg_rating = round(stats[1], 1) if stats[1] else 0
+    total_reviews = stats['total'] if stats['total'] else 0
+    avg_rating = round(stats['avg_rating'], 1) if stats['avg_rating'] else 0
     
     # Get individual reviews
     c.execute("""
         SELECT id, user_id, product_id, rating, review_text, created_at
         FROM reviews
-        WHERE product_id = ?
+        WHERE product_id = %s
         ORDER BY created_at DESC
-        LIMIT ? OFFSET ?
+        LIMIT %s OFFSET %s
     """, (product_id, limit, offset))
     
     reviews_data = c.fetchall()
@@ -100,12 +101,12 @@ def get_product_reviews(product_id: str, limit: int = 20, offset: int = 0):
     
     reviews = [
         {
-            "id": r[0],
-            "user_id": r[1],
-            "product_id": r[2],
-            "rating": r[3],
-            "review_text": r[4],
-            "created_at": r[5]
+            "id": r['id'],
+            "user_id": r['user_id'],
+            "product_id": r['product_id'],
+            "rating": r['rating'],
+            "review_text": r['review_text'],
+            "created_at": r['created_at']
         }
         for r in reviews_data
     ]
@@ -133,14 +134,14 @@ def get_user_reviews(user_id: str, limit: int = 50):
     Returns list of reviews by the user.
     """
     conn = get_db()
-    c = conn.cursor()
+    c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     
     c.execute("""
         SELECT id, user_id, product_id, rating, review_text, created_at
         FROM reviews
-        WHERE user_id = ?
+        WHERE user_id = %s
         ORDER BY created_at DESC
-        LIMIT ?
+        LIMIT %s
     """, (user_id, limit))
     
     reviews_data = c.fetchall()
@@ -148,12 +149,12 @@ def get_user_reviews(user_id: str, limit: int = 50):
     
     return [
         {
-            "id": r[0],
-            "user_id": r[1],
-            "product_id": r[2],
-            "rating": r[3],
-            "review_text": r[4],
-            "created_at": r[5]
+            "id": r['id'],
+            "user_id": r['user_id'],
+            "product_id": r['product_id'],
+            "rating": r['rating'],
+            "review_text": r['review_text'],
+            "created_at": r['created_at']
         }
         for r in reviews_data
     ]
@@ -170,7 +171,7 @@ def get_rating_stats(product_id: str = None):
     Otherwise, get overall stats.
     """
     conn = get_db()
-    c = conn.cursor()
+    c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     
     if product_id:
         c.execute("""
@@ -185,7 +186,7 @@ def get_rating_stats(product_id: str = None):
                 SUM(CASE WHEN rating = 2 THEN 1 ELSE 0 END) as two_stars,
                 SUM(CASE WHEN rating = 1 THEN 1 ELSE 0 END) as one_star
             FROM reviews
-            WHERE product_id = ?
+            WHERE product_id = %s
         """, (product_id,))
     else:
         c.execute("""
@@ -206,16 +207,16 @@ def get_rating_stats(product_id: str = None):
     conn.close()
     
     return {
-        "total_reviews": result[0] or 0,
-        "average_rating": round(result[1], 1) if result[1] else 0,
-        "min_rating": result[2] or 0,
-        "max_rating": result[3] or 0,
+        "total_reviews": result['count'] or 0,
+        "average_rating": round(result['avg'], 1) if result['avg'] else 0,
+        "min_rating": result['min'] or 0,
+        "max_rating": result['max'] or 0,
         "distribution": {
-            "5_stars": result[4] or 0,
-            "4_stars": result[5] or 0,
-            "3_stars": result[6] or 0,
-            "2_stars": result[7] or 0,
-            "1_star": result[8] or 0
+            "5_stars": result['five_stars'] or 0,
+            "4_stars": result['four_stars'] or 0,
+            "3_stars": result['three_stars'] or 0,
+            "2_stars": result['two_stars'] or 0,
+            "1_star": result['one_star'] or 0
         }
     }
 
@@ -235,23 +236,23 @@ def delete_review(review_id: int, user_id: str):
     Returns success or error message.
     """
     conn = get_db()
-    c = conn.cursor()
+    c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     
     # Verify ownership
-    c.execute("SELECT user_id FROM reviews WHERE id = ?", (review_id,))
+    c.execute("SELECT user_id FROM reviews WHERE id = %s", (review_id,))
     result = c.fetchone()
     
     if not result:
         conn.close()
         raise HTTPException(status_code=404, detail="Review not found")
     
-    if result[0] != user_id:
+    if result['user_id'] != user_id:
         conn.close()
         raise HTTPException(status_code=403, detail="Unauthorized - not review author")
     
     # Delete review
     try:
-        c.execute("DELETE FROM reviews WHERE id = ?", (review_id,))
+        c.execute("DELETE FROM reviews WHERE id = %s", (review_id,))
         conn.commit()
         conn.close()
         return {"status": "success", "message": "Review deleted successfully"}

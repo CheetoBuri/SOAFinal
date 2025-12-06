@@ -57,27 +57,13 @@ app.add_middleware(
 @app.on_event("startup")
 def startup_event():
     # Only init once - check if tables exist first
-    import sqlite3
-    conn = None
+    # Initialize PostgreSQL connection pool
     try:
-        conn = sqlite3.connect("cafe_orders.db", timeout=5.0)
-        c = conn.cursor()
-        c.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='users'")
-        if not c.fetchone():
-            print("🔧 First time setup - initializing database...")
-            conn.close()
-            conn = None
-            init_db()
-        else:
-            print("✅ Database already initialized")
-        
-        # Run migrations
-        migrate_add_delivered_at()
+        init_db()
+        print("✅ PostgreSQL connection pool initialized")
     except Exception as e:
-        print(f"⚠️ Error checking database: {e}")
-    finally:
-        if conn:
-            conn.close()
+        print(f"⚠️ Error initializing database: {e}")
+        # Don't crash the app, let it try to connect later
     print("✅ Application ready")
 
 # Include all routers

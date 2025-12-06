@@ -9,6 +9,7 @@ from utils.security import generate_otp, send_email
 from utils.email_service import send_simple_email
 from utils.timezone import get_vietnam_time
 from datetime import timedelta
+import psycopg2.extras
 
 router = APIRouter(prefix="/api/payment", tags=["4️⃣ Payment"])
 
@@ -28,34 +29,35 @@ def send_payment_otp(request: PaymentOTPRequest, background_tasks: BackgroundTas
     user_id = request.user_id
     
     conn = get_db()
-    c = conn.cursor()
+    c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     
     # Verify order exists and belongs to user
-    c.execute("SELECT user_id, total, status FROM orders WHERE id = ?", (order_id,))
+    c.execute("SELECT user_id, total, status FROM orders WHERE id = %s", (order_id,))
     order = c.fetchone()
     
     if not order:
         conn.close()
         raise HTTPException(status_code=404, detail="Order not found")
     
-    if order[0] != user_id:
+    if order['user_id'] != user_id:
         conn.close()
         raise HTTPException(status_code=403, detail="Not authorized")
     
-    if order[2] != "pending_payment":
+    if order['status'] != "pending_payment":
         conn.close()
         raise HTTPException(status_code=400, detail="Order is not pending payment")
     
     # Check user balance
-    c.execute("SELECT email, balance FROM users WHERE id = ?", (user_id,))
+    c.execute("SELECT email, balance FROM users WHERE id = %s", (user_id,))
     user = c.fetchone()
     
     if not user:
         conn.close()
         raise HTTPException(status_code=404, detail="User not found")
     
-    user_email, user_balance = user
-    order_total = order[1]
+    user_email = user['email']
+    user_balance = user['balance']
+    order_total = order['total']
     
     if user_balance < order_total:
         conn.close()
@@ -64,12 +66,14 @@ def send_payment_otp(request: PaymentOTPRequest, background_tasks: BackgroundTas
     # Generate OTP
     otp_code = generate_otp()
     created_at = get_vietnam_time()
-    expires_at = created_at + timedelta(minutes=10)
+    # Save expires_at as naive datetime in Vietnam timezone
+    expires_at = (created_at + timedelta(minutes=10)).replace(tzinfo=None)
+    created_at = created_at.replace(tzinfo=None)
     
     # Store OTP
     c.execute("""
         INSERT INTO payment_otp (order_id, user_id, code, amount, created_at, expires_at)
-        VALUES (?, ?, ?, ?, ?, ?)
+        VALUES (%s, %s, %s, %s, %s, %s)
     """, (order_id, user_id, otp_code, order_total, created_at.isoformat(), expires_at.isoformat()))
     
     conn.commit()
@@ -131,13 +135,13 @@ def verify_payment_otp(request: VerifyPaymentOTPRequest, background_tasks: Backg
     otp = request.otp_code
     
     conn = get_db()
-    c = conn.cursor()
+    c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     
     # Check OTP
     c.execute("""
         SELECT code, expires_at, verified
         FROM payment_otp
-        WHERE order_id = ? AND user_id = ?
+        WHERE order_id = %s AND user_id = %s
         ORDER BY created_at DESC LIMIT 1
     """, (order_id, user_id))
     
@@ -147,14 +151,20 @@ def verify_payment_otp(request: VerifyPaymentOTPRequest, background_tasks: Backg
         conn.close()
         raise HTTPException(status_code=404, detail="No OTP found for this order")
     
-    stored_otp, expires_at, verified = result
+    stored_otp = result['code']
+    expires_at = result['expires_at']
+    verified = result['verified']
     
     if verified:
         conn.close()
         raise HTTPException(status_code=400, detail="OTP already used")
     
+    # Check expiration using naive datetime comparison
     from datetime import datetime
-    if get_vietnam_time() > datetime.fromisoformat(expires_at):
+    current_time = get_vietnam_time().replace(tzinfo=None)
+    if isinstance(expires_at, str):
+        expires_at = datetime.fromisoformat(expires_at)
+    if current_time > expires_at:
         conn.close()
         raise HTTPException(status_code=400, detail="OTP expired")
     
@@ -163,28 +173,30 @@ def verify_payment_otp(request: VerifyPaymentOTPRequest, background_tasks: Backg
         raise HTTPException(status_code=400, detail="Invalid OTP")
     
     # Get order total
-    c.execute("SELECT total, status FROM orders WHERE id = ?", (order_id,))
+    c.execute("SELECT total, status FROM orders WHERE id = %s", (order_id,))
     order = c.fetchone()
     
     if not order:
         conn.close()
         raise HTTPException(status_code=404, detail="Order not found")
     
-    order_total, order_status = order
+    order_total = order['total']
+    order_status = order['status']
     
     if order_status != "pending_payment":
         conn.close()
         raise HTTPException(status_code=400, detail="Order is not pending payment")
     
     # Deduct from user balance
-    c.execute("SELECT email, balance FROM users WHERE id = ?", (user_id,))
+    c.execute("SELECT email, balance FROM users WHERE id = %s", (user_id,))
     user = c.fetchone()
     
     if not user:
         conn.close()
         raise HTTPException(status_code=404, detail="User not found")
     
-    user_email, user_balance = user
+    user_email = user['email']
+    user_balance = user['balance']
     
     if user_balance < order_total:
         conn.close()
@@ -192,20 +204,20 @@ def verify_payment_otp(request: VerifyPaymentOTPRequest, background_tasks: Backg
     
     # Process payment
     new_balance = user_balance - order_total
-    c.execute("UPDATE users SET balance = balance - ? WHERE id = ?", (order_total, user_id))
+    c.execute("UPDATE users SET balance = balance - %s WHERE id = %s", (order_total, user_id))
     
     payment_time = get_vietnam_time().isoformat()
     c.execute("""
         UPDATE orders
-        SET status = 'paid', payment_time = ?
-        WHERE id = ?
+        SET status = 'paid', payment_time = %s
+        WHERE id = %s
     """, (payment_time, order_id))
     
     # Mark OTP as verified
     c.execute("""
         UPDATE payment_otp
-        SET verified = 1
-        WHERE order_id = ? AND user_id = ? AND code = ?
+        SET verified = TRUE
+        WHERE order_id = %s AND user_id = %s AND code = %s
     """, (order_id, user_id, otp))
     
     # Record transaction
@@ -214,7 +226,7 @@ def verify_payment_otp(request: VerifyPaymentOTPRequest, background_tasks: Backg
     c.execute("""
         INSERT INTO transactions 
         (id, user_id, type, amount, balance_before, balance_after, order_id, description, created_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
     """, (
         transaction_id,
         user_id,

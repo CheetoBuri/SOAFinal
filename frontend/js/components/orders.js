@@ -92,6 +92,99 @@ export async function cancelOrder(orderId) {
     }
 }
 
+export async function confirmPayment(orderId, amount) {
+    if (!confirm('Send payment confirmation OTP to your email?')) {
+        return;
+    }
+    
+    // Send OTP
+    const result = await api.sendPaymentOTP(state.currentUser.id, orderId, amount);
+    
+    if (!result.ok) {
+        alert(`Failed to send OTP: ${result.data?.detail || 'Unknown error'}`);
+        return;
+    }
+    
+    alert(`OTP sent to your email! Please check your inbox.`);
+    
+    // Show OTP verification modal
+    showPaymentOTPModal(orderId, amount);
+}
+
+function showPaymentOTPModal(orderId, amount) {
+    const modal = document.createElement('div');
+    modal.className = 'modal active';
+    modal.style.zIndex = '3000';
+    modal.id = 'paymentOTPModal';
+    modal.innerHTML = `
+        <div class="modal-content" style="max-inline-size: 450px;">
+            <div class="modal-header">🔐 Payment Confirmation</div>
+            <div style="padding: 20px;">
+                <p style="color: #666; margin-block-end: 15px;">
+                    Enter the 6-digit OTP sent to your email to confirm payment of <strong style="color: #c41e3a;">${ui.formatCurrency(amount)}</strong>
+                </p>
+                <div class="form-group">
+                    <label>OTP Code *</label>
+                    <input type="text" id="paymentOTPInput" maxlength="6" placeholder="Enter 6 digits" 
+                        style="inline-size:100%; padding:12px; font-size:24px; text-align:center; letter-spacing:5px; border:2px solid #ddd; border-radius:8px;">
+                </div>
+                <p style="color: #999; font-size: 12px; margin-block-start: 10px;">
+                    OTP expires in 10 minutes. Check spam folder if you don't see the email.
+                </p>
+            </div>
+            <div class="modal-buttons">
+                <button type="button" class="btn-submit" onclick="window.verifyPaymentOTPFromOrders('${orderId}')">
+                    Confirm & Pay
+                </button>
+                <button type="button" class="btn-cancel" onclick="window.closePaymentOTPModal()">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    
+    setTimeout(() => {
+        document.getElementById('paymentOTPInput')?.focus();
+    }, 100);
+}
+
+window.verifyPaymentOTPFromOrders = async function(orderId) {
+    const otpInput = document.getElementById('paymentOTPInput');
+    const otpCode = otpInput?.value.trim();
+    
+    if (!otpCode || otpCode.length !== 6) {
+        alert('Vui lòng nhập đúng 6 số OTP');
+        return;
+    }
+    
+    const result = await api.verifyPaymentOTP(state.currentUser.id, orderId, otpCode);
+    
+    if (result.ok) {
+        alert(`Payment successful! Order #${orderId} is now paid.`);
+        
+        if (result.data.new_balance !== undefined) {
+            state.currentUser.balance = result.data.new_balance;
+        }
+        
+        closePaymentOTPModal();
+        
+        // Refresh orders view
+        const { switchView } = await import('./navigation.js');
+        switchView('orderStatus');
+    } else {
+        const errorMsg = result.data?.detail || result.data?.message || 'Xác thực OTP thất bại';
+        alert(`Lỗi: ${errorMsg}`);
+    }
+}
+
+window.closePaymentOTPModal = function() {
+    const modal = document.getElementById('paymentOTPModal');
+    if (modal) modal.remove();
+}
+
+window.confirmPayment = confirmPayment;
+
 export async function confirmReceived(orderId) {
     if (!confirm('Confirm that you have received your order?')) {
         return;
@@ -200,12 +293,33 @@ function formatActiveOrderCard(order) {
             <div class="order-items">${itemsList}</div>
             ${address ? `<div style="color:#666; font-size:13px; margin-top:8px;">📍 ${address}</div>` : ''}
             ${order.special_notes ? `<div style="color:#999; font-size:12px; margin-top:8px;">📝 ${order.special_notes}</div>` : ''}
-            <div class="order-actions">
-                <button class="btn-cancel" onclick="window.cancelOrder('${order.id}')">❌ Cancel Order</button>
-                <button class="btn-received" onclick="window.confirmReceived('${order.id}')">✅ Received</button>
-            </div>
+            ${formatOrderActions(order)}
         </div>
     `;
+}
+
+function formatOrderActions(order) {
+    // Don't show buttons for cancelled or delivered orders
+    if (order.status === 'cancelled' || order.status === 'delivered') {
+        return '';
+    }
+    
+    let buttons = '<div class="order-actions">';
+    
+    // Cancel button always available for active orders
+    buttons += `<button class="btn-cancel" onclick="window.cancelOrder('${order.id}')">❌ Cancel Order</button>`;
+    
+    // Conditional second button based on payment status
+    if (order.status === 'pending_payment' && order.payment_method === 'balance') {
+        // Balance payment pending - show Confirm Payment
+        buttons += `<button class="btn-received" onclick="window.confirmPayment('${order.id}', ${order.total})">💳 Confirm Payment</button>`;
+    } else if (order.status !== 'pending_payment' || order.payment_method === 'cod' || order.payment_method === 'cash') {
+        // Order paid or is COD - show Received button
+        buttons += `<button class="btn-received" onclick="window.confirmReceived('${order.id}')">✅ Received</button>`;
+    }
+    
+    buttons += '</div>';
+    return buttons;
 }
 
 function formatOrderItems(items) {
@@ -217,6 +331,12 @@ function formatOrderItems(items) {
     return items.map(item => {
         let details = item.product_name || item.name || 'Unknown';
         if (item.size) details += ` (${item.size})`;
+        
+        // Temperature (hot/ice)
+        if (item.temperature) {
+            const tempLabel = item.temperature === 'hot' ? '☕ Hot' : '🧊 Iced';
+            details += `, ${tempLabel}`;
+        }
         
         if (item.milks && Array.isArray(item.milks) && item.milks.length > 0) {
             const milkNames = { 'nut': 'Nut Milk', 'condensed': 'Condensed Milk' };

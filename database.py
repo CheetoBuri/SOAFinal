@@ -1,126 +1,101 @@
 """
 Database connection and initialization
 """
-import sqlite3
+import psycopg2
+from psycopg2.extras import RealDictCursor
+from psycopg2 import pool
+import os
+import json
 
-DATABASE = "cafe_orders.db"
+# Database connection parameters from environment
+DB_CONFIG = {
+    "host": os.getenv("DB_HOST", "localhost"),
+    "port": os.getenv("DB_PORT", "5432"),
+    "database": os.getenv("DB_NAME", "cafe_orders"),
+    "user": os.getenv("DB_USER", "cafe_user"),
+    "password": os.getenv("DB_PASSWORD", "cafe_password")
+}
+
+# Connection pool
+connection_pool = None
+
+
+def init_connection_pool():
+    """Initialize PostgreSQL connection pool"""
+    global connection_pool
+    try:
+        connection_pool = psycopg2.pool.SimpleConnectionPool(
+            1,  # minconn
+            10,  # maxconn
+            **DB_CONFIG
+        )
+        print("✅ PostgreSQL connection pool created")
+    except Exception as e:
+        print(f"❌ Error creating connection pool: {e}")
+        raise
+
+
+class PooledConnection:
+    """Wrapper for pooled connection that returns to pool on close()"""
+    def __init__(self, conn, pool):
+        self._conn = conn
+        self._pool = pool
+        self._closed = False
+    
+    def cursor(self, *args, **kwargs):
+        return self._conn.cursor(*args, **kwargs)
+    
+    def commit(self):
+        if not self._closed:
+            self._conn.commit()
+    
+    def rollback(self):
+        if not self._closed:
+            self._conn.rollback()
+    
+    def close(self):
+        """Return connection to pool instead of closing"""
+        if not self._closed:
+            try:
+                self._conn.commit()
+            except:
+                self._conn.rollback()
+            finally:
+                self._pool.putconn(self._conn)
+                self._closed = True
+    
+    def __getattr__(self, name):
+        """Delegate other attributes to real connection"""
+        return getattr(self._conn, name)
 
 
 def get_db():
-    """Get database connection with timeout"""
-    conn = sqlite3.connect(DATABASE, timeout=30.0, check_same_thread=False)
-    return conn
+    """Get database connection from pool"""
+    if connection_pool is None:
+        init_connection_pool()
+    
+    conn = connection_pool.getconn()
+    return PooledConnection(conn, connection_pool)
 
 
 def init_db():
-    """Initialize SQLite database from schema.sql"""
-    conn = sqlite3.connect(DATABASE)
-    
+    """Initialize PostgreSQL database - tables are created by init_postgres.sql"""
     try:
-        # Load and execute schema.sql
-        with open("schema.sql", "r") as f:
-            schema = f.read()
-        conn.executescript(schema)
-        conn.commit()
-        print(f"✅ Database initialized from schema.sql")
-    except FileNotFoundError:
-        print("⚠️  schema.sql not found, creating tables manually...")
-        # Fallback to manual table creation
-        c = conn.cursor()
-        c.execute('''CREATE TABLE IF NOT EXISTS users (
-            id TEXT PRIMARY KEY,
-            email TEXT UNIQUE NOT NULL,
-            username TEXT UNIQUE,
-            password_hash TEXT NOT NULL,
-            full_name TEXT,
-            phone TEXT UNIQUE,
-            balance REAL DEFAULT 1000000,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )''')
-        c.execute('''CREATE TABLE IF NOT EXISTS otp_codes (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            email TEXT NOT NULL,
-            code TEXT NOT NULL,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            expires_at TIMESTAMP NOT NULL,
-            verified BOOLEAN DEFAULT 0
-        )''')
-        c.execute('''CREATE TABLE IF NOT EXISTS orders (
-            id TEXT PRIMARY KEY,
-            user_id TEXT,
-            items TEXT NOT NULL,
-            total REAL NOT NULL,
-            status TEXT DEFAULT 'pending',
-            special_notes TEXT,
-            promo_code TEXT,
-            discount REAL DEFAULT 0,
-            payment_method TEXT,
-            customer_name TEXT,
-            customer_phone TEXT,
-            delivery_district TEXT,
-            delivery_ward TEXT,
-            delivery_street TEXT,
-            payment_time TIMESTAMP,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY(user_id) REFERENCES users(id)
-        )''')
-        c.execute('''CREATE TABLE IF NOT EXISTS favorites (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id TEXT NOT NULL,
-            product_id TEXT NOT NULL,
-            added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            UNIQUE(user_id, product_id),
-            FOREIGN KEY(user_id) REFERENCES users(id)
-        )''')
-        c.execute('''CREATE TABLE IF NOT EXISTS promo_codes (
-            id TEXT PRIMARY KEY,
-            code TEXT UNIQUE NOT NULL,
-            discount_percent REAL NOT NULL,
-            max_uses INTEGER,
-            used_count INTEGER DEFAULT 0,
-            expires_at TIMESTAMP,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )''')
-        c.execute('''CREATE TABLE IF NOT EXISTS payment_otps (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id TEXT NOT NULL,
-            order_id TEXT NOT NULL,
-            amount REAL NOT NULL,
-            otp_code TEXT NOT NULL,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            expires_at TIMESTAMP NOT NULL,
-            verified BOOLEAN DEFAULT 0,
-            FOREIGN KEY(user_id) REFERENCES users(id)
-        )''')
-        c.execute('''CREATE TABLE IF NOT EXISTS cart (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id TEXT NOT NULL UNIQUE,
-            items TEXT NOT NULL,
-            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY(user_id) REFERENCES users(id)
-        )''')
-        conn.commit()
-    finally:
-        conn.close()
+        init_connection_pool()
+        print("✅ PostgreSQL database initialized")
+    except Exception as e:
+        print(f"❌ Error initializing database: {e}")
+        raise
 
 
 def migrate_add_delivered_at():
-    """Add delivered_at column to orders table if it doesn't exist"""
-    conn = get_db()
-    c = conn.cursor()
-    
-    try:
-        # Check if column exists
-        c.execute("PRAGMA table_info(orders)")
-        columns = [col[1] for col in c.fetchall()]
-        
-        if 'delivered_at' not in columns:
-            c.execute("ALTER TABLE orders ADD COLUMN delivered_at TIMESTAMP")
-            conn.commit()
-            print("✅ Added 'delivered_at' column to orders table")
-        else:
-            print("ℹ️  Column 'delivered_at' already exists")
-    except Exception as e:
-        print(f"⚠️  Migration error: {e}")
-    finally:
-        conn.close()
+    """Migration no longer needed - delivered_at is in init_postgres.sql"""
+    print("ℹ️  Migration skipped - using PostgreSQL schema")
+
+
+def dict_factory(cursor, row):
+    """Convert database row to dictionary"""
+    d = {}
+    for idx, col in enumerate(cursor.description):
+        d[col[0]] = row[idx]
+    return d

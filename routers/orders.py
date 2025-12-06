@@ -10,6 +10,7 @@ from utils.email_service import send_refund_email
 import json
 import uuid
 from datetime import datetime
+import psycopg2.extras
 
 router = APIRouter(prefix="/api", tags=["3️⃣ Checkout & Promo", "5️⃣ Orders & History"])
 
@@ -26,11 +27,11 @@ def validate_promo(request: PromoCodeRequest):
     code = request.code.upper().strip()
     
     conn = get_db()
-    c = conn.cursor()
+    c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     
     c.execute("""
         SELECT discount_percent, max_uses, used_count, expires_at
-        FROM promo_codes WHERE code = ?
+        FROM promo_codes WHERE code = %s
     """, (code,))
     
     result = c.fetchone()
@@ -39,9 +40,14 @@ def validate_promo(request: PromoCodeRequest):
     if not result:
         raise HTTPException(status_code=404, detail="Invalid promo code")
     
-    discount_percent, max_uses, used_count, expires_at = result
+    discount_percent = result['discount_percent']
+    max_uses = result['max_uses']
+    used_count = result['used_count']
+    expires_at = result['expires_at']
     
     # Check validity
+    if hasattr(expires_at, 'isoformat'):
+        expires_at = expires_at.isoformat()
     if expires_at and datetime.fromisoformat(expires_at) < get_vietnam_time():
         raise HTTPException(status_code=400, detail="Promo code expired")
     
@@ -92,20 +98,26 @@ def checkout(request: CheckoutRequest):
     # Validate and apply promo code
     if promo_code:
         conn = get_db()
-        c = conn.cursor()
+        c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         
         c.execute("""
             SELECT id, discount_percent, max_uses, used_count, expires_at
-            FROM promo_codes WHERE code = ?
+            FROM promo_codes WHERE code = %s
         """, (promo_code,))
         
         result = c.fetchone()
         
         if result:
-            promo_id, discount_percent, max_uses, used_count, expires_at = result
+            promo_id = result['id']
+            discount_percent = result['discount_percent']
+            max_uses = result['max_uses']
+            used_count = result['used_count']
+            expires_at = result['expires_at']
             
             # Check validity
             valid = True
+            if hasattr(expires_at, 'isoformat'):
+                expires_at = expires_at.isoformat()
             if expires_at and datetime.fromisoformat(expires_at) < get_vietnam_time():
                 valid = False
             if max_uses and used_count >= max_uses:
@@ -113,7 +125,7 @@ def checkout(request: CheckoutRequest):
             
             if valid:
                 discount = total * (discount_percent / 100)
-                c.execute("UPDATE promo_codes SET used_count = used_count + 1 WHERE id = ?", (promo_id,))
+                c.execute("UPDATE promo_codes SET used_count = used_count + 1 WHERE id = %s", (promo_id,))
         
         conn.commit()
         conn.close()
@@ -123,15 +135,15 @@ def checkout(request: CheckoutRequest):
     # Check balance for balance payment BEFORE creating order
     if request.payment_method == "balance":
         conn = get_db()
-        c = conn.cursor()
-        c.execute("SELECT balance FROM users WHERE id = ?", (request.user_id,))
+        c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        c.execute("SELECT balance FROM users WHERE id = %s", (request.user_id,))
         user = c.fetchone()
         conn.close()
         
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
         
-        user_balance = user[0]
+        user_balance = user['balance']
         if user_balance < final_total:
             raise HTTPException(
                 status_code=400, 
@@ -147,8 +159,9 @@ def checkout(request: CheckoutRequest):
     order_id = str(uuid.uuid4())[:8].upper()
     
     conn = get_db()
-    c = conn.cursor()
+    c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     
+    # Convert items to JSON string for PostgreSQL
     items_json = json.dumps(request.items)
     created_at = get_vietnam_time().isoformat()
     
@@ -158,7 +171,7 @@ def checkout(request: CheckoutRequest):
     c.execute("""
         INSERT INTO orders
         (id, user_id, items, total, special_notes, promo_code, discount, payment_method, customer_name, customer_phone, delivery_district, delivery_ward, delivery_street, status, created_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
     """, (
         order_id,
         request.user_id,
@@ -199,36 +212,36 @@ def get_orders(user_id: str):
     Returns array of user's orders sorted by creation date (newest first).
     """
     conn = get_db()
-    c = conn.cursor()
+    c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     
     c.execute("""
         SELECT id, items, total, status, special_notes, promo_code, discount, 
                payment_method, customer_name, customer_phone, delivery_district, 
                delivery_ward, delivery_street, payment_time, created_at, delivered_at
         FROM orders
-        WHERE user_id = ?
+        WHERE user_id = %s
         ORDER BY created_at DESC
     """, (user_id,))
     
     orders = []
     for row in c.fetchall():
         orders.append({
-            "id": row[0],
-            "items": json.loads(row[1]),
-            "total": row[2],
-            "status": row[3],
-            "special_notes": row[4],
-            "promo_code": row[5],
-            "discount": row[6],
-            "payment_method": row[7],
-            "customer_name": row[8],
-            "customer_phone": row[9],
-            "delivery_district": row[10],
-            "delivery_ward": row[11],
-            "delivery_street": row[12],
-            "payment_time": row[13],
-            "created_at": row[14],
-            "delivered_at": row[15]
+            "id": row['id'],
+            "items": row['items'],
+            "total": row['total'],
+            "status": row['status'],
+            "special_notes": row['special_notes'],
+            "promo_code": row['promo_code'],
+            "discount": row['discount'],
+            "payment_method": row['payment_method'],
+            "customer_name": row['customer_name'],
+            "customer_phone": row['customer_phone'],
+            "delivery_district": row['delivery_district'],
+            "delivery_ward": row['delivery_ward'],
+            "delivery_street": row['delivery_street'],
+            "payment_time": row['payment_time'],
+            "created_at": row['created_at'],
+            "delivered_at": row['delivered_at']
         })
     
     conn.close()
@@ -252,14 +265,14 @@ def cancel_order(order_id: str, request: OrderActionRequest):
         raise HTTPException(status_code=401, detail="User ID required")
     
     conn = get_db()
-    c = conn.cursor()
+    c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     
     # Get order details and user info
     c.execute("""
         SELECT o.user_id, o.total, o.status, o.payment_method, u.email, u.full_name 
         FROM orders o
         JOIN users u ON o.user_id = u.id
-        WHERE o.id = ?
+        WHERE o.id = %s
     """, (order_id,))
     order = c.fetchone()
     
@@ -267,7 +280,12 @@ def cancel_order(order_id: str, request: OrderActionRequest):
         conn.close()
         raise HTTPException(status_code=404, detail="Order not found")
     
-    order_user_id, total, status, payment_method, user_email, user_name = order
+    order_user_id = order['user_id']
+    total = order['total']
+    status = order['status']
+    payment_method = order['payment_method']
+    user_email = order['email']
+    user_name = order['full_name']
     
     if order_user_id != user_id:
         conn.close()
@@ -287,11 +305,12 @@ def cancel_order(order_id: str, request: OrderActionRequest):
         refund_amount = total
         
         # Get current balance
-        c.execute("SELECT balance FROM users WHERE id = ?", (user_id,))
-        current_balance = c.fetchone()[0]
+        c.execute("SELECT balance FROM users WHERE id = %s", (user_id,))
+        result = c.fetchone()
+        current_balance = result['balance'] if result else 0
         new_balance = current_balance + refund_amount
         
-        c.execute("UPDATE users SET balance = balance + ? WHERE id = ?", (refund_amount, user_id))
+        c.execute("UPDATE users SET balance = balance + %s WHERE id = %s", (refund_amount, user_id))
         
         # Record transaction
         import uuid
@@ -302,7 +321,7 @@ def cancel_order(order_id: str, request: OrderActionRequest):
         c.execute("""
             INSERT INTO transactions 
             (id, user_id, type, amount, balance_before, balance_after, order_id, description, created_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
         """, (
             transaction_id,
             user_id,
@@ -319,7 +338,7 @@ def cancel_order(order_id: str, request: OrderActionRequest):
     # Just cancel the order
     
     # Update order status
-    c.execute("UPDATE orders SET status = 'cancelled' WHERE id = ?", (order_id,))
+    c.execute("UPDATE orders SET status = 'cancelled' WHERE id = %s", (order_id,))
     
     conn.commit()
     conn.close()
@@ -362,21 +381,21 @@ def mark_order_received(order_id: str, request: OrderActionRequest):
         raise HTTPException(status_code=401, detail="User ID required")
     
     conn = get_db()
-    c = conn.cursor()
+    c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     
     # Get order details
-    c.execute("SELECT user_id, status, payment_method FROM orders WHERE id = ?", (order_id,))
+    c.execute("SELECT user_id, status, payment_method FROM orders WHERE id = %s", (order_id,))
     order = c.fetchone()
     
     if not order:
         conn.close()
         raise HTTPException(status_code=404, detail="Order not found")
     
-    if order[0] != user_id:
+    if order['user_id'] != user_id:
         conn.close()
         raise HTTPException(status_code=403, detail="Not authorized")
     
-    if order[1] == 'cancelled':
+    if order['status'] == 'cancelled':
         conn.close()
         raise HTTPException(status_code=400, detail="Cancelled order cannot be marked as received")
     
@@ -385,15 +404,13 @@ def mark_order_received(order_id: str, request: OrderActionRequest):
     current_time = get_vietnam_time().isoformat()
     
     # For COD orders that haven't been paid yet, also set payment_time
-    if order[2] == 'cash_on_delivery' and order[1] == 'pending_payment':
-        c.execute(
-            "UPDATE orders SET status = 'delivered', payment_time = ?, delivered_at = ? WHERE id = ?", 
+    if order['payment_method'] == 'cash_on_delivery' and order['status'] == 'pending_payment':
+        c.execute("UPDATE orders SET status = 'delivered', payment_time = %s, delivered_at = %s WHERE id = %s", 
             (current_time, current_time, order_id)
         )
     else:
         # For all other orders (balance/already paid), just set delivered_at
-        c.execute(
-            "UPDATE orders SET status = 'delivered', delivered_at = ? WHERE id = ?", 
+        c.execute("UPDATE orders SET status = 'delivered', delivered_at = %s WHERE id = %s", 
             (current_time, order_id)
         )
     

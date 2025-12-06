@@ -5,6 +5,7 @@ from fastapi import APIRouter, HTTPException
 from models.schemas import FavoriteRequest
 from models.responses import StatusResponse, FavoritesResponse
 from database import get_db
+import psycopg2.extras
 
 router = APIRouter(prefix="/api/favorites", tags=["7️⃣ Favorites"])
 
@@ -26,10 +27,10 @@ def add_favorite(request: FavoriteRequest):
         raise HTTPException(status_code=400, detail="user_id and product_id required")
     
     conn = get_db()
-    c = conn.cursor()
+    c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     
     # Check if already exists
-    c.execute("SELECT id FROM favorites WHERE user_id = ? AND product_id = ?", (user_id, product_id))
+    c.execute("SELECT id FROM favorites WHERE user_id = %s AND product_id = %s", (user_id, product_id))
     existing = c.fetchone()
     
     if existing:
@@ -37,7 +38,7 @@ def add_favorite(request: FavoriteRequest):
         raise HTTPException(status_code=400, detail="Product already in favorites")
     
     # Add to favorites
-    c.execute("INSERT INTO favorites (user_id, product_id) VALUES (?, ?)", (user_id, product_id))
+    c.execute("INSERT INTO favorites (user_id, product_id) VALUES (%s, %s)", (user_id, product_id))
     
     conn.commit()
     conn.close()
@@ -65,9 +66,9 @@ def remove_favorite_post(request: FavoriteRequest):
         raise HTTPException(status_code=400, detail="user_id and product_id required")
     
     conn = get_db()
-    c = conn.cursor()
+    c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     
-    c.execute("DELETE FROM favorites WHERE user_id = ? AND product_id = ?", (user_id, product_id))
+    c.execute("DELETE FROM favorites WHERE user_id = %s AND product_id = %s", (user_id, product_id))
     
     if c.rowcount == 0:
         conn.close()
@@ -96,9 +97,9 @@ def remove_favorite(product_id: str, user_id: str):
         raise HTTPException(status_code=400, detail="user_id query parameter required")
     
     conn = get_db()
-    c = conn.cursor()
+    c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     
-    c.execute("DELETE FROM favorites WHERE user_id = ? AND product_id = ?", (user_id, product_id))
+    c.execute("DELETE FROM favorites WHERE user_id = %s AND product_id = %s", (user_id, product_id))
     
     if c.rowcount == 0:
         conn.close()
@@ -126,11 +127,11 @@ def get_favorites(user_id: str):
         raise HTTPException(status_code=400, detail="user_id required")
     
     conn = get_db()
-    c = conn.cursor()
+    c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     
-    c.execute("SELECT product_id FROM favorites WHERE user_id = ?", (user_id,))
+    c.execute("SELECT product_id FROM favorites WHERE user_id = %s", (user_id,))
     
-    favorites = [{"product_id": row[0]} for row in c.fetchall()]
+    favorites = [{"product_id": row['product_id']} for row in c.fetchall()]
     
     conn.close()
     
