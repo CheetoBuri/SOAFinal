@@ -274,60 +274,36 @@ export async function loadFrequentItems() {
     if (!listDiv) return;
     
     try {
-        // Get user's order history to calculate frequent items
-        const result = await api.apiCall(`/orders?user_id=${state.currentUser.id}`);
+        // Get user's frequent items from new API endpoint
+        const result = await api.apiCall(`/frequent-items?user_id=${state.currentUser.id}&limit=5`);
         
-        const orders = result.ok ? (result.data.orders || result.data) : [];
-        
-        if (orders.length > 0) {
-            // Count product frequency
-            const productCounts = {};
-            orders.forEach(order => {
-                if (order.items && Array.isArray(order.items)) {
-                    order.items.forEach(item => {
-                        if (!productCounts[item.product_id]) {
-                            productCounts[item.product_id] = {
-                                count: 0,
-                                productInfo: item
-                            };
-                        }
-                        productCounts[item.product_id].count += item.quantity;
-                    });
+        if (result.ok && result.data.items && result.data.items.length > 0) {
+            const frequentItems = result.data.items;
+            
+            listDiv.innerHTML = frequentItems.map(item => {
+                // Create a summary of customization options
+                const customSummary = [];
+                if (item.customization) {
+                    if (item.customization.size) customSummary.push(item.customization.size);
+                    if (item.customization.temperature) customSummary.push(item.customization.temperature);
+                    if (item.customization.milk) customSummary.push('milk');
+                    if (item.customization.sugar) customSummary.push(`${item.customization.sugar}% sugar`);
                 }
-            });
-            
-            // Sort by frequency and get top 5
-            const frequentItems = Object.entries(productCounts)
-                .sort((a, b) => b[1].count - a[1].count)
-                .slice(0, 5)
-                .map(([id, data]) => {
-                    // Find matching menu item to get icon
-                    const menuItem = state.menuItems.find(m => m.id === id);
-                    return {
-                        id,
-                        ...data.productInfo,
-                        orderCount: data.count,
-                        icon: menuItem?.icon || '🍽️',
-                        product_id: id // Ensure product_id is set
-                    };
-                });
-            
-            if (frequentItems.length > 0) {
-                listDiv.innerHTML = frequentItems.map(item => `
-                    <div class="frequent-item" onclick="window.selectSearchResult('${item.product_id}')">
+                
+                return `
+                    <div class="frequent-item" data-frequent-item='${JSON.stringify(item)}' onclick="window.openFrequentItemModal(this)">
                         <div class="frequent-item-icon">${item.icon}</div>
                         <div class="frequent-item-info">
-                            <div class="frequent-item-name">${item.product_name || item.name}</div>
+                            <div class="frequent-item-name">${item.product_name}</div>
                             <div class="frequent-item-meta">
-                                <span class="frequent-item-count">Ordered ${item.orderCount}x</span>
+                                <span class="frequent-item-count">Ordered ${item.order_count}x</span>
                                 <span class="frequent-item-price">${ui.formatCurrency(item.price)}</span>
                             </div>
+                            ${customSummary.length > 0 ? `<div style="font-size:11px; color:#888; margin-top:2px;">${customSummary.join(', ')}</div>` : ''}
                         </div>
                     </div>
-                `).join('');
-            } else {
-                listDiv.innerHTML = '<p style="color:#999; font-size:12px; text-align:center;">No order history yet</p>';
-            }
+                `;
+            }).join('');
         } else {
             listDiv.innerHTML = '<p style="color:#999; font-size:12px; text-align:center;">No order history yet</p>';
         }

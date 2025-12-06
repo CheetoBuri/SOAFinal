@@ -248,6 +248,47 @@ def get_orders(user_id: str):
     return {"orders": orders}
 
 
+@router.get("/frequent-items", summary="Get User's Frequent Items with Customization Options")
+def get_frequent_items(user_id: str, limit: int = 5):
+    """
+    Get user's most frequently ordered items with their customization options.
+    
+    - **user_id**: User ID (query parameter, required)
+    - **limit**: Maximum number of items to return (default: 5)
+    
+    Returns array of frequent items sorted by order count (most ordered first).
+    Each item includes the customization options that were selected.
+    """
+    conn = get_db()
+    c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    
+    c.execute("""
+        SELECT product_id, product_name, product_icon, base_price, order_count, 
+               customization, last_ordered_at
+        FROM frequent_items
+        WHERE user_id = %s
+        ORDER BY order_count DESC, last_ordered_at DESC
+        LIMIT %s
+    """, (user_id, limit))
+    
+    items = []
+    for row in c.fetchall():
+        customization = json.loads(row['customization']) if row['customization'] else {}
+        
+        items.append({
+            "product_id": row['product_id'],
+            "product_name": row['product_name'],
+            "icon": row['product_icon'],
+            "price": row['base_price'],
+            "order_count": row['order_count'],
+            "customization": customization,
+            "last_ordered_at": row['last_ordered_at']
+        })
+    
+    conn.close()
+    return {"items": items}
+
+
 @router.post("/orders/{order_id}/cancel", summary="Cancel Order and Refund")
 def cancel_order(order_id: str, request: OrderActionRequest):
     """
@@ -369,6 +410,7 @@ def mark_order_received(order_id: str, request: OrderActionRequest):
     """
     Mark order as received/completed by customer.
     For COD orders: this also completes the payment.
+    Also saves items with their customization options to frequent_items table.
     
     - **order_id**: Order ID to mark as received (path parameter, required)
     - **user_id**: User ID for authorization (in request body, required)
@@ -383,8 +425,8 @@ def mark_order_received(order_id: str, request: OrderActionRequest):
     conn = get_db()
     c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     
-    # Get order details
-    c.execute("SELECT user_id, status, payment_method FROM orders WHERE id = %s", (order_id,))
+    # Get order details including items
+    c.execute("SELECT user_id, status, payment_method, items FROM orders WHERE id = %s", (order_id,))
     order = c.fetchone()
     
     if not order:
@@ -413,6 +455,60 @@ def mark_order_received(order_id: str, request: OrderActionRequest):
         c.execute("UPDATE orders SET status = 'delivered', delivered_at = %s WHERE id = %s", 
             (current_time, order_id)
         )
+    
+    # Save items to frequent_items table with their customization options
+    try:
+        items = json.loads(order['items']) if isinstance(order['items'], str) else order['items']
+        
+        for item in items:
+            product_id = item.get('product_id')
+            product_name = item.get('product_name') or item.get('name', 'Unknown')
+            product_icon = item.get('icon', '🍽️')
+            base_price = item.get('price', 0)
+            quantity = item.get('quantity', 1)
+            
+            # Extract customization options
+            customization = {
+                'size': item.get('size'),
+                'temperature': item.get('temperature'),
+                'milk': item.get('milk'),
+                'sugar': item.get('sugar'),
+                'upsells': item.get('upsells', [])
+            }
+            
+            # Fallback: handle old format with milks array (backward compatibility)
+            if not customization['milk'] and item.get('milks') and len(item.get('milks', [])) > 0:
+                customization['milk'] = item['milks'][0]
+            
+            # Remove None values
+            customization = {k: v for k, v in customization.items() if v is not None}
+            customization_json = json.dumps(customization, sort_keys=True)
+            
+            # Check if this exact combination exists
+            c.execute("""
+                SELECT id, order_count FROM frequent_items
+                WHERE user_id = %s AND product_id = %s AND customization = %s
+            """, (user_id, product_id, customization_json))
+            
+            existing = c.fetchone()
+            
+            if existing:
+                # Update count and last_ordered_at
+                c.execute("""
+                    UPDATE frequent_items
+                    SET order_count = order_count + %s, last_ordered_at = %s
+                    WHERE id = %s
+                """, (quantity, current_time, existing['id']))
+            else:
+                # Insert new frequent item
+                c.execute("""
+                    INSERT INTO frequent_items 
+                    (user_id, product_id, product_name, product_icon, base_price, order_count, customization, last_ordered_at)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                """, (user_id, product_id, product_name, product_icon, base_price, quantity, customization_json, current_time))
+    except Exception as e:
+        print(f"⚠️ Error saving to frequent_items: {str(e)}")
+        # Don't fail the whole operation if frequent_items saving fails
     
     conn.commit()
     conn.close()

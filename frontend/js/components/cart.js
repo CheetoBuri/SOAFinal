@@ -840,8 +840,8 @@ export async function processCheckout(event) {
             size: item.size || 'M',
             sugar: item.sugar || '0',
             temperature: item.temperature || null,
-            milks: item.milk ? [item.milk] : [],
-            toppings: [...(item.upsells || []), ...(item.toppings || [])],
+            milk: (item.milks && item.milks.length > 0) ? item.milks[0] : null,
+            upsells: item.upsells || [],
             price: item.price
         })),
         customer_name: customerName,
@@ -1037,3 +1037,227 @@ window.closePaymentOTPModal = function() {
     const modal = document.getElementById('paymentOTPModal');
     if (modal) modal.remove();
 }
+
+// ========== OPEN FREQUENT ITEM WITH PRE-FILLED OPTIONS ==========
+export async function openFrequentItemModal(element) {
+    const itemData = JSON.parse(element.getAttribute('data-frequent-item'));
+    
+    // Fetch product details to get full customization structure
+    const result = await api.apiCall(`/menu/product/${itemData.product_id}`);
+    if (!result.ok) {
+        alert('Failed to load product details');
+        return;
+    }
+    
+    const { product, customization } = result.data;
+    
+    // Show the modal with customization options
+    showCustomizationModalWithPresets(product, customization, itemData.customization);
+}
+
+function showCustomizationModalWithPresets(product, customization, presetOptions) {
+    const modal = document.createElement('div');
+    modal.className = 'modal active';
+    modal.style.zIndex = '2000';
+    modal.id = 'customizationModal';
+    
+    const isFood = product.category === 'food';
+    const isCoffee = product.category === 'coffee';
+    const isVNCoffee = isCoffee && product.type === 'vietnamese';
+    
+    // Preset values from frequent item
+    const presetSize = presetOptions?.size || 'M';
+    const presetTemp = presetOptions?.temperature || 'iced';
+    const presetMilk = presetOptions?.milk || null;
+    const presetSugar = presetOptions?.sugar || '0';
+    const presetUpsells = presetOptions?.upsells || [];
+    
+    let modalContent = `
+        <div class="modal-content" style="max-inline-size: 600px; max-block-size: 90vh; overflow-y: auto;">
+            <button class="modal-close" onclick="window.closeSizeModal()" aria-label="Close">×</button>
+            <div class="modal-header">
+                <span>${product.icon} ${product.name}</span>
+                <span style="color: #c41e3a; font-size: 18px;">${ui.formatCurrency(product.price)}</span>
+            </div>
+            <div style="padding: 10px; background: #fff3cd; border-radius: 8px; margin-bottom: 15px; font-size: 13px; color: #856404;">
+                ⭐ Your usual customization is pre-selected. Feel free to adjust!
+            </div>
+            <input type="hidden" id="modalProductId" value="${product.id}">
+            <input type="hidden" id="modalProductName" value="${product.name}">
+            <input type="hidden" id="modalBasePrice" value="${product.price}">
+            <input type="hidden" id="modalCategory" value="${product.category}">
+    `;
+    
+    // Size selection (for beverages only) - Pre-select preset size
+    if (customization.hasSize) {
+        modalContent += `
+            <div class="form-group">
+                <label><strong>📏 Size:</strong></label>
+                <div class="size-options" style="display: flex; gap: 10px; margin-block-start: 8px;">
+                    ${Object.entries(customization.sizes).map(([key, data]) => `
+                        <label class="option-card ${key === presetSize ? 'selected' : ''}" style="flex: 1; cursor: pointer; padding: 12px; border: 2px solid #ddd; border-radius: 8px; text-align: center; transition: all 0.3s;">
+                            <input type="radio" name="size" value="${key}" ${key === presetSize ? 'checked' : ''} 
+                                   data-price="${data.priceModifier}" onchange="window.updateModalPrice()" style="display: none;">
+                            <div style="font-weight: bold; font-size: 16px;">${key}</div>
+                            <div style="font-size: 12px; color: #666;">${data.name}</div>
+                            ${data.priceModifier !== 0 ? `<div style="color: #c41e3a; font-size: 13px; font-weight: 600;">${data.priceModifier > 0 ? '+' : ''}${ui.formatCurrency(data.priceModifier)}</div>` : '<div style="font-size: 12px; color: #999;">Base</div>'}
+                        </label>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    }
+    
+    // Temperature selection (for coffee only) - Pre-select preset temp
+    if (isCoffee) {
+        modalContent += `
+            <div class="form-group">
+                <label><strong>🌡️ Temperature:</strong></label>
+                <div class="temperature-options" style="display: flex; gap: 10px; margin-block-start: 8px;">
+                    <label class="option-card ${presetTemp === 'iced' ? 'selected' : ''}" style="flex: 1; cursor: pointer; padding: 12px; border: 2px solid #ddd; border-radius: 8px; text-align: center; transition: all 0.3s;">
+                        <input type="radio" name="temperature" value="iced" ${presetTemp === 'iced' ? 'checked' : ''} style="display: none;">
+                        <div style="font-size: 24px; margin-bottom: 4px;">🧊</div>
+                        <div style="font-weight: bold; font-size: 14px;">Iced</div>
+                        <div style="font-size: 11px; color: #666;">Cold with ice</div>
+                    </label>
+                    <label class="option-card ${presetTemp === 'hot' ? 'selected' : ''}" style="flex: 1; cursor: pointer; padding: 12px; border: 2px solid #ddd; border-radius: 8px; text-align: center; transition: all 0.3s;">
+                        <input type="radio" name="temperature" value="hot" ${presetTemp === 'hot' ? 'checked' : ''} style="display: none;">
+                        <div style="font-size: 24px; margin-bottom: 4px;">☕</div>
+                        <div style="font-weight: bold; font-size: 14px;">Hot</div>
+                        <div style="font-size: 11px; color: #666;">Served hot</div>
+                    </label>
+                </div>
+            </div>
+        `;
+    }
+    
+    // Milk options (for coffee) - Pre-select preset milk
+    if (isCoffee && Object.keys(customization.milkOptions).length > 0) {
+        modalContent += `
+            <div class="form-group">
+                <label><strong>🥛 Milk Options:</strong> <span style="font-size: 12px; color: #666;">(Optional) Choose up to 1 milk. Condensed milk can be added anytime.</span></label>
+                <div class="milk-options" style="display: flex; flex-direction: column; gap: 8px; margin-block-start: 8px;">
+                    ${Object.entries(customization.milkOptions).map(([key, data]) => {
+                        const isPreselected = presetMilk === key || (data.default && !presetMilk);
+                        return `
+                        <label class="checkbox-option ${isPreselected ? 'selected' : ''}" style="cursor: pointer; display: flex; align-items: center; gap: 10px; padding: 10px; border: 2px solid #ddd; border-radius: 8px; transition: all 0.3s;" data-milk-key="${key}">
+                            <input type="checkbox" class="milk-checkbox" value="${key}" ${isPreselected ? 'checked' : ''}
+                                   data-price="${data.price}">
+                            <span style="flex: 1;">${data.name}</span>
+                            ${data.price > 0 ? `<span style="color: #c41e3a; font-weight: 600;">+${ui.formatCurrency(data.price)}</span>` : ''}
+                        </label>
+                    `;}).join('')}
+                </div>
+            </div>
+        `;
+    }
+    
+    // Sugar level (if applicable) - Pre-select preset sugar
+    if (customization.hasSugar) {
+        modalContent += `
+            <div class="form-group">
+                <label><strong>🍬 Sugar Level:</strong></label>
+                <select id="sugarSelect" class="form-select" style="inline-size:100%; padding:12px; border:2px solid #ddd; border-radius:8px; margin-block-start:8px; font-size: 14px;">
+                    <option value="0" ${presetSugar === '0' || presetSugar === 0 ? 'selected' : ''}>0% (No Sugar)</option>
+                    <option value="25" ${presetSugar === '25' || presetSugar === 25 ? 'selected' : ''}>25%</option>
+                    <option value="50" ${presetSugar === '50' || presetSugar === 50 ? 'selected' : ''}>50%</option>
+                    <option value="75" ${presetSugar === '75' || presetSugar === 75 ? 'selected' : ''}>75%</option>
+                    <option value="100" ${presetSugar === '100' || presetSugar === 100 ? 'selected' : ''}>100%</option>
+                    <option value="125" ${presetSugar === '125' || presetSugar === 125 ? 'selected' : ''}>125% (Extra Sweet)</option>
+                    <option value="150" ${presetSugar === '150' || presetSugar === 150 ? 'selected' : ''}>150% (Very Sweet)</option>
+                </select>
+            </div>
+        `;
+    }
+    
+    // Upsells (for coffee/tea) - Pre-select preset upsells
+    if (Object.keys(customization.upsells).length > 0) {
+        const upsellTitle = isCoffee ? '✨ Add Coffee Toppings' : '✨ Add Tea Toppings';
+        modalContent += `
+            <div class="form-group">
+                <label><strong>${upsellTitle}:</strong></label>
+                <div class="upsells-options" style="display: flex; flex-direction: column; gap: 6px; margin-block-start: 8px;">
+                    ${Object.entries(customization.upsells).map(([key, data]) => {
+                        const isPreselected = presetUpsells.includes(key);
+                        return `
+                        <label class="checkbox-option ${isPreselected ? 'selected' : ''}" style="cursor: pointer; display: flex; align-items: center; gap: 10px; padding: 10px; border: 2px solid #ddd; border-radius: 8px; transition: all 0.3s;">
+                            <input type="checkbox" class="upsell-checkbox" value="${key}" ${isPreselected ? 'checked' : ''} data-price="${data.price}" onchange="window.updateModalPrice()">
+                            <span style="flex: 1;">${data.name}</span>
+                            <span style="color: #c41e3a; font-weight: 600;">+${ui.formatCurrency(data.price)}</span>
+                        </label>
+                    `;}).join('')}
+                </div>
+            </div>
+        `;
+    }
+    
+    // Toppings (for food) - Pre-select if any preset toppings exist
+    if (Object.keys(customization.toppings).length > 0) {
+        modalContent += `
+            <div class="form-group">
+                <label><strong>🎂 Toppings:</strong></label>
+                <div class="toppings-options" style="display: flex; flex-direction: column; gap: 6px; margin-block-start: 8px;">
+                    ${Object.entries(customization.toppings).map(([key, data]) => `
+                        <label class="checkbox-option" style="cursor: pointer; display: flex; align-items: center; gap: 10px; padding: 10px; border: 2px solid #ddd; border-radius: 8px; transition: all 0.3s;">
+                            <input type="checkbox" class="topping-checkbox" value="${key}" data-price="${data.price}" onchange="window.updateModalPrice()">
+                            <span style="flex: 1;">${data.name}</span>
+                            <span style="color: #c41e3a; font-weight: 600;">+${ui.formatCurrency(data.price)}</span>
+                        </label>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    }
+    
+    // Calculate initial price based on presets
+    let initialPrice = product.price;
+    if (customization.hasSize && customization.sizes[presetSize]) {
+        initialPrice += customization.sizes[presetSize].priceModifier;
+    }
+    if (presetMilk && customization.milkOptions[presetMilk]) {
+        initialPrice += customization.milkOptions[presetMilk].price;
+    }
+    presetUpsells.forEach(upsellKey => {
+        if (customization.upsells[upsellKey]) {
+            initialPrice += customization.upsells[upsellKey].price;
+        }
+    });
+    
+    // Price summary
+    modalContent += `
+            <div class="form-group" style="margin-block-start: 20px; padding: 15px; background: linear-gradient(135deg, #f8f8f8 0%, #e8e8e8 100%); border-radius: 12px; border: 2px solid #c41e3a;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <label style="font-weight: bold; font-size: 18px; margin: 0; color: #333;">Total:</label>
+                    <span id="modalFinalPrice" style="font-size: 24px; font-weight: bold; color: #c41e3a;">${ui.formatCurrency(initialPrice)}</span>
+                </div>
+            </div>
+            
+            <div class="modal-buttons" style="margin-block-start: 20px; display: flex; gap: 10px;">
+                <button class="btn-submit" onclick="window.addToCartFromModal()" style="flex: 2; padding: 14px; font-size: 16px;">
+                    🛒 Add to Cart
+                </button>
+                <button class="btn-cancel" onclick="window.closeSizeModal()" style="flex: 1; padding: 14px; font-size: 16px;">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    `;
+    
+    modal.innerHTML = modalContent;
+    document.body.appendChild(modal);
+    
+    // Add backdrop click to close
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            closeSizeModal();
+        }
+    });
+    
+    // Add event listeners for option-card selection styling
+    addOptionCardListeners();
+    
+    // Update price immediately based on presets
+    updateModalPrice();
+}
+
+window.openFrequentItemModal = openFrequentItemModal;

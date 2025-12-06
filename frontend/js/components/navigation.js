@@ -25,6 +25,8 @@ export function switchView(view) {
         document.getElementById('shopView')?.classList.add('active');
         if (shopControls) shopControls.style.display = 'block';
         if (cartSidebar) cartSidebar.style.display = 'block';
+        // Reload frequent items when entering shop view (catches new items from received orders)
+        loadFrequentItems();
     } else if (view === 'orderStatus') {
         document.getElementById('orderStatusView')?.classList.add('active');
         if (shopControls) shopControls.style.display = 'none';

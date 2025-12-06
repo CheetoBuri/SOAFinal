@@ -153,6 +153,29 @@ CREATE INDEX IF NOT EXISTS idx_reviews_user ON reviews(user_id);
 CREATE INDEX IF NOT EXISTS idx_reviews_created ON reviews(created_at);
 
 -- ============================================
+-- FREQUENT ITEMS TABLE
+-- ============================================
+CREATE TABLE IF NOT EXISTS frequent_items (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id TEXT NOT NULL,
+    product_id TEXT NOT NULL,
+    product_name TEXT NOT NULL,
+    product_icon TEXT,
+    base_price REAL NOT NULL,
+    order_count INTEGER DEFAULT 1,
+    last_ordered_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    -- Customization options (stored as JSON)
+    customization TEXT,
+    -- Customization includes: size, temperature, milk, sugar, upsells, etc.
+    UNIQUE(user_id, product_id, customization),
+    FOREIGN KEY(user_id) REFERENCES users(id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_frequent_items_user ON frequent_items(user_id);
+CREATE INDEX IF NOT EXISTS idx_frequent_items_product ON frequent_items(product_id);
+CREATE INDEX IF NOT EXISTS idx_frequent_items_last_ordered ON frequent_items(last_ordered_at);
+
+-- ============================================
 -- SAMPLE DATA (Optional - uncomment to use)
 -- ============================================
 

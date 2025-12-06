@@ -2,6 +2,7 @@
 import * as api from '../utils/api.js';
 import * as ui from '../utils/ui.js';
 import { state } from '../utils/state.js';
+import { loadFrequentItems } from './menu.js';
 
 export async function loadOrderHistory() {
     const result = await api.getOrderHistory(state.currentUser.id);
@@ -203,6 +204,8 @@ export async function confirmReceived(orderId) {
     if (result.ok) {
         ui.showSuccess('Thank you! Order marked as received.');
         loadOrderStatus();
+        // Reload frequent items to show newly added items with customization options
+        loadFrequentItems();
     } else {
         ui.showError(result.data.detail);
         

@@ -390,6 +390,7 @@ def delete_user_dev(user_id: str):
         c.execute("DELETE FROM cart WHERE user_id = %s", (user_id,))
         c.execute("DELETE FROM reviews WHERE user_id = %s", (user_id,))
         c.execute("DELETE FROM payment_otp WHERE user_id = %s", (user_id,))
+        c.execute("DELETE FROM frequent_items WHERE user_id = %s", (user_id,))
         c.execute("SELECT email FROM users WHERE id = %s", (user_id,))
         row = c.fetchone()
         if row and row['email']:
@@ -415,6 +416,7 @@ def reset_database_dev():
         "cart",
         "reviews",
         "payment_otp",
+        "frequent_items",
         "otp_codes",
         "users",
     ]
