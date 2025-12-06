@@ -3,7 +3,7 @@ import * as api from '../utils/api.js';
 import * as storage from '../utils/storage.js';
 import * as ui from '../utils/ui.js';
 import { setCurrentUser } from '../utils/state.js';
-import { loadMenu, loadFavorites } from './menu.js';
+import { loadMenu, loadFavorites, loadFrequentItems } from './menu.js';
 import { updateCartUI } from './cart.js';
 import { switchView } from './navigation.js';
 
@@ -15,6 +15,7 @@ export async function initAuth() {
         showApp();
         await loadMenu();
         await loadFavorites();
+        await loadFrequentItems();
         // Ensure cart UI is initialized for already logged-in users
         updateCartUI();
     } else {
@@ -115,6 +116,7 @@ export async function handleLogin(e) {
         showApp();
         await loadMenu();
         await loadFavorites();
+        await loadFrequentItems();
         // Initialize cart UI to ensure checkout button works
         updateCartUI();
         switchView('shop');  // Go to shop view (menu)
@@ -200,6 +202,7 @@ export async function handleRegister(e) {
         showApp();
         await loadMenu();
         await loadFavorites();
+        await loadFrequentItems();
         // Initialize cart UI to ensure checkout button works
         updateCartUI();
         switchView('shop');  // Go to shop view (menu)

@@ -71,6 +71,29 @@ function showCustomizationModal(product, customization) {
         `;
     }
     
+    // Temperature selection (for coffee only)
+    if (isCoffee) {
+        modalContent += `
+            <div class="form-group">
+                <label><strong>🌡️ Temperature:</strong></label>
+                <div class="temperature-options" style="display: flex; gap: 10px; margin-block-start: 8px;">
+                    <label class="option-card selected" style="flex: 1; cursor: pointer; padding: 12px; border: 2px solid #ddd; border-radius: 8px; text-align: center; transition: all 0.3s;">
+                        <input type="radio" name="temperature" value="iced" checked style="display: none;">
+                        <div style="font-size: 24px; margin-bottom: 4px;">🧊</div>
+                        <div style="font-weight: bold; font-size: 14px;">Iced</div>
+                        <div style="font-size: 11px; color: #666;">Cold with ice</div>
+                    </label>
+                    <label class="option-card" style="flex: 1; cursor: pointer; padding: 12px; border: 2px solid #ddd; border-radius: 8px; text-align: center; transition: all 0.3s;">
+                        <input type="radio" name="temperature" value="hot" style="display: none;">
+                        <div style="font-size: 24px; margin-bottom: 4px;">☕</div>
+                        <div style="font-weight: bold; font-size: 14px;">Hot</div>
+                        <div style="font-size: 11px; color: #666;">Served hot</div>
+                    </label>
+                </div>
+            </div>
+        `;
+    }
+    
     // Milk options (for coffee)
     if (isCoffee && Object.keys(customization.milkOptions).length > 0) {
         modalContent += `
@@ -182,10 +205,14 @@ function showCustomizationModal(product, customization) {
 
 // Add listeners for visual selection feedback
 function addOptionCardListeners() {
-    // Size option cards
+    // Size and Temperature option cards
     document.querySelectorAll('.option-card input[type="radio"]').forEach(radio => {
         radio.addEventListener('change', function() {
-            document.querySelectorAll('.option-card').forEach(card => card.classList.remove('selected'));
+            const radioName = this.getAttribute('name');
+            // Only remove 'selected' from cards with the same radio group
+            document.querySelectorAll(`input[name="${radioName}"]`).forEach(r => {
+                r.closest('.option-card')?.classList.remove('selected');
+            });
             this.closest('.option-card').classList.add('selected');
         });
     });
@@ -280,6 +307,7 @@ export function addToCartFromModal() {
     
     // Collect selections
     const size = document.querySelector('input[name="size"]:checked')?.value || 'M';
+    const temperature = document.querySelector('input[name="temperature"]:checked')?.value || 'iced';
     const checkedMilkCbs = Array.from(document.querySelectorAll('.milk-checkbox:checked'));
     const regularMilks = checkedMilkCbs.filter(cb => cb.value !== 'condensed' && cb.value !== 'condensed_milk');
 
@@ -320,6 +348,7 @@ export function addToCartFromModal() {
         quantity: 1,
         category: category,
         size: size,
+        temperature: temperature,
         sugar: sugar,
         milks: milks,
         upsells: upsells,
@@ -371,6 +400,12 @@ export function updateCartUI() {
         
         // Size
         if (item.size) customizations.push(`Size: ${item.size}`);
+        
+        // Temperature (for coffee)
+        if (item.temperature) {
+            const tempLabel = item.temperature === 'hot' ? '☕ Hot' : '🧊 Iced';
+            customizations.push(tempLabel);
+        }
         
         // Sugar level
         if (item.sugar) customizations.push(`Sugar: ${item.sugar}%`);

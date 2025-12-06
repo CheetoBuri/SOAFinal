@@ -96,3 +96,66 @@
     cursor: pointer;
     font-size: 12px;
 }
+
+/* ========== FREQUENT ITEMS ========== */
+.frequent-items-list {
+    max-height: 350px;
+    overflow-y: auto;
+}
+
+.frequent-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    background: #f8f8f8;
+    border-radius: 8px;
+    margin: 8px 0;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 1px solid transparent;
+}
+
+.frequent-item:hover {
+    background: #fff;
+    border-color: var(--primary);
+    transform: translateX(4px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.frequent-item-icon {
+    font-size: 24px;
+    flex-shrink: 0;
+}
+
+.frequent-item-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.frequent-item-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: #1a1a1a;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.frequent-item-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 4px;
+    font-size: 11px;
+}
+
+.frequent-item-count {
+    color: #666;
+}
+
+.frequent-item-price {
+    color: var(--primary);
+    font-weight: 600;
+}
+

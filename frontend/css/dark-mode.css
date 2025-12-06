@@ -132,6 +132,61 @@ body.dark-mode .category-btn.active {
     border: none;
 }
 
+/* Header Search */
+body.dark-mode .header-search-input {
+    background: #252525;
+    border-color: #3a3a3a;
+    color: #e0e0e0;
+}
+
+body.dark-mode .header-search-input:focus {
+    border-color: #e5e5e5;
+    background: #2a2a2a;
+}
+
+body.dark-mode .header-search-input::placeholder {
+    color: #666;
+}
+
+body.dark-mode .header-search-results {
+    background: #252525;
+    border-color: #3a3a3a;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+body.dark-mode #headerSearchResultsList > div {
+    background: #2a2a2a;
+    color: #e0e0e0;
+}
+
+body.dark-mode #headerSearchResultsList > div:hover {
+    background: #e5e5e5;
+    color: #1a1a1a;
+}
+
+/* Frequent Items */
+body.dark-mode .frequent-item {
+    background: #2a2a2a;
+    border-color: #3a3a3a;
+}
+
+body.dark-mode .frequent-item:hover {
+    background: #2f2f2f;
+    border-color: #e5e5e5;
+}
+
+body.dark-mode .frequent-item-name {
+    color: #ffffff;
+}
+
+body.dark-mode .frequent-item-count {
+    color: #999;
+}
+
+body.dark-mode .frequent-item-price {
+    color: #e5e5e5;
+}
+
 /* Main Content */
 body.dark-mode .main-content {
     background: #1a1a1a;

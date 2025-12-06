@@ -2,7 +2,7 @@
 import * as ui from '../utils/ui.js';
 import { state, setCurrentView } from '../utils/state.js';
 import { loadOrderHistory, loadOrderStatus } from './orders.js';
-import { loadFavoritesView } from './menu.js';
+import { loadFavoritesView, loadFrequentItems } from './menu.js';
 import { loadProfileData, loadTransactionHistory } from './profile.js';
 
 export function switchView(view) {
@@ -41,4 +41,9 @@ export function switchView(view) {
         if (cartSidebar) cartSidebar.style.display = 'block';
         loadFavoritesView();
     }
+}
+
+// Load frequent items when switching to shop view
+export function initFrequentItems() {
+    loadFrequentItems();
 }

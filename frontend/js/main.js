@@ -1,6 +1,6 @@
 // ========== MAIN APPLICATION FILE ==========
 import { initAuth, handleLogin, sendOTP, handleRegister, sendForgotOTP, handleForgotPassword, resetForgotForm, resetRegisterForm, logout, switchAuthTab, setupAuthListeners } from './components/auth.js';
-import { loadMenu, filterByCategory, handleSearch, selectSearchResult, toggleFavorite } from './components/menu.js';
+import { loadMenu, filterByCategory, handleSearch, selectSearchResult, toggleFavorite, loadFrequentItems } from './components/menu.js';
 import { showAddToCart, closeSizeModal, addToCartFromModal, updateModalPrice, updateCartUI, changeQty, removeFromCart, openCheckoutModal, closeCheckoutModal, processCheckout } from './components/cart.js';
 import { switchView } from './components/navigation.js';
 import { cancelOrder, confirmReceived } from './components/orders.js';

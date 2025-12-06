@@ -126,9 +126,11 @@ export async function filterByCategory(category, event) {
 }
 
 export async function handleSearch() {
-    const query = document.getElementById('searchInput')?.value.trim();
-    const resultsDiv = document.getElementById('searchResults');
-    const resultsList = document.getElementById('searchResultsList');
+    // Support both sidebar and header search
+    const headerInput = document.getElementById('headerSearchInput');
+    const query = headerInput?.value.trim() || '';
+    const resultsDiv = document.getElementById('headerSearchResults');
+    const resultsList = document.getElementById('headerSearchResultsList');
     
     if (!query || query.length < 2) {
         if (resultsDiv) resultsDiv.style.display = 'none';
@@ -140,26 +142,28 @@ export async function handleSearch() {
     if (result.ok && result.data.items && result.data.items.length > 0) {
         if (resultsList) {
             resultsList.innerHTML = result.data.items.map(item => 
-                `<div style="padding:8px; background:#f0f0f0; border-radius:4px; margin:5px 0; cursor:pointer;" onclick="window.selectSearchResult('${item.id}')">
-                    ${item.icon} ${item.name} - ${ui.formatCurrency(item.price)}
+                `<div onclick="window.selectSearchResult('${item.id}')">
+                    <span style="font-size:20px;">${item.icon}</span>
+                    <span style="flex:1;">${item.name}</span>
+                    <span style="font-weight:600;">${ui.formatCurrency(item.price)}</span>
                 </div>`
             ).join('');
         }
         if (resultsDiv) resultsDiv.style.display = 'block';
     } else {
         if (resultsList) {
-            resultsList.innerHTML = '<div style="color:#999;">No results found</div>';
+            resultsList.innerHTML = '<div style="color:#999; text-align:center; padding:20px;">No results found</div>';
         }
         if (resultsDiv) resultsDiv.style.display = 'block';
     }
 }
 
 export function selectSearchResult(productId) {
-    const searchInput = document.getElementById('searchInput');
-    const resultsDiv = document.getElementById('searchResults');
+    const headerSearchInput = document.getElementById('headerSearchInput');
+    const headerResultsDiv = document.getElementById('headerSearchResults');
     
-    if (searchInput) searchInput.value = '';
-    if (resultsDiv) resultsDiv.style.display = 'none';
+    if (headerSearchInput) headerSearchInput.value = '';
+    if (headerResultsDiv) headerResultsDiv.style.display = 'none';
     
     const productCard = document.querySelector(`[data-product-id="${productId}"]`);
     if (productCard) {
@@ -252,3 +256,75 @@ export async function loadFavoritesView() {
         }
     }
 }
+
+// ========== FREQUENT ITEMS ==========
+export async function loadFrequentItems() {
+    if (!state.currentUser) return;
+    
+    const listDiv = document.getElementById('frequentItemsList');
+    if (!listDiv) return;
+    
+    try {
+        // Get user's order history to calculate frequent items
+        const result = await api.apiCall(`/orders?user_id=${state.currentUser.id}`);
+        
+        const orders = result.ok ? (result.data.orders || result.data) : [];
+        
+        if (orders.length > 0) {
+            // Count product frequency
+            const productCounts = {};
+            orders.forEach(order => {
+                if (order.items && Array.isArray(order.items)) {
+                    order.items.forEach(item => {
+                        if (!productCounts[item.product_id]) {
+                            productCounts[item.product_id] = {
+                                count: 0,
+                                productInfo: item
+                            };
+                        }
+                        productCounts[item.product_id].count += item.quantity;
+                    });
+                }
+            });
+            
+            // Sort by frequency and get top 5
+            const frequentItems = Object.entries(productCounts)
+                .sort((a, b) => b[1].count - a[1].count)
+                .slice(0, 5)
+                .map(([id, data]) => {
+                    // Find matching menu item to get icon
+                    const menuItem = state.menuItems.find(m => m.id === id);
+                    return {
+                        id,
+                        ...data.productInfo,
+                        orderCount: data.count,
+                        icon: menuItem?.icon || '🍽️',
+                        product_id: id // Ensure product_id is set
+                    };
+                });
+            
+            if (frequentItems.length > 0) {
+                listDiv.innerHTML = frequentItems.map(item => `
+                    <div class="frequent-item" onclick="window.selectSearchResult('${item.product_id}')">
+                        <div class="frequent-item-icon">${item.icon}</div>
+                        <div class="frequent-item-info">
+                            <div class="frequent-item-name">${item.product_name || item.name}</div>
+                            <div class="frequent-item-meta">
+                                <span class="frequent-item-count">Ordered ${item.orderCount}x</span>
+                                <span class="frequent-item-price">${ui.formatCurrency(item.price)}</span>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                listDiv.innerHTML = '<p style="color:#999; font-size:12px; text-align:center;">No order history yet</p>';
+            }
+        } else {
+            listDiv.innerHTML = '<p style="color:#999; font-size:12px; text-align:center;">No order history yet</p>';
+        }
+    } catch (error) {
+        console.error('Error loading frequent items:', error);
+        listDiv.innerHTML = '<p style="color:#999; font-size:12px; text-align:center;">Unable to load</p>';
+    }
+}
+

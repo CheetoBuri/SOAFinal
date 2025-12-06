@@ -172,6 +172,15 @@
                 <span class="logo-icon">☕</span>
                 <span class="logo-text">Cafe Ordering System</span>
             </div>
+            
+            <!-- HEADER SEARCH -->
+            <div class="header-search">
+                <input type="text" class="header-search-input" id="headerSearchInput" placeholder="Search menu..." onkeyup="handleSearch()">
+                <div id="headerSearchResults" class="header-search-results" style="display:none;">
+                    <div id="headerSearchResultsList"></div>
+                </div>
+            </div>
+            
             <div class="header-actions">
                 <button class="icon-btn" onclick="switchView('shop')" title="Home Menu">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -243,15 +252,6 @@
             <div class="sidebar">
                 <!-- SHOP & FAVORITES CONTROLS -->
                 <div id="shopControls">
-                    <!-- SEARCH -->
-                    <div class="sidebar-section">
-                        <h3>🔍 Search</h3>
-                        <input type="text" class="search-box" id="searchInput" placeholder="Search menu..." onkeyup="handleSearch()">
-                        <div id="searchResults" style="display:none; margin-block-start:10px;">
-                            <div id="searchResultsList" style="font-size:13px;"></div>
-                        </div>
-                    </div>
-
                     <!-- CATEGORIES -->
                     <div class="sidebar-section">
                         <h3>📂 Categories</h3>
@@ -260,6 +260,14 @@
                         <button class="category-btn" onclick="filterByCategory('tea', event)">🍵 Tea</button>
                         <button class="category-btn" onclick="filterByCategory('juice', event)">🧃 Juice</button>
                         <button class="category-btn" onclick="filterByCategory('food', event)">🍰 Food</button>
+                    </div>
+                    
+                    <!-- FREQUENT ITEMS -->
+                    <div class="sidebar-section">
+                        <h3>🔥 Frequent Items</h3>
+                        <div id="frequentItemsList" class="frequent-items-list">
+                            <p style="color:#999; font-size:12px; text-align:center;">Loading...</p>
+                        </div>
                     </div>
                 </div>
             </div>

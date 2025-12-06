@@ -124,4 +124,14 @@
         padding: 6px 10px;
         font-size: 12px;
     }
+    
+    .header-search {
+        max-width: 100%;
+    }
+    
+    .header-actions {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
 }
+
