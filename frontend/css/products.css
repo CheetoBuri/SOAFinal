@@ -313,24 +313,38 @@
 }
 
 .btn-favorite {
-    background: transparent;
-    color: var(--error);
+    background: white;
     border: none;
-    font-weight: 600;
-    font-size: 24px;
     padding: 8px;
-    transition: var(--trans-fast);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.btn-favorite svg {
+    color: #9ca3af;
+    transition: all 0.3s ease;
 }
 
 .btn-favorite:hover {
-    background: transparent;
-    transform: scale(1.2);
-    filter: brightness(1.2);
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-.btn-favorite.favorited {
-    background: transparent;
-    color: var(--error);
-    border: none;
-    filter: drop-shadow(0 2px 4px rgba(239, 68, 68, 0.3));
+.btn-favorite:hover svg {
+    color: #ef4444;
+}
+
+.btn-favorite.favorited svg {
+    color: #ef4444;
+    fill: #fca5a5;
+    stroke: #ef4444;
+    filter: drop-shadow(0 2px 4px rgba(239, 68, 68, 0.2));
+}
+
+.btn-favorite:active {
+    transform: scale(0.95);
 }

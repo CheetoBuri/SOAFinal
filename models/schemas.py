@@ -278,17 +278,21 @@ class OrderActionRequest(BaseModel):
 # ========== REVIEW MODELS ==========
 
 class ReviewSubmit(BaseModel):
-    """Submit a new review"""
+    """Submit a new review (product + service)"""
     user_id: str
     product_id: str
-    rating: int  # 1-5
+    rating: int  # Product rating 1-5
     review_text: Optional[str] = None
+    service_rating: Optional[int] = None  # Service/shipping rating 1-5
+    service_review_text: Optional[str] = None
     order_id: Optional[str] = None
     
     @model_validator(mode='after')
     def validate_rating(self):
         if not 1 <= self.rating <= 5:
-            raise ValueError('Rating must be between 1 and 5')
+            raise ValueError('Product rating must be between 1 and 5')
+        if self.service_rating is not None and not 1 <= self.service_rating <= 5:
+            raise ValueError('Service rating must be between 1 and 5')
         return self
     
     class Config:
@@ -298,6 +302,8 @@ class ReviewSubmit(BaseModel):
                 "product_id": "cf_1",
                 "rating": 5,
                 "review_text": "Amazing espresso!",
+                "service_rating": 4,
+                "service_review_text": "Fast delivery, friendly shipper",
                 "order_id": "ord_123"
             }
         }

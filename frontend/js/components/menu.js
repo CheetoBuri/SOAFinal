@@ -119,7 +119,9 @@ export function displayProducts(items, targetGridId = null) {
                 <div class="product-price">${ui.formatCurrency(item.price)}</div>
                 <div class="product-buttons">
                     <button class="btn-small btn-favorite ${favorited ? 'favorited' : ''}" onclick="event.stopPropagation(); window.toggleFavorite('${item.id}')" title="${favorited ? 'Remove from favorites' : 'Add to favorites'}">
-                        ${favorited ? '❤️' : '🤍'}
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                        </svg>
                     </button>
                 </div>
             `;
@@ -260,11 +262,9 @@ function updateHeartIcons(productId, isFavorited) {
         if (heartBtn) {
             if (isFavorited) {
                 heartBtn.classList.add('favorited');
-                heartBtn.innerHTML = '❤️';
                 heartBtn.title = 'Remove from favorites';
             } else {
                 heartBtn.classList.remove('favorited');
-                heartBtn.innerHTML = '🤍';
                 heartBtn.title = 'Add to favorites';
             }
         }

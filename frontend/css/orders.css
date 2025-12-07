@@ -232,3 +232,36 @@ button:disabled {
     cursor: not-allowed !important;
     opacity: 0.6 !important;
 }
+
+/* ========== REVIEW BUTTON (Modern Minimal) ========== */
+.btn-review {
+    background: white;
+    color: #1a1a1a;
+    border: 1.5px solid #e5e7eb;
+    padding: 10px 20px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.btn-review:hover {
+    background: #fafafa;
+    border-color: #d1d5db;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+.btn-review:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.btn-review svg {
+    flex-shrink: 0;
+}

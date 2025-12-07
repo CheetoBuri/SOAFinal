@@ -7,6 +7,7 @@ import { cancelOrder, confirmReceived } from './components/orders.js';
 import * as profileComponent from './components/profile.js';
 import * as ui from './utils/ui.js';
 import { initDarkMode, toggleDarkMode } from './utils/darkmode.js';
+import './components/reviews.js';  // Import reviews to expose window functions
 
 // Expose functions to window for onclick handlers
 window.handleLogin = handleLogin;

@@ -12,35 +12,49 @@ import psycopg2.extras
 router = APIRouter(prefix="/api/reviews", tags=["Reviews"])
 
 
-@router.post("/submit", summary="Submit Product Review", response_model=StatusResponse)
+@router.post("/submit", summary="Submit Product + Service Review", response_model=StatusResponse)
 def submit_review(request: ReviewSubmit):
     """
-    Submit a review for a product.
+    Submit a review for a product and optionally for shipping/service.
     
     - **user_id**: User ID (required)
     - **product_id**: Product ID (required)
-    - **rating**: Rating 1-5 (required)
-    - **review_text**: Review text (optional)
+    - **rating**: Product rating 1-5 (required)
+    - **review_text**: Product review text (optional)
+    - **service_rating**: Shipping/service rating 1-5 (optional)
+    - **service_review_text**: Service review text (optional)
     - **order_id**: Order ID reference (optional)
     
     Returns success or error message.
     """
     if not 1 <= request.rating <= 5:
-        raise HTTPException(status_code=400, detail="Rating must be between 1 and 5")
+        raise HTTPException(status_code=400, detail="Product rating must be between 1 and 5")
+    
+    if request.service_rating is not None and not 1 <= request.service_rating <= 5:
+        raise HTTPException(status_code=400, detail="Service rating must be between 1 and 5")
     
     conn = get_db()
     c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     
     try:
         c.execute("""
-            INSERT OR REPLACE INTO reviews
-            (user_id, product_id, rating, review_text, order_id, created_at, updated_at)
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
+            INSERT INTO reviews
+            (user_id, product_id, rating, review_text, service_rating, service_review_text, order_id, created_at, updated_at)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+            ON CONFLICT (user_id, product_id, order_id) 
+            DO UPDATE SET 
+                rating = EXCLUDED.rating,
+                review_text = EXCLUDED.review_text,
+                service_rating = EXCLUDED.service_rating,
+                service_review_text = EXCLUDED.service_review_text,
+                updated_at = EXCLUDED.updated_at
         """, (
             request.user_id,
             request.product_id,
             request.rating,
             request.review_text,
+            request.service_rating,
+            request.service_review_text,
             request.order_id,
             get_vietnam_time().isoformat(),
             get_vietnam_time().isoformat()
@@ -258,5 +272,82 @@ def delete_review(review_id: int, user_id: str):
         return {"status": "success", "message": "Review deleted successfully"}
     except Exception as e:
         conn.rollback()
+        conn.close()
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/order/{order_id}", summary="Get Reviews for an Order")
+def get_order_reviews(order_id: str, user_id: str):
+    """
+    Get all reviews submitted for a specific order.
+    
+    - **order_id**: Order ID (path parameter, required)
+    - **user_id**: User ID (query parameter, required for verification)
+    
+    Returns list of reviews with product info and ratings.
+    """
+    conn = get_db()
+    c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    
+    try:
+        # First get the order to access items JSON
+        c.execute("""
+            SELECT items
+            FROM orders
+            WHERE id = %s AND user_id = %s
+        """, (order_id, user_id))
+        
+        order_result = c.fetchone()
+        if not order_result:
+            conn.close()
+            return {
+                "order_id": order_id,
+                "has_reviews": False,
+                "reviews": []
+            }
+        
+        # Parse items JSON to create product_id -> name mapping
+        import json
+        items = json.loads(order_result['items']) if isinstance(order_result['items'], str) else order_result['items']
+        product_names = {}
+        for item in items:
+            product_id = item.get('product_id') or item.get('id')
+            product_name = item.get('product_name') or item.get('name', 'Product')
+            size = item.get('size', '')
+            if size and size != 'M':
+                product_name += f" ({size})"
+            product_names[product_id] = product_name
+        
+        # Get reviews
+        c.execute("""
+            SELECT 
+                r.id,
+                r.product_id,
+                r.rating,
+                r.review_text,
+                r.service_rating,
+                r.service_review_text,
+                r.created_at,
+                r.updated_at
+            FROM reviews r
+            WHERE r.order_id = %s AND r.user_id = %s
+            ORDER BY r.created_at DESC
+        """, (order_id, user_id))
+        
+        reviews = c.fetchall()
+        
+        # Add product names to reviews
+        for review in reviews:
+            review['product_name'] = product_names.get(review['product_id'], 'Unknown Product')
+        
+        conn.close()
+        
+        return {
+            "order_id": order_id,
+            "has_reviews": len(reviews) > 0,
+            "reviews": reviews
+        }
+        
+    except Exception as e:
         conn.close()
         raise HTTPException(status_code=500, detail=str(e))

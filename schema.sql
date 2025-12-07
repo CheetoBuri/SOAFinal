@@ -90,7 +90,7 @@ CREATE INDEX IF NOT EXISTS idx_orders_created_at ON orders(created_at);
 -- FAVORITES TABLE
 -- ============================================
 CREATE TABLE IF NOT EXISTS favorites (
-    id INTEGER PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
     user_id TEXT NOT NULL,
     product_id TEXT NOT NULL,
     added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -133,18 +133,22 @@ CREATE INDEX IF NOT EXISTS idx_payment_otp_user ON payment_otp(user_id);
 CREATE INDEX IF NOT EXISTS idx_payment_otp_order ON payment_otp(order_id);
 
 -- ============================================
--- REVIEWS TABLE
+-- REVIEWS TABLE (Product + Service Reviews)
 -- ============================================
 CREATE TABLE IF NOT EXISTS reviews (
-    id INTEGER PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
     user_id TEXT NOT NULL,
     product_id TEXT NOT NULL,
     order_id TEXT,
+    -- Product review
     rating INTEGER NOT NULL CHECK(rating >= 1 AND rating <= 5),
     review_text TEXT,
+    -- Service/Shipping review
+    service_rating INTEGER CHECK(service_rating >= 1 AND service_rating <= 5),
+    service_review_text TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE(user_id, product_id),
+    UNIQUE(user_id, product_id, order_id),
     FOREIGN KEY(user_id) REFERENCES users(id),
     FOREIGN KEY(order_id) REFERENCES orders(id)
 );

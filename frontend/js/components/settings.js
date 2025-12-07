@@ -127,6 +127,7 @@ window.openSettingsModal = function(event) {
         }
         settings.classList.add('active');
         settings.classList.remove('dimmed');
+        document.body.style.overflow = 'hidden';
         try { 
             ensureAllModalsExist();
             initSettingsInteractivity(); 
@@ -143,6 +144,7 @@ window.closeSettingsModal = function(event) {
             // Remove both active and dimmed classes when closing
             settings.classList.remove('active');
             settings.classList.remove('dimmed');
+            document.body.style.overflow = '';
         }
     }
 };

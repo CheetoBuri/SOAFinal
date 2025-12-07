@@ -599,6 +599,17 @@ body.dark-mode .order-total {
     font-weight: 700;
 }
 
+body.dark-mode .btn-review {
+    background: #2a2a2a;
+    color: #e5e5e5;
+    border-color: #3a3a3a;
+}
+
+body.dark-mode .btn-review:hover {
+    background: #333333;
+    border-color: #4a4a4a;
+}
+
 body.dark-mode .order-items {
     color: #b5b5b5;
 }

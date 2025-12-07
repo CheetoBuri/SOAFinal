@@ -12,8 +12,78 @@ export async function loadOrderHistory() {
 
     if (result.ok && result.data.orders && result.data.orders.length > 0) {
         ordersList.innerHTML = result.data.orders.map(formatOrderCard).join('');
+        
+        // Check review status and hide Write Review button if already reviewed
+        const userId = localStorage.getItem('userId');
+        if (userId) {
+            for (const order of result.data.orders) {
+                if (order.status === 'delivered' || order.status === 'completed') {
+                    checkAndHideWriteReviewButton(order.id, userId);
+                }
+            }
+        }
     } else {
         ordersList.innerHTML = '<p style="color:#999;">No orders yet. Start shopping!</p>';
+    }
+}
+
+async function checkAndHideWriteReviewButton(orderId, userId) {
+    try {
+        const response = await fetch(`/api/reviews/order/${orderId}?user_id=${userId}`);
+        if (!response.ok) return;
+        
+        const data = await response.json();
+        
+        if (data.has_reviews) {
+            // Hide Write Review button, keep only View Reviews button
+            const reviewSection = document.getElementById(`reviewSection_${orderId}`);
+            if (reviewSection) {
+                const writeButton = reviewSection.querySelector('button:first-child');
+                if (writeButton) {
+                    writeButton.style.display = 'none';
+                }
+            }
+        }
+    } catch (error) {
+        console.error('Error checking review status:', error);
+    }
+}
+
+// View reviews for an order
+window.viewOrderReviews = async function(orderId) {
+    const userId = localStorage.getItem('userId');
+    if (!userId) {
+        alert('⚠️ Please log in to view reviews');
+        return;
+    }
+    
+    try {
+        const url = `/api/reviews/order/${orderId}?user_id=${userId}`;
+        console.log('Fetching reviews from:', url);
+        const response = await fetch(url);
+        
+        console.log('Response status:', response.status);
+        
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Response error:', errorText);
+            throw new Error(`Failed to fetch reviews: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        console.log('Review data received:', data);
+        
+        if (!data.has_reviews || !data.reviews || data.reviews.length === 0) {
+            alert('ℹ️ You haven\'t submitted any reviews for this order yet.');
+            return;
+        }
+        
+        // Open view review modal with the data
+        window.openViewReviewModalDirect(orderId, data.reviews);
+        
+    } catch (error) {
+        console.error('Error loading reviews:', error);
+        alert('ℹ️ No reviews found for this order.');
     }
 }
 
@@ -226,8 +296,14 @@ function formatOrderCard(order) {
     const deliveredDate = order.delivered_at ? ui.formatDate(order.delivered_at) : null;
     const address = formatAddress(order);
     
+    // Show review button only for delivered/completed orders
+    const canReview = order.status === 'delivered' || order.status === 'completed';
+    
+    // Check if order has reviews (will be set after checking)
+    const hasReviews = order.hasReviews || false;
+    
     return `
-        <div class="order-card">
+        <div class="order-card" data-order-id="${order.id}">
             <div class="order-header">
                 <div>
                     <div class="order-id">Order #${order.id}</div>
@@ -245,6 +321,23 @@ function formatOrderCard(order) {
             ${address ? `<div style="color:#666; font-size:13px; margin-top:10px;">📍 ${address}</div>` : ''}
             ${order.special_notes ? `<div style="color:#999; font-size:12px; margin-top:8px;">📝 ${order.special_notes}</div>` : ''}
             <div style="color:#666; font-size:13px; margin-top:8px;">💳 Payment: ${order.payment_method}</div>
+            ${canReview ? `
+                <div style="margin-top:15px; padding-top:15px; border-top:1px solid #f0f0f0; display:flex; gap:10px; flex-wrap:wrap;" id="reviewSection_${order.id}">
+                    <button class="btn-review" onclick="window.openOrderReviewModal('${order.id}', ${JSON.stringify(order.items).replace(/"/g, '&quot;')})">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                        </svg>
+                        Write Review
+                    </button>
+                    <button class="btn-review" onclick="window.viewOrderReviews('${order.id}')" style="background:#f8f9fa; color:#006241;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                        View Reviews
+                    </button>
+                </div>
+            ` : ''}
         </div>
     `;
 }
