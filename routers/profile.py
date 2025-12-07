@@ -15,46 +15,6 @@ import psycopg2.extras
 router = APIRouter(prefix="/api/user", tags=["6️⃣ User Profile"])
 
 
-@router.post("/change-email", summary="Change User Email", response_model=StatusResponse)
-def change_email(request: ChangeEmailRequest):
-    """
-    Change user's email address with password verification.
-    
-    - **user_id**: User ID (required)
-    - **new_email**: New email address (required)
-    - **password**: Current password for verification (required)
-    
-    Returns success status and message.
-    """
-    conn = get_db()
-    c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-    
-    # Verify user and password
-    c.execute("SELECT password_hash FROM users WHERE id = %s", (request.user_id,))
-    result = c.fetchone()
-    
-    if not result:
-        conn.close()
-        raise HTTPException(status_code=404, detail="User not found")
-    
-    if not verify_password(request.password, result['password_hash']):
-        conn.close()
-        raise HTTPException(status_code=401, detail="Invalid password")
-    
-    # Check if new email already exists
-    c.execute("SELECT id FROM users WHERE email = %s AND id != %s", (request.new_email, request.user_id))
-    if c.fetchone():
-        conn.close()
-        raise HTTPException(status_code=400, detail="Email already in use")
-    
-    # Update email
-    c.execute("UPDATE users SET email = %s WHERE id = %s", (request.new_email, request.user_id))
-    conn.commit()
-    conn.close()
-    
-    return {"status": "success", "message": "Email updated successfully"}
-
-
 @router.post("/change-username", summary="Change Username", response_model=StatusResponse)
 def change_username(request: ChangeUsernameRequest):
     """
@@ -145,41 +105,6 @@ def change_phone(request: ChangePhoneRequest):
         finally:
             if conn:
                 conn.close()
-
-
-@router.post("/change-password", summary="Change User Password", response_model=StatusResponse)
-def change_password(request: ChangePasswordRequest):
-    """
-    Change user's password with current password verification.
-    
-    - **user_id**: User ID (required)
-    - **current_password**: Current password (required)
-    - **new_password**: New password (minimum 6 characters, required)
-    
-    Returns success status and message.
-    """
-    conn = get_db()
-    c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-    
-    # Verify user and current password
-    c.execute("SELECT password_hash FROM users WHERE id = %s", (request.user_id,))
-    result = c.fetchone()
-    
-    if not result:
-        conn.close()
-        raise HTTPException(status_code=404, detail="User not found")
-    
-    if not verify_password(request.current_password, result['password_hash']):
-        conn.close()
-        raise HTTPException(status_code=401, detail="Current password is incorrect")
-    
-    # Update password
-    new_hash = hash_password(request.new_password)
-    c.execute("UPDATE users SET password_hash = %s WHERE id = %s", (new_hash, request.user_id))
-    conn.commit()
-    conn.close()
-    
-    return {"status": "success", "message": "Password changed successfully"}
 
 
 # ====== VERIFY CURRENT PASSWORD ======
