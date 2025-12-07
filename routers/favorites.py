@@ -29,24 +29,34 @@ def add_favorite(request: FavoriteRequest):
     conn = get_db()
     c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     
-    # Check if already exists
-    c.execute("SELECT id FROM favorites WHERE user_id = %s AND product_id = %s", (user_id, product_id))
-    existing = c.fetchone()
-    
-    if existing:
+    try:
+        # Check if already exists
+        c.execute("SELECT id FROM favorites WHERE user_id = %s AND product_id = %s", (user_id, product_id))
+        existing = c.fetchone()
+        
+        if existing:
+            conn.close()
+            raise HTTPException(status_code=400, detail="Product already in favorites")
+        
+        # Add to favorites
+        c.execute("INSERT INTO favorites (user_id, product_id) VALUES (%s, %s)", (user_id, product_id))
+        
+        conn.commit()
+        return {
+            "status": "success",
+            "message": "Added to favorites"
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        conn.rollback()
+        # Handle foreign key constraint errors gracefully
+        error_msg = str(e)
+        if "foreign key constraint" in error_msg.lower():
+            raise HTTPException(status_code=404, detail="User or product not found")
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
         conn.close()
-        raise HTTPException(status_code=400, detail="Product already in favorites")
-    
-    # Add to favorites
-    c.execute("INSERT INTO favorites (user_id, product_id) VALUES (%s, %s)", (user_id, product_id))
-    
-    conn.commit()
-    conn.close()
-    
-    return {
-        "status": "success",
-        "message": "Added to favorites"
-    }
 
 
 @router.post("/remove", summary="Remove Product from Favorites (POST)", response_model=StatusResponse)

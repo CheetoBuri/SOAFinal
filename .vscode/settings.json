@@ -1,3 +1,7 @@
 {
-    "kiroAgent.configureMCP": "Disabled"
+    "kiroAgent.configureMCP": "Disabled",
+    "files.associations": {
+        "*.sql": "postgres"
+    },
+    "mssql.enableIntelliSense": false
 }

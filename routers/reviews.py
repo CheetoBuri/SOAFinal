@@ -65,6 +65,13 @@ def submit_review(request: ReviewSubmit):
         
     except Exception as e:
         conn.rollback()
+        # Handle foreign key constraint errors gracefully
+        error_msg = str(e)
+        if "foreign key constraint" in error_msg.lower():
+            if "user_id" in error_msg:
+                raise HTTPException(status_code=404, detail="User not found")
+            elif "product_id" in error_msg:
+                raise HTTPException(status_code=404, detail="Product not found")
         raise HTTPException(status_code=500, detail=str(e))
     finally:
         conn.close()
@@ -221,7 +228,7 @@ def get_rating_stats(product_id: str = None):
     conn.close()
     
     return {
-        "total_reviews": result['count'] or 0,
+        "total_reviews": result['total'] or 0,
         "average_rating": round(result['avg'], 1) if result['avg'] else 0,
         "min_rating": result['min'] or 0,
         "max_rating": result['max'] or 0,
