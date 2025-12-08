@@ -324,7 +324,7 @@ export async function loadFavoritesView() {
     }
 }
 
-// ========== FREQUENT ITEMS ==========
+// ========== QUICK REORDER ==========
 export async function loadFrequentItems() {
     if (!state.currentUser) return;
     
