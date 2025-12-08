@@ -73,8 +73,8 @@ app.include_router(profile.router)
 app.include_router(orders.router)
 app.include_router(payment.router)
 app.include_router(favorites.router)
-app.include_router(cart.router)
-app.include_router(reviews.router)
+app.include_router(cart.router, include_in_schema=False)  # Hide from Swagger
+app.include_router(reviews.router, include_in_schema=False)  # Hide from Swagger
 if locations is not None:
     app.include_router(locations.router)
 if transactions is not None:
