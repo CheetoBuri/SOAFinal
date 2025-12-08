@@ -25,6 +25,13 @@
     justify-content: center;
     min-height: 100vh;
     background: linear-gradient(135deg, #fafafa 0%, #f0f0f5 100%);
+    background-image: 
+        linear-gradient(rgba(250, 250, 250, 0.1), rgba(240, 240, 245, 0.1)),
+        url('../images/background/cafe-auth.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
     padding: 20px;
     position: relative;
     overflow: hidden;

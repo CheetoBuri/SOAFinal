@@ -3,9 +3,9 @@
     display: flex;
     flex-direction: column;
     gap: 16px;
-    max-width: 880px;
-    margin-left: auto;
-    margin-right: auto;
+    max-inline-size: 880px;
+    margin-inline-start: auto;
+    margin-inline-end: auto;
 }
 
 .order-card {
@@ -25,9 +25,9 @@
     display: flex;
     justify-content: space-between;
     align-items: start;
-    margin-bottom: 16px;
-    border-bottom: 1px solid #f0f0f0;
-    padding-bottom: 16px;
+    margin-block-end: 16px;
+    border-block-end: 1px solid #f0f0f0;
+    padding-block-end: 16px;
 }
 
 .order-id {
@@ -39,7 +39,7 @@
 .order-date {
     color: #999;
     font-size: 13px;
-    margin-top: 4px;
+    margin-block-start: 4px;
 }
 
 .order-status {
@@ -74,8 +74,8 @@
     display: flex;
     gap: 8px;
     margin: 24px 0;
-    border-bottom: none;
-    padding-bottom: 0;
+    border-block-end: none;
+    padding-block-end: 0;
 }
 
 .status-tab {
@@ -105,25 +105,25 @@
     padding: 28px;
     box-shadow: 0 1px 3px rgba(0,0,0,0.05);
     border: 1px solid #f0f0f0;
-    margin-bottom: 20px;
-    max-width: 880px;
-    margin-left: auto;
-    margin-right: auto;
-    border-left: 4px solid #e0e0e0;
+    margin-block-end: 20px;
+    max-inline-size: 880px;
+    margin-inline-start: auto;
+    margin-inline-end: auto;
+    border-inline-start: 4px solid #e0e0e0;
     transition: all 0.2s ease;
 }
 
 .order-status-card:hover {
     box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    border-left-color: #1a1a1a;
+    border-inline-start-color: #1a1a1a;
 }
 
 .order-status-card.delivering {
-    border-left-color: #999;
+    border-inline-start-color: #999;
 }
 
 .order-status-card.completed {
-    border-left-color: #1a1a1a;
+    border-inline-start-color: #1a1a1a;
 }
 
 .order-status-badge {
@@ -132,7 +132,7 @@
     border-radius: 20px;
     font-size: 12px;
     font-weight: 600;
-    margin-left: 10px;
+    margin-inline-start: 10px;
 }
 
 .badge-preparing {
@@ -148,7 +148,7 @@
 .order-actions {
     display: flex;
     gap: 12px;
-    margin-top: 20px;
+    margin-block-start: 20px;
 }
 
 .btn-cancel {
@@ -199,9 +199,9 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-top: 10px;
-    padding-top: 10px;
-    border-top: 1px solid #e0e0e0;
+    margin-block-start: 10px;
+    padding-block-start: 10px;
+    border-block-start: 1px solid #e0e0e0;
 }
 
 .order-total {
@@ -213,14 +213,14 @@
 /* ========== LOADING SPINNER ========== */
 .spinner {
     display: inline-block;
-    width: 14px;
-    height: 14px;
+    inline-size: 14px;
+    block-size: 14px;
     border: 2px solid rgba(255, 255, 255, 0.3);
-    border-top-color: white;
+    border-block-start-color: white;
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
     vertical-align: middle;
-    margin-right: 5px;
+    margin-inline-end: 5px;
 }
 
 @keyframes spin {
@@ -264,4 +264,47 @@ button:disabled {
 
 .btn-review svg {
     flex-shrink: 0;
+}
+
+/* ========== PRICE BREAKDOWN ========== */
+.order-price-breakdown {
+    background: #f9f9f9;
+    padding: 12px;
+    border-radius: 6px;
+    margin-block-start: 10px;
+    font-size: 13px;
+}
+
+.price-label {
+    color: #666;
+}
+
+.price-value {
+    font-weight: 500;
+    color: #1a1a1a;
+}
+
+.discount-value {
+    color: #28a745;
+    font-weight: 500;
+}
+
+.order-total-row {
+    display: flex;
+    justify-content: space-between;
+    padding-block-start: 8px;
+    border-block-start: 2px solid #ddd;
+    margin-block-start: 6px;
+}
+
+.total-label {
+    color: #000;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.total-value {
+    color: #c41e3a;
+    font-weight: 700;
+    font-size: 15px;
 }

@@ -236,7 +236,11 @@ async function loadTransactions() {
                 const amountAbs = Math.abs(t.amount || 0);
                 const sign = isPositive ? '+' : '-';
                 const amountClass = isPositive ? 'positive' : 'negative';
-                const icon = t.type === 'payment' ? '💳' : (t.type === 'refund' ? '↩️' : '💰');
+                const icon = t.type === 'payment' 
+                    ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>' 
+                    : (t.type === 'refund' 
+                        ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2.5 2v6h6M2.66 15.57a10 10 0 1 0 .57-8.38"/></svg>' 
+                        : '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>');
                 const orderRef = t.order_id ? `#${t.order_id}` : '';
                 return `
                 <div class="txn-item">

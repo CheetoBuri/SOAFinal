@@ -65,8 +65,17 @@ body.dark-mode header {
 }
 
 body.dark-mode .header-logo .logo-text {
-    color: #ffffff;
-    font-weight: 600;
+    background: linear-gradient(135deg, #ff6b9d 0%, #ffa8c5 50%, #00d4ff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: brightness(1.2) saturate(1.3);
+}
+
+body.dark-mode .header-logo svg,
+body.dark-mode .logo-icon svg {
+    stroke: #ffa8c5;
+    filter: drop-shadow(0 0 3px rgba(255, 168, 197, 0.6));
 }
 
 body.dark-mode .icon-btn {
@@ -198,8 +207,16 @@ body.dark-mode .main-content h2 {
 }
 
 body.dark-mode .category-title {
-    color: #ffffff;
-    font-weight: 600;
+    background: linear-gradient(135deg, #ff6b9d 0%, #ffa8c5 50%, #00d4ff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: brightness(1.1) saturate(1.2);
+}
+
+body.dark-mode .category-title svg {
+    stroke: #ffa8c5;
+    filter: drop-shadow(0 0 2px rgba(255, 168, 197, 0.5));
 }
 
 /* Hero Section */
@@ -209,8 +226,12 @@ body.dark-mode .hero-section {
 }
 
 body.dark-mode .hero-title {
-    color: #ffffff;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    background: linear-gradient(135deg, #ff6b9d 0%, #ffa8c5 50%, #c0f4ff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: none;
+    filter: brightness(1.2) saturate(1.3);
 }
 
 body.dark-mode .hero-subtitle {
@@ -854,4 +875,34 @@ body.dark-mode #checkoutSummary [id="checkoutTotal"] {
 }
 body.dark-mode #checkoutSummary [style*="border-block-start"] {
     border-block-start-color: #444 !important;
+}
+
+/* ========== ORDER PRICE BREAKDOWN ========== */
+body.dark-mode .order-price-breakdown {
+    background: #2a2a2a !important;
+    border: 1px solid #3a3a3a;
+}
+
+body.dark-mode .price-label {
+    color: #b5b5b5 !important;
+}
+
+body.dark-mode .price-value {
+    color: #e5e5e5 !important;
+}
+
+body.dark-mode .discount-value {
+    color: #4ade80 !important;
+}
+
+body.dark-mode .order-total-row {
+    border-top: 2px solid #404040 !important;
+}
+
+body.dark-mode .total-label {
+    color: #ffffff !important;
+}
+
+body.dark-mode .total-value {
+    color: #ff8fa3 !important;
 }

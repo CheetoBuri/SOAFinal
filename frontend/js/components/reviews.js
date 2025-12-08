@@ -1,5 +1,6 @@
 // ========== REVIEWS COMPONENT ==========
 import { loadOrderHistory } from './orders.js';
+import { icons } from '../utils/icons.js';
 
 /**
  * Format item customization details for display
@@ -9,12 +10,12 @@ function formatItemCustomization(item) {
     
     // Size
     if (item.size && item.size !== 'M') {
-        details.push(`<span style="color:#006241;">📏 ${item.size}</span>`);
+        details.push(`<span style="color:#006241;">Size: ${item.size}</span>`);
     }
     
     // Temperature (hot/ice)
     if (item.temperature) {
-        const tempLabel = item.temperature === 'hot' ? '☕ Hot' : '🧊 Iced';
+        const tempLabel = item.temperature === 'hot' ? 'Hot' : 'Iced';
         details.push(`<span style="color:#e97451;">${tempLabel}</span>`);
     }
     
@@ -22,7 +23,7 @@ function formatItemCustomization(item) {
     if (item.milks && Array.isArray(item.milks) && item.milks.length > 0) {
         const milkNames = { 'nut': 'Nut Milk', 'condensed': 'Condensed Milk' };
         const milkLabels = item.milks.map(m => milkNames[m] || m).join(', ');
-        details.push(`<span style="color:#8b5a3c;">🥛 ${milkLabels}</span>`);
+        details.push(`<span style="color:#8b5a3c;">${milkLabels}</span>`);
     }
     
     // Toppings
@@ -38,12 +39,12 @@ function formatItemCustomization(item) {
             'fruit': 'Fresh Fruit'
         };
         const toppingLabels = item.toppings.map(t => toppingNames[t] || t).join(', ');
-        details.push(`<span style="color:#d4a574;">✨ ${toppingLabels}</span>`);
+        details.push(`<span style="color:#d4a574;">${toppingLabels}</span>`);
     }
     
     // Sugar level
     if (item.sugar && item.sugar !== '0') {
-        details.push(`<span style="color:#c4a572;">🍬 Sugar ${item.sugar}%</span>`);
+        details.push(`<span style="color:#c4a572;">Sugar ${item.sugar}%</span>`);
     }
     
     // Quantity

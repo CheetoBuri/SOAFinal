@@ -64,10 +64,10 @@ export function displayProducts(items, targetGridId = null) {
     
     // Group items by category for better display
     const categories = {
-        coffee: { title: '☕ Coffee', items: [] },
-        tea: { title: '🍵 Tea', items: [] },
-        juice: { title: '🧃 Juice & Smoothies', items: [] },
-        food: { title: '🥐 Food & Desserts', items: [] }
+        coffee: { title: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle; margin-right:6px;"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>Coffee', items: [] },
+        tea: { title: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle; margin-right:6px;"><path d="M17 8h1a4 4 0 1 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"/><line x1="6" y1="2" x2="6" y2="4"/><line x1="10" y1="2" x2="10" y2="4"/><line x1="14" y1="2" x2="14" y2="4"/></svg>Tea', items: [] },
+        juice: { title: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle; margin-right:6px;"><path d="M3 3v18h18"/><path d="M7 16h10l1-12H6z"/><circle cx="12" cy="9" r="2"/></svg>Juice & Smoothies', items: [] },
+        food: { title: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle; margin-right:6px;"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3"/><path d="M19 22v-8"/></svg>Food & Desserts', items: [] }
     };
     
     items.forEach(item => {
@@ -101,8 +101,12 @@ export function displayProducts(items, targetGridId = null) {
             
             // Show food type badge
             if (item.category === 'food' && item.type) {
-                const typeLabels = { savory: '🥐', sweet: '🍪', cake: '🍰' };
-                typeBadge = `<span class="type-badge food-${item.type}">${typeLabels[item.type] || ''}</span>`;
+                const typeSVGs = { 
+                    savory: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/></svg>',
+                    sweet: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5"/><path d="M8.5 8.5v.01"/><path d="M16 15.5v.01"/><path d="M12 12v.01"/></svg>',
+                    cake: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-8a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8"/><path d="M4 16s.5-1 2-1 2.5 2 4 2 2.5-2 4-2 2.5 2 4 2 2-1 2-1"/><path d="M7 8v2"/><path d="M12 8v2"/><path d="M17 8v2"/></svg>'
+                };
+                typeBadge = `<span class="type-badge food-${item.type}">${typeSVGs[item.type] || ''}</span>`;
             }
             
             // Use lazy loading for images to improve performance

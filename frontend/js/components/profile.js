@@ -178,12 +178,10 @@ function formatTransaction(txn) {
     const isPositive = txn.amount >= 0;
     const amountClass = isPositive ? 'positive' : 'negative';
     const amountPrefix = isPositive ? '+' : '';
-    const typeIcon = txn.type === 'payment' ? '💳' : txn.type === 'refund' ? '↩️' : '💰';
     
     return `
         <div class="transaction-item">
             <div style="display:flex; align-items:center; gap:12px;">
-                <div style="font-size:24px;">${typeIcon}</div>
                 <div style="flex:1;">
                     <div style="font-weight:600; color:#333;">${txn.description || txn.type}</div>
                     <div style="font-size:12px; color:#999;">${ui.formatDate(txn.created_at)}</div>

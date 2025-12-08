@@ -3,6 +3,7 @@ import * as api from '../utils/api.js';
 import * as ui from '../utils/ui.js';
 import { state } from '../utils/state.js';
 import { loadFrequentItems } from './menu.js';
+import { icons } from '../utils/icons.js';
 
 export async function loadOrderHistory() {
     const result = await api.getOrderHistory(state.currentUser.id);
@@ -53,7 +54,7 @@ async function checkAndHideWriteReviewButton(orderId, userId) {
 window.viewOrderReviews = async function(orderId) {
     const userId = localStorage.getItem('userId');
     if (!userId) {
-        alert('⚠️ Please log in to view reviews');
+        alert('⚠ Please log in to view reviews');
         return;
     }
     
@@ -189,7 +190,7 @@ function showPaymentOTPModal(orderId, amount) {
     modal.id = 'paymentOTPModal';
     modal.innerHTML = `
         <div class="modal-content" style="max-inline-size: 450px;">
-            <div class="modal-header">🔐 Payment Confirmation</div>
+            <div class="modal-header">Payment Confirmation</div>
             <div style="padding: 20px;">
                 <p style="color: #666; margin-block-end: 15px;">
                     Enter the 6-digit OTP sent to your email to confirm payment of <strong style="color: #c41e3a;">${ui.formatCurrency(amount)}</strong>
@@ -282,7 +283,7 @@ export async function confirmReceived(orderId) {
         // Restore button if error
         if (receivedBtn) {
             receivedBtn.disabled = false;
-            receivedBtn.innerHTML = '✓ Received';
+            receivedBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle; margin-right:4px;"><polyline points="20 6 9 17 4 12"/></svg>Received';
             receivedBtn.style.opacity = '1';
         }
     }
@@ -308,21 +309,21 @@ function formatOrderCard(order) {
                 <div>
                     <div class="order-id">Order #${order.id}</div>
                     <div class="order-date">Created: ${createdDate}</div>
-                    ${paymentDate ? `<div class="order-date" style="color:#28a745;">💳 Paid: ${paymentDate}</div>` : ''}
-                    ${deliveredDate ? `<div class="order-date" style="color:#1e90ff;">📦 Delivered: ${deliveredDate}</div>` : ''}
+                    ${paymentDate ? `<div class="order-date" style="color:#28a745;">Paid: ${paymentDate}</div>` : ''}
+                    ${deliveredDate ? `<div class="order-date" style="color:#1e90ff;">Delivered: ${deliveredDate}</div>` : ''}
                 </div>
                 <div class="order-status status-${order.status}">${order.status.toUpperCase()}</div>
             </div>
             <div style="margin:12px 0;">
-                <h4 style="margin:0 0 8px 0; color:#006241; font-size:14px;">📋 Order Items</h4>
+                <h4 style="margin:0 0 8px 0; color:#006241; font-size:14px;">Order Items</h4>
                 ${itemsList}
             </div>
             ${priceBreakdown}
-            ${order.customer_name ? `<div style="color:#666; font-size:13px; margin-top:10px;">👤 ${order.customer_name}</div>` : ''}
-            ${order.customer_phone ? `<div style="color:#666; font-size:13px; margin-top:4px;">📞 ${order.customer_phone}</div>` : ''}
-            ${address ? `<div style="color:#666; font-size:13px; margin-top:10px;">📍 ${address}</div>` : ''}
-            ${order.special_notes ? `<div style="color:#999; font-size:12px; margin-top:8px;">📝 ${order.special_notes}</div>` : ''}
-            <div style="color:#666; font-size:13px; margin-top:8px;">💳 Payment: ${order.payment_method}</div>
+            ${order.customer_name ? `<div style="color:#666; font-size:13px; margin-top:10px;">${order.customer_name}</div>` : ''}
+            ${order.customer_phone ? `<div style="color:#666; font-size:13px; margin-top:4px;">${order.customer_phone}</div>` : ''}
+            ${address ? `<div style="color:#666; font-size:13px; margin-top:10px;">${address}</div>` : ''}
+            ${order.special_notes ? `<div style="color:#999; font-size:12px; margin-top:8px;">Note: ${order.special_notes}</div>` : ''}
+            <div style="color:#666; font-size:13px; margin-top:8px;">Payment: ${order.payment_method}</div>
             ${canReview ? `
                 <div style="margin-top:15px; padding-top:15px; border-top:1px solid #f0f0f0; display:flex; gap:10px; flex-wrap:wrap;" id="reviewSection_${order.id}">
                     <button class="btn-review" onclick="window.openOrderReviewModal('${order.id}', ${JSON.stringify(order.items).replace(/"/g, '&quot;')})">
@@ -357,24 +358,24 @@ function formatActiveOrderCard(order) {
     if (order.status === 'pending_payment') {
         if (order.payment_method === 'cod' || order.payment_method === 'cash') {
             // COD: Order is ready for delivery, will be paid on arrival
-            statusBadges = '<span style="background:#FFA500; color:white; padding:4px 12px; border-radius:12px; font-size:12px; font-weight:bold;">🚚 Out for Delivery Soon</span>';
-            paymentMethodText = '<div style="color:#666; font-size:13px; margin-top:6px;">💵 Payment Method: <strong>Cash on Delivery</strong></div>';
+            statusBadges = `<span style="background:#FFA500; color:white; padding:4px 12px; border-radius:12px; font-size:12px; font-weight:bold; display:inline-flex; align-items:center; gap:4px;">${icons.truck} Out for Delivery Soon</span>`;
+            paymentMethodText = `<div style="color:#666; font-size:13px; margin-top:6px;">Payment Method: <strong>Cash on Delivery</strong></div>`;
         } else {
             // Balance: Need OTP verification before delivery
-            statusBadges = '<span style="background:#FF6B6B; color:white; padding:4px 12px; border-radius:12px; font-size:12px; font-weight:bold;">⏳ Awaiting OTP Verification</span>';
-            paymentMethodText = '<div style="color:#666; font-size:13px; margin-top:6px;">💳 Payment Method: <strong>Wallet Balance</strong><br>Please check your email for OTP to complete payment</div>';
+            statusBadges = `<span style="background:#FF6B6B; color:white; padding:4px 12px; border-radius:12px; font-size:12px; font-weight:bold; display:inline-flex; align-items:center; gap:4px;">${icons.clock} Awaiting OTP Verification</span>`;
+            paymentMethodText = `<div style="color:#666; font-size:13px; margin-top:6px;">Payment Method: <strong>Wallet Balance</strong><br>Please check your email for OTP to complete payment</div>`;
         }
     } else if (order.status === 'paid') {
         // Payment confirmed - ready for delivery
-        statusBadges = '<span style="background:#FFA500; color:white; padding:4px 12px; border-radius:12px; font-size:12px; font-weight:bold;">🚚 Out for Delivery Soon</span>';
-        statusBadges += ' <span style="background:#4CAF50; color:white; padding:4px 12px; border-radius:12px; font-size:12px; font-weight:bold; margin-left:8px;">✓ Paid</span>';
+        statusBadges = `<span style="background:#FFA500; color:white; padding:4px 12px; border-radius:12px; font-size:12px; font-weight:bold; display:inline-flex; align-items:center; gap:4px;">${icons.truck} Out for Delivery Soon</span>`;
+        statusBadges += ` <span style="background:#4CAF50; color:white; padding:4px 12px; border-radius:12px; font-size:12px; font-weight:bold; margin-left:8px; display:inline-flex; align-items:center; gap:4px;">${icons.check} Paid</span>`;
         paymentMethodText = (order.payment_method === 'cod' || order.payment_method === 'cash')
-            ? '<div style="color:#666; font-size:13px; margin-top:6px;">💵 Payment Method: <strong>Cash on Delivery</strong></div>'
-            : '<div style="color:#666; font-size:13px; margin-top:6px;">💳 Payment Method: <strong>Wallet Balance</strong></div>';
+            ? `<div style="color:#666; font-size:13px; margin-top:6px;">Payment Method: <strong>Cash on Delivery</strong></div>`
+            : `<div style="color:#666; font-size:13px; margin-top:6px;">Payment Method: <strong>Wallet Balance</strong></div>`;
     } else if (order.status === 'preparing') {
-        statusBadges = '<span style="background:#2196F3; color:white; padding:4px 12px; border-radius:12px; font-size:12px; font-weight:bold;">👨‍🍳 Preparing</span>';
+        statusBadges = `<span style="background:#2196F3; color:white; padding:4px 12px; border-radius:12px; font-size:12px; font-weight:bold; display:inline-flex; align-items:center; gap:4px;">${icons.flame} Preparing</span>`;
     } else if (order.status === 'in_transit' || order.status === 'delivering') {
-        statusBadges = '<span style="background:#9C27B0; color:white; padding:4px 12px; border-radius:12px; font-size:12px; font-weight:bold;">🚚 On the Way</span>';
+        statusBadges = `<span style="background:#9C27B0; color:white; padding:4px 12px; border-radius:12px; font-size:12px; font-weight:bold; display:inline-flex; align-items:center; gap:4px;">${icons.truck} On the Way</span>`;
     }
     
     return `
@@ -391,14 +392,14 @@ function formatActiveOrderCard(order) {
                 ${paymentMethodText}
             </div>
             <div style="margin:12px 0;">
-                <h4 style="margin:0 0 8px 0; color:#006241; font-size:14px;">📋 Order Items</h4>
+                <h4 style="margin:0 0 8px 0; color:#006241; font-size:14px;">Order Items</h4>
                 ${itemsList}
             </div>
             ${priceBreakdown}
-            ${order.customer_name ? `<div style="color:#666; font-size:13px; margin-top:10px;">👤 ${order.customer_name}</div>` : ''}
-            ${order.customer_phone ? `<div style="color:#666; font-size:13px; margin-top:4px;">📞 ${order.customer_phone}</div>` : ''}
-            ${address ? `<div style="color:#666; font-size:13px; margin-top:10px;">📍 ${address}</div>` : ''}
-            ${order.special_notes ? `<div style="color:#999; font-size:12px; margin-top:8px;">📝 ${order.special_notes}</div>` : ''}
+            ${order.customer_name ? `<div style="color:#666; font-size:13px; margin-top:10px;">${order.customer_name}</div>` : ''}
+            ${order.customer_phone ? `<div style="color:#666; font-size:13px; margin-top:4px;">${order.customer_phone}</div>` : ''}
+            ${address ? `<div style="color:#666; font-size:13px; margin-top:10px;">${address}</div>` : ''}
+            ${order.special_notes ? `<div style="color:#999; font-size:12px; margin-top:8px;">Note: ${order.special_notes}</div>` : ''}
             ${formatOrderActions(order)}
         </div>
     `;
@@ -413,15 +414,15 @@ function formatOrderActions(order) {
     let buttons = '<div class="order-actions">';
     
     // Cancel button always available for active orders
-    buttons += `<button class="btn-cancel" onclick="window.cancelOrder('${order.id}')">❌ Cancel Order</button>`;
+    buttons += `<button class="btn-cancel" onclick="window.cancelOrder('${order.id}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle; margin-right:4px;"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>Cancel Order</button>`;
     
     // Conditional second button based on payment status
     if (order.status === 'pending_payment' && order.payment_method === 'balance') {
         // Balance payment pending - show Confirm Payment
-        buttons += `<button class="btn-received" onclick="window.confirmPayment('${order.id}', ${order.total})">💳 Confirm Payment</button>`;
+        buttons += `<button class="btn-received" onclick="window.confirmPayment('${order.id}', ${order.total})"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle; margin-right:4px;"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Confirm Payment</button>`;
     } else if (order.status !== 'pending_payment' || order.payment_method === 'cod' || order.payment_method === 'cash') {
         // Order paid or is COD - show Received button
-        buttons += `<button class="btn-received" onclick="window.confirmReceived('${order.id}')">✅ Received</button>`;
+        buttons += `<button class="btn-received" onclick="window.confirmReceived('${order.id}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle; margin-right:4px;"><polyline points="20 6 9 17 4 12"/></svg>Received</button>`;
     }
     
     buttons += '</div>';
@@ -440,7 +441,7 @@ function formatOrderItems(items) {
         
         // Temperature (hot/ice)
         if (item.temperature) {
-            const tempLabel = item.temperature === 'hot' ? '☕ Hot' : '🧊 Iced';
+            const tempLabel = item.temperature === 'hot' ? 'Hot' : 'Iced';
             details += `, ${tempLabel}`;
         }
         
@@ -497,24 +498,24 @@ function formatPriceBreakdown(order) {
     const total = order.total || 0;
     
     return `
-        <div style="background:#f9f9f9; padding:12px; border-radius:6px; margin-top:10px; font-size:13px;">
+        <div class="order-price-breakdown">
             <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
-                <span style="color:#666;">Subtotal:</span>
-                <span style="font-weight:500;">${ui.formatCurrency(subtotal)}</span>
+                <span class="price-label">Subtotal:</span>
+                <span class="price-value">${ui.formatCurrency(subtotal)}</span>
             </div>
             ${discount > 0 ? `
             <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
-                <span style="color:#666;">Discount${order.promo_code ? ` (${order.promo_code})` : ''}:</span>
-                <span style="color:#28a745; font-weight:500;">-${ui.formatCurrency(discount)}</span>
+                <span class="price-label">Discount${order.promo_code ? ` (${order.promo_code})` : ''}:</span>
+                <span class="discount-value">-${ui.formatCurrency(discount)}</span>
             </div>
             ` : ''}
             <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
-                <span style="color:#666;">🚚 Shipping Fee:</span>
-                <span style="font-weight:500;">${ui.formatCurrency(shippingFee)}</span>
+                <span class="price-label">Shipping Fee:</span>
+                <span class="price-value">${ui.formatCurrency(shippingFee)}</span>
             </div>
-            <div style="display:flex; justify-content:space-between; padding-top:8px; border-top:2px solid #ddd; margin-top:6px;">
-                <span style="color:#000; font-weight:600; font-size:14px;">Total:</span>
-                <span style="color:#c41e3a; font-weight:700; font-size:15px;">${ui.formatCurrency(total)}</span>
+            <div class="order-total-row">
+                <span class="total-label">Total:</span>
+                <span class="total-value">${ui.formatCurrency(total)}</span>
             </div>
         </div>
     `;

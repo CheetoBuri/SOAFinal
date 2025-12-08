@@ -5,7 +5,15 @@
     left: 0;
     width: 100vw;
     height: 100vh;
+    /* Background image với fallback */
     background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #1a1a1a 100%);
+    background-image: 
+        linear-gradient(rgba(26, 26, 26, 0.1), rgba(26, 26, 26, 0.1)), /* Overlay rất nhẹ - ảnh hiện 90% */
+        url('../images/background/cafe-landing.jpg'); /* Ảnh nền landing */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
     display: flex;
     justify-content: center;
     align-items: center;

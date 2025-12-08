@@ -56,7 +56,7 @@ function showCustomizationModal(product, customization) {
     if (customization.hasSize) {
         modalContent += `
             <div class="form-group">
-                <label><strong>📏 Size:</strong></label>
+                <label><strong>Size:</strong></label>
                 <div class="size-options" style="display: flex; gap: 10px; margin-block-start: 8px;">
                     ${Object.entries(customization.sizes).map(([key, data]) => `
                         <label class="option-card ${key === 'M' ? 'selected' : ''}" style="flex: 1; cursor: pointer; padding: 12px; border: 2px solid #ddd; border-radius: 8px; text-align: center; transition: all 0.3s;">
@@ -76,17 +76,17 @@ function showCustomizationModal(product, customization) {
     if (isCoffee) {
         modalContent += `
             <div class="form-group">
-                <label><strong>🌡️ Temperature:</strong></label>
+                <label><strong>Temperature:</strong></label>
                 <div class="temperature-options" style="display: flex; gap: 10px; margin-block-start: 8px;">
                     <label class="option-card selected" style="flex: 1; cursor: pointer; padding: 12px; border: 2px solid #ddd; border-radius: 8px; text-align: center; transition: all 0.3s;">
                         <input type="radio" name="temperature" value="iced" checked style="display: none;">
-                        <div style="font-size: 24px; margin-bottom: 4px;">🧊</div>
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-bottom:4px;"><path d="M2 12h20M12 2v20"/><path d="m6.8 6.8 10.4 10.4"/><path d="m17.2 6.8L6.8 17.2"/></svg>
                         <div style="font-weight: bold; font-size: 14px;">Iced</div>
                         <div style="font-size: 11px; color: #666;">Cold with ice</div>
                     </label>
                     <label class="option-card" style="flex: 1; cursor: pointer; padding: 12px; border: 2px solid #ddd; border-radius: 8px; text-align: center; transition: all 0.3s;">
                         <input type="radio" name="temperature" value="hot" style="display: none;">
-                        <div style="font-size: 24px; margin-bottom: 4px;">☕</div>
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-bottom:4px;"><path d="M17 8h1a4 4 0 1 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"/><line x1="6" y1="2" x2="6" y2="8"/><line x1="10" y1="2" x2="10" y2="8"/><line x1="14" y1="2" x2="14" y2="8"/></svg>
                         <div style="font-weight: bold; font-size: 14px;">Hot</div>
                         <div style="font-size: 11px; color: #666;">Served hot</div>
                     </label>
@@ -99,7 +99,7 @@ function showCustomizationModal(product, customization) {
     if (hasMilkOption && Object.keys(customization.milkOptions).length > 0) {
         modalContent += `
             <div class="form-group">
-                <label><strong>🥛 Milk Options:</strong> <span style="font-size: 12px; color: #666;">(Optional) Choose up to 1 milk. Condensed milk can be added anytime.</span></label>
+                <label><strong>Milk Options:</strong> <span style="font-size: 12px; color: #666;">(Optional) Choose up to 1 milk. Condensed milk can be added anytime.</span></label>
                 <div class="milk-options" style="display: flex; flex-direction: column; gap: 8px; margin-block-start: 8px;">
                     ${Object.entries(customization.milkOptions).map(([key, data]) => `
                         <label class="checkbox-option ${data.default ? 'selected' : ''}" style="cursor: pointer; display: flex; align-items: center; gap: 10px; padding: 10px; border: 2px solid #ddd; border-radius: 8px; transition: all 0.3s;" data-milk-key="${key}">
@@ -119,7 +119,7 @@ function showCustomizationModal(product, customization) {
         const defaultSugar = product.defaultSugar || '0';
         modalContent += `
             <div class="form-group">
-                <label><strong>🍬 Sugar Level:</strong></label>
+                <label><strong>Sugar Level:</strong></label>
                 <select id="sugarSelect" class="form-select" style="inline-size:100%; padding:12px; border:2px solid #ddd; border-radius:8px; margin-block-start:8px; font-size: 14px;">
                     <option value="0" ${defaultSugar === '0' ? 'selected' : ''}>0% (No Sugar)</option>
                     <option value="25" ${defaultSugar === '25' ? 'selected' : ''}>25%</option>
@@ -135,7 +135,7 @@ function showCustomizationModal(product, customization) {
     
     // Upsells (for coffee/tea)
     if (Object.keys(customization.upsells).length > 0) {
-        const upsellTitle = isCoffee ? '✨ Add Coffee Toppings' : '✨ Add Tea Toppings';
+        const upsellTitle = isCoffee ? 'Add Coffee Toppings' : 'Add Tea Toppings';
         modalContent += `
             <div class="form-group">
                 <label><strong>${upsellTitle}:</strong></label>
@@ -156,7 +156,7 @@ function showCustomizationModal(product, customization) {
     if (Object.keys(customization.toppings).length > 0) {
         modalContent += `
             <div class="form-group">
-                <label><strong>🎂 Toppings:</strong></label>
+                <label><strong>Toppings:</strong></label>
                 <div class="toppings-options" style="display: flex; flex-direction: column; gap: 6px; margin-block-start: 8px;">
                     ${Object.entries(customization.toppings).map(([key, data]) => `
                         <label class="checkbox-option" style="cursor: pointer; display: flex; align-items: center; gap: 10px; padding: 10px; border: 2px solid #ddd; border-radius: 8px; transition: all 0.3s;">
@@ -181,7 +181,7 @@ function showCustomizationModal(product, customization) {
             
             <div class="modal-buttons" style="margin-block-start: 20px; display: flex; gap: 10px;">
                 <button class="btn-submit" onclick="window.addToCartFromModal()" style="flex: 2; padding: 14px; font-size: 16px;">
-                    🛒 Add to Cart
+                    Add to Cart
                 </button>
                 <button class="btn-cancel" onclick="window.closeSizeModal()" style="flex: 1; padding: 14px; font-size: 16px;">
                     Cancel
@@ -404,7 +404,7 @@ export function updateCartUI() {
         
         // Temperature (for coffee)
         if (item.temperature) {
-            const tempLabel = item.temperature === 'hot' ? '☕ Hot' : '🧊 Iced';
+            const tempLabel = item.temperature === 'hot' ? 'Hot' : 'Iced';
             customizations.push(tempLabel);
         }
         
@@ -475,7 +475,7 @@ export function updateCartUI() {
                     <button class="btn-decrease" data-index="${index}">-</button>
                     <span>${item.quantity}</span>
                     <button class="btn-increase" data-index="${index}">+</button>
-                    <button class="btn-remove" data-index="${index}">🗑️</button>
+                    <button class="btn-remove" data-index="${index}">×</button>
                 </div>
             </div>
         `;
@@ -576,7 +576,7 @@ export function openCheckoutModal() {
             <div id="checkoutModal" class="modal">
                 <div class="modal-content">
                     <button class="modal-close" onclick="closeCheckoutModal()" aria-label="Close">×</button>
-                    <div class="modal-header">🛒 Checkout</div>
+                    <div class="modal-header">Checkout</div>
                     <form onsubmit="processCheckout(event)">
                         <div class="form-group">
                             <label>Customer Name *</label>
@@ -619,7 +619,7 @@ export function openCheckoutModal() {
                             <textarea id="specialNotes" rows="3" placeholder="Any special requests? (e.g., less sugar, no ice)"></textarea>
                         </div>
                         <div id="checkoutOrderItems" style="background:#fff; border:1px solid #ddd; border-radius:8px; padding:15px; margin:15px 0; max-block-size:200px; overflow-y:auto;">
-                            <h4 style="margin:0 0 10px 0; color:#006241; font-size:16px;">📋 Order Items</h4>
+                            <h4 style="margin:0 0 10px 0; color:#006241; font-size:16px;">Order Items</h4>
                             <div id="checkoutItemsList"></div>
                         </div>
                         <div id="checkoutSummary" style="background:#f5f5f5; padding:15px; border-radius:8px; margin:15px 0;">
@@ -632,7 +632,7 @@ export function openCheckoutModal() {
                                 <span id="checkoutDiscount">-₫0</span>
                             </div>
                             <div style="display:flex; justify-content:space-between; margin-block-end:8px;">
-                                <span>🚚 Shipping Fee:</span>
+                                <span>Shipping Fee:</span>
                                 <span id="checkoutShipping">₫30,000</span>
                             </div>
                             <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:18px; color:#c41e3a; padding-block-start:8px; border-block-start:2px solid #ddd;">
@@ -978,7 +978,7 @@ function showPaymentOTPModal(orderId, amount) {
     modal.id = 'paymentOTPModal';
     modal.innerHTML = `
         <div class="modal-content" style="max-inline-size: 450px;">
-            <div class="modal-header">🔐 Payment Confirmation</div>
+            <div class="modal-header">Payment Confirmation</div>
             <div style="padding: 20px;">
                 <p style="color: #666; margin-block-end: 15px;">
                     Enter the 6-digit OTP sent to your email to confirm payment of <strong style="color: #c41e3a;">${ui.formatCurrency(amount)}</strong>
@@ -1091,7 +1091,7 @@ function showCustomizationModalWithPresets(product, customization, presetOptions
                 <span style="color: #c41e3a; font-size: 18px;">${ui.formatCurrency(product.price)}</span>
             </div>
             <div style="padding: 10px; background: #fff3cd; border-radius: 8px; margin-bottom: 15px; font-size: 13px; color: #856404;">
-                ⭐ Your usual customization is pre-selected. Feel free to adjust!
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle; margin-right:2px;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>Your usual customization is pre-selected. Feel free to adjust!
             </div>
             <input type="hidden" id="modalProductId" value="${product.id}">
             <input type="hidden" id="modalProductName" value="${product.name}">
@@ -1103,7 +1103,7 @@ function showCustomizationModalWithPresets(product, customization, presetOptions
     if (customization.hasSize) {
         modalContent += `
             <div class="form-group">
-                <label><strong>📏 Size:</strong></label>
+                <label><strong>Size:</strong></label>
                 <div class="size-options" style="display: flex; gap: 10px; margin-block-start: 8px;">
                     ${Object.entries(customization.sizes).map(([key, data]) => `
                         <label class="option-card ${key === presetSize ? 'selected' : ''}" style="flex: 1; cursor: pointer; padding: 12px; border: 2px solid #ddd; border-radius: 8px; text-align: center; transition: all 0.3s;">
@@ -1123,17 +1123,17 @@ function showCustomizationModalWithPresets(product, customization, presetOptions
     if (isCoffee) {
         modalContent += `
             <div class="form-group">
-                <label><strong>🌡️ Temperature:</strong></label>
+                <label><strong>Temperature:</strong></label>
                 <div class="temperature-options" style="display: flex; gap: 10px; margin-block-start: 8px;">
                     <label class="option-card ${presetTemp === 'iced' ? 'selected' : ''}" style="flex: 1; cursor: pointer; padding: 12px; border: 2px solid #ddd; border-radius: 8px; text-align: center; transition: all 0.3s;">
                         <input type="radio" name="temperature" value="iced" ${presetTemp === 'iced' ? 'checked' : ''} style="display: none;">
-                        <div style="font-size: 24px; margin-bottom: 4px;">🧊</div>
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-bottom:4px;"><path d="M2 12h20M12 2v20"/><path d="m6.8 6.8 10.4 10.4"/><path d="m17.2 6.8L6.8 17.2"/></svg>
                         <div style="font-weight: bold; font-size: 14px;">Iced</div>
                         <div style="font-size: 11px; color: #666;">Cold with ice</div>
                     </label>
                     <label class="option-card ${presetTemp === 'hot' ? 'selected' : ''}" style="flex: 1; cursor: pointer; padding: 12px; border: 2px solid #ddd; border-radius: 8px; text-align: center; transition: all 0.3s;">
                         <input type="radio" name="temperature" value="hot" ${presetTemp === 'hot' ? 'checked' : ''} style="display: none;">
-                        <div style="font-size: 24px; margin-bottom: 4px;">☕</div>
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-bottom:4px;"><path d="M17 8h1a4 4 0 1 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"/><line x1="6" y1="2" x2="6" y2="8"/><line x1="10" y1="2" x2="10" y2="8"/><line x1="14" y1="2" x2="14" y2="8"/></svg>
                         <div style="font-weight: bold; font-size: 14px;">Hot</div>
                         <div style="font-size: 11px; color: #666;">Served hot</div>
                     </label>
@@ -1146,7 +1146,7 @@ function showCustomizationModalWithPresets(product, customization, presetOptions
     if (hasMilkOption && Object.keys(customization.milkOptions).length > 0) {
         modalContent += `
             <div class="form-group">
-                <label><strong>🥛 Milk Options:</strong> <span style="font-size: 12px; color: #666;">(Optional) Choose up to 1 milk. Condensed milk can be added anytime.</span></label>
+                <label><strong>Milk Options:</strong> <span style="font-size: 12px; color: #666;">(Optional) Choose up to 1 milk. Condensed milk can be added anytime.</span></label>
                 <div class="milk-options" style="display: flex; flex-direction: column; gap: 8px; margin-block-start: 8px;">
                     ${Object.entries(customization.milkOptions).map(([key, data]) => {
                         const isPreselected = presetMilk === key || (data.default && !presetMilk);
@@ -1167,7 +1167,7 @@ function showCustomizationModalWithPresets(product, customization, presetOptions
     if (customization.hasSugar) {
         modalContent += `
             <div class="form-group">
-                <label><strong>🍬 Sugar Level:</strong></label>
+                <label><strong>Sugar Level:</strong></label>
                 <select id="sugarSelect" class="form-select" style="inline-size:100%; padding:12px; border:2px solid #ddd; border-radius:8px; margin-block-start:8px; font-size: 14px;">
                     <option value="0" ${presetSugar === '0' || presetSugar === 0 ? 'selected' : ''}>0% (No Sugar)</option>
                     <option value="25" ${presetSugar === '25' || presetSugar === 25 ? 'selected' : ''}>25%</option>
@@ -1183,7 +1183,7 @@ function showCustomizationModalWithPresets(product, customization, presetOptions
     
     // Upsells (for coffee/tea) - Pre-select preset upsells
     if (Object.keys(customization.upsells).length > 0) {
-        const upsellTitle = isCoffee ? '✨ Add Coffee Toppings' : '✨ Add Tea Toppings';
+        const upsellTitle = isCoffee ? 'Add Coffee Toppings' : 'Add Tea Toppings';
         modalContent += `
             <div class="form-group">
                 <label><strong>${upsellTitle}:</strong></label>
@@ -1206,7 +1206,7 @@ function showCustomizationModalWithPresets(product, customization, presetOptions
     if (Object.keys(customization.toppings).length > 0) {
         modalContent += `
             <div class="form-group">
-                <label><strong>🎂 Toppings:</strong></label>
+                <label><strong>Toppings:</strong></label>
                 <div class="toppings-options" style="display: flex; flex-direction: column; gap: 6px; margin-block-start: 8px;">
                     ${Object.entries(customization.toppings).map(([key, data]) => `
                         <label class="checkbox-option" style="cursor: pointer; display: flex; align-items: center; gap: 10px; padding: 10px; border: 2px solid #ddd; border-radius: 8px; transition: all 0.3s;">
@@ -1245,7 +1245,7 @@ function showCustomizationModalWithPresets(product, customization, presetOptions
             
             <div class="modal-buttons" style="margin-block-start: 20px; display: flex; gap: 10px;">
                 <button class="btn-submit" onclick="window.addToCartFromModal()" style="flex: 2; padding: 14px; font-size: 16px;">
-                    🛒 Add to Cart
+                    Add to Cart
                 </button>
                 <button class="btn-cancel" onclick="window.closeSizeModal()" style="flex: 1; padding: 14px; font-size: 16px;">
                     Cancel
