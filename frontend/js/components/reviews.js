@@ -2,6 +2,61 @@
 import { loadOrderHistory } from './orders.js';
 
 /**
+ * Format item customization details for display
+ */
+function formatItemCustomization(item) {
+    const details = [];
+    
+    // Size
+    if (item.size && item.size !== 'M') {
+        details.push(`<span style="color:#006241;">📏 ${item.size}</span>`);
+    }
+    
+    // Temperature (hot/ice)
+    if (item.temperature) {
+        const tempLabel = item.temperature === 'hot' ? '☕ Hot' : '🧊 Iced';
+        details.push(`<span style="color:#e97451;">${tempLabel}</span>`);
+    }
+    
+    // Milks
+    if (item.milks && Array.isArray(item.milks) && item.milks.length > 0) {
+        const milkNames = { 'nut': 'Nut Milk', 'condensed': 'Condensed Milk' };
+        const milkLabels = item.milks.map(m => milkNames[m] || m).join(', ');
+        details.push(`<span style="color:#8b5a3c;">🥛 ${milkLabels}</span>`);
+    }
+    
+    // Toppings
+    if (item.toppings && Array.isArray(item.toppings) && item.toppings.length > 0) {
+        const toppingNames = { 
+            'butter': 'Butter', 
+            'jam': 'Jam', 
+            'cream': 'Cream cheese', 
+            'nutella': 'Nutella',
+            'sauce': 'Sauce', 
+            'almond': 'Almond', 
+            'whipped': 'Whipped Cream', 
+            'fruit': 'Fresh Fruit'
+        };
+        const toppingLabels = item.toppings.map(t => toppingNames[t] || t).join(', ');
+        details.push(`<span style="color:#d4a574;">✨ ${toppingLabels}</span>`);
+    }
+    
+    // Sugar level
+    if (item.sugar && item.sugar !== '0') {
+        details.push(`<span style="color:#c4a572;">🍬 Sugar ${item.sugar}%</span>`);
+    }
+    
+    // Quantity
+    if (item.quantity > 1) {
+        details.push(`<span style="color:#666; font-weight:500;">×${item.quantity}</span>`);
+    }
+    
+    return details.length > 0 ? 
+        `<div style="margin-top:6px; font-size:12px; line-height:1.8; display:flex; flex-wrap:wrap; gap:8px;">${details.join('')}</div>` : 
+        '';
+}
+
+/**
  * Submit a review for a product
  */
 async function submitReview(productId, rating, reviewText = '') {
@@ -204,13 +259,14 @@ function openOrderReviewModal(orderId, orderItems) {
     // Build items list for review
     const itemsHTML = orderItems.map((item, idx) => {
         const productName = item.product_name || item.name || 'Product';
-        const itemSize = item.size && item.size !== 'M' ? ` (${item.size})` : '';
+        const customizationDetails = formatItemCustomization(item);
         
         return `
         <div class="review-item-section" data-item-index="${idx}" style="background:white; padding:16px; border-radius:12px; margin-bottom:12px; border:1.5px solid #e5e7eb;">
-            <h4 style="margin:0 0 12px; color:#1a1a1a; font-size:14px; font-weight:600;">
-                ${productName}${itemSize}
+            <h4 style="margin:0 0 4px; color:#1a1a1a; font-size:14px; font-weight:600;">
+                ${productName}
             </h4>
+            ${customizationDetails}
             
             <!-- Product Rating -->
             <div class="rating-group" style="margin-bottom:12px;">
@@ -517,12 +573,15 @@ window.openViewReviewModalDirect = function(orderId, reviews) {
     
     // Add each product review
     for (const review of reviews) {
+        const customizationDetails = formatItemCustomization(review);
+        
         modalHTML += `
             <div style="background:white; border-radius:12px; padding:16px; margin-bottom:12px; border:1px solid #e5e7eb; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
-                <div style="color:#1a1a1a; font-size:14px; font-weight:600; margin-bottom:8px;">
+                <div style="color:#1a1a1a; font-size:14px; font-weight:600; margin-bottom:4px;">
                     ${escapeHTML(review.product_name)}
                 </div>
-                <div style="display:flex; align-items:center; gap:6px; margin-bottom:8px;">
+                ${customizationDetails}
+                <div style="display:flex; align-items:center; gap:6px; margin-top:8px; margin-bottom:8px;">
                     ${generateStarsHTML(review.rating, false)}
                     <span style="color:#666; font-size:13px; font-weight:500;">${review.rating}/5</span>
                 </div>

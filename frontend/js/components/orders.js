@@ -94,7 +94,7 @@ export async function loadOrderStatus() {
     if (!ordersList) return;
 
     if (result.ok && result.data.orders) {
-        // Show all active orders including pending_payment (COD orders)
+        // Show only active orders (exclude delivered, cancelled, completed)
         const activeOrders = result.data.orders.filter(order => 
             order.status === 'pending_payment' || 
             order.status === 'paid' ||
@@ -107,7 +107,7 @@ export async function loadOrderStatus() {
         if (activeOrders.length > 0) {
             ordersList.innerHTML = activeOrders.map(formatActiveOrderCard).join('');
         } else {
-            ordersList.innerHTML = '<p style="text-align:center; color:#999; padding:40px;">No active orders</p>';
+            ordersList.innerHTML = '<p style="text-align:center; color:#999; padding:40px;">No active orders. All orders have been completed or cancelled.</p>';
         }
     } else {
         ordersList.innerHTML = '<p style="text-align:center; color:#999; padding:40px;">No active orders</p>';
@@ -273,9 +273,9 @@ export async function confirmReceived(orderId) {
     
     if (result.ok) {
         ui.showSuccess('Thank you! Order marked as received.');
-        loadOrderStatus();
+        await loadOrderStatus();
         // Reload frequent items to show newly added items with customization options
-        loadFrequentItems();
+        await loadFrequentItems();
     } else {
         ui.showError(result.data.detail);
         
@@ -318,6 +318,8 @@ function formatOrderCard(order) {
                 ${itemsList}
             </div>
             ${priceBreakdown}
+            ${order.customer_name ? `<div style="color:#666; font-size:13px; margin-top:10px;">👤 ${order.customer_name}</div>` : ''}
+            ${order.customer_phone ? `<div style="color:#666; font-size:13px; margin-top:4px;">📞 ${order.customer_phone}</div>` : ''}
             ${address ? `<div style="color:#666; font-size:13px; margin-top:10px;">📍 ${address}</div>` : ''}
             ${order.special_notes ? `<div style="color:#999; font-size:12px; margin-top:8px;">📝 ${order.special_notes}</div>` : ''}
             <div style="color:#666; font-size:13px; margin-top:8px;">💳 Payment: ${order.payment_method}</div>
@@ -393,6 +395,8 @@ function formatActiveOrderCard(order) {
                 ${itemsList}
             </div>
             ${priceBreakdown}
+            ${order.customer_name ? `<div style="color:#666; font-size:13px; margin-top:10px;">👤 ${order.customer_name}</div>` : ''}
+            ${order.customer_phone ? `<div style="color:#666; font-size:13px; margin-top:4px;">📞 ${order.customer_phone}</div>` : ''}
             ${address ? `<div style="color:#666; font-size:13px; margin-top:10px;">📍 ${address}</div>` : ''}
             ${order.special_notes ? `<div style="color:#999; font-size:12px; margin-top:8px;">📝 ${order.special_notes}</div>` : ''}
             ${formatOrderActions(order)}

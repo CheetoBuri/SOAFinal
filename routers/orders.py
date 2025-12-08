@@ -489,6 +489,12 @@ def mark_order_received(order_id: str, request: OrderActionRequest):
         
         for item in items:
             product_id = item.get('product_id')
+            
+            # Skip items without product_id (invalid data from API tests)
+            if not product_id:
+                print(f"⚠️ Skipping item without product_id: {item.get('product_name', 'Unknown')}")
+                continue
+            
             product_name = item.get('product_name') or item.get('name', 'Unknown')
             # Get icon from menu data, fallback to item icon or default
             product_icon = icon_lookup.get(product_id) or item.get('icon', '🍽️')

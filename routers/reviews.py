@@ -127,7 +127,7 @@ def get_product_reviews(product_id: str, limit: int = 20, offset: int = 0):
             "product_id": r['product_id'],
             "rating": r['rating'],
             "review_text": r['review_text'],
-            "created_at": r['created_at']
+            "created_at": r['created_at'].isoformat() if r['created_at'] else None
         }
         for r in reviews_data
     ]
@@ -175,7 +175,7 @@ def get_user_reviews(user_id: str, limit: int = 50):
             "product_id": r['product_id'],
             "rating": r['rating'],
             "review_text": r['review_text'],
-            "created_at": r['created_at']
+            "created_at": r['created_at'].isoformat() if r['created_at'] else None
         }
         for r in reviews_data
     ]
@@ -313,17 +313,24 @@ def get_order_reviews(order_id: str, user_id: str):
                 "reviews": []
             }
         
-        # Parse items JSON to create product_id -> name mapping
+        # Parse items JSON to create product_id -> item data mapping
         import json
         items = json.loads(order_result['items']) if isinstance(order_result['items'], str) else order_result['items']
-        product_names = {}
+        product_data = {}
         for item in items:
             product_id = item.get('product_id') or item.get('id')
             product_name = item.get('product_name') or item.get('name', 'Product')
-            size = item.get('size', '')
-            if size and size != 'M':
-                product_name += f" ({size})"
-            product_names[product_id] = product_name
+            
+            # Store full item data including customizations
+            product_data[product_id] = {
+                'product_name': product_name,
+                'size': item.get('size'),
+                'temperature': item.get('temperature'),
+                'milks': item.get('milks'),
+                'toppings': item.get('toppings'),
+                'sugar': item.get('sugar'),
+                'quantity': item.get('quantity', 1)
+            }
         
         # Get reviews
         c.execute("""
@@ -343,9 +350,16 @@ def get_order_reviews(order_id: str, user_id: str):
         
         reviews = c.fetchall()
         
-        # Add product names to reviews
+        # Add product data (name + customizations) to reviews
         for review in reviews:
-            review['product_name'] = product_names.get(review['product_id'], 'Unknown Product')
+            item_data = product_data.get(review['product_id'], {})
+            review['product_name'] = item_data.get('product_name', 'Unknown Product')
+            review['size'] = item_data.get('size')
+            review['temperature'] = item_data.get('temperature')
+            review['milks'] = item_data.get('milks')
+            review['toppings'] = item_data.get('toppings')
+            review['sugar'] = item_data.get('sugar')
+            review['quantity'] = item_data.get('quantity', 1)
         
         conn.close()
         
